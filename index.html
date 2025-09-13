@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <title>Demo - Sistema de Rutas (muy básico)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Cabecera -->
+  <header class="site-header">
+    <h1>Sistema de Rutas — Demo</h1>
+    <p class="subtitle">Página sencilla para mostrar búsqueda y mapa (demo)</p>
+  </header>
+<br>
+  <!-- Área principal -->
+  <main class="container">
+    <!-- Formulario simple -->
+    <section class="panel">
+      <label for="dest">Destino:</label>
+      <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
+
+      <div class="buttons">
+        <button id="searchBtn">Buscar ruta</button>
+        <button id="downloadBtn">Descargar mapa (demo)</button>
+      </div>
+
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <!-- "Mapa" sencillo — aquí puedes integrar un mapa real después -->
+    <section class="panel map-panel" id="map">
+      <!-- caja que representa el mapa (placeholder) -->
+      <div id="mapBox" class="map-box">AQUÍ IRÁ EL MAPA (placeholder)</div>
+      <small class="muted">Haz clic en el recuadro para simular cargar el mapa.</small>
+    </section>
+  </main>
+
+  <!-- Pie -->
+  <footer class="site-footer">
+    <p>Demo creado en Visual Studio Code — Muy básico</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

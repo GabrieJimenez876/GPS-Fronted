@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sistema de Rutas con Mapa Real</title>
+
+  <!-- Estilos de Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Sistema de Rutas — Demo con Mapa Real</h1>
+  </header>
+
+  <main class="container">
+    <!-- Panel de búsqueda -->
+    <section class="panel">
+      <label for="dest">Destino:</label>
+      <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
+
+      <div class="buttons">
+        <button id="locateBtn">📍 Mi ubicación</button>
+        <button id="markBtn">📌 Marcar destino</button>
+      </div>
+
+      <div id="results" class="results"></div>
+    </section>
+
+    <!-- Mapa real -->
+    <section class="panel map-panel">
+      <div id="map" class="map-box"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Mapa con Leaflet + OpenStreetMap</p>
+  </footer>
+
+  <!-- Scripts de Leaflet -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

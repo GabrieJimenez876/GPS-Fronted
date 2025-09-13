@@ -45,16 +45,32 @@ markBtn.addEventListener('click', () => {
         return;
     }
 
-    // Ejemplo: coordenadas simuladas (en app real, usar geocoding)
-    const destLatLng = [-16.5 + Math.random() * 0.01, -68.15 + Math.random() * 0.01];
+    // Usar Nominatim para geocodificar el destino
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destino)}&limit=1`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<p style="color:#b91c1c">Destino no encontrado</p>';
+                return;
+            }
+            const destLatLng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
 
-    if (destMarker) map.removeLayer(destMarker);
+            if (destMarker) map.removeLayer(destMarker);
 
-    destMarker = L.marker(destLatLng, {icon: L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32]})})
-        .addTo(map)
-        .bindPopup(destino)
-        .openPopup();
+            destMarker = L.marker(destLatLng, {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                    iconSize: [32, 32]
+                })
+            })
+                .addTo(map)
+                .bindPopup(destino)
+                .openPopup();
 
-    map.setView(destLatLng, 15);
-    resultsDiv.innerHTML = `<p>Destino marcado: ${destino} (${destLatLng[0].toFixed(5)}, ${destLatLng[1].toFixed(5)})</p>`;
+            map.setView(destLatLng, 15);
+            resultsDiv.innerHTML = `<p>Destino marcado: ${destino} (${destLatLng[0].toFixed(5)}, ${destLatLng[1].toFixed(5)})</p>`;
+        })
+        .catch(() => {
+            resultsDiv.innerHTML = '<p style="color:#b91c1c">Error al buscar el destino</p>';
+        });
 });

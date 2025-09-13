@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ingreso / Registro — Sistema de Rutas (La Paz)</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#0ea5e9;
+      --muted:#9aa3b2;
+      --success:#16a34a;
+      --danger:#ef4444;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background: linear-gradient(180deg,#071022 0%, #0b1630 100%);
+      color: #e6eef6;
+    }
+    .container{
+      width:100%;
+      max-width:980px;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+    }
+    .hero{
+      padding:28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:12px;
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .card{
+      background:var(--card);
+      padding:20px;
+      border-radius:10px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    h1{margin:0 0 8px;font-size:1.4rem}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    form{display:flex;flex-direction:column;gap:10px}
+    label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"]{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:var(--glass);
+      color:inherit;
+      outline:none;
+    }
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    .muted{color:var(--muted);font-size:.85rem}
+    button{
+      background:linear-gradient(90deg,var(--accent), #38bdf8);
+      color:#06202b;
+      border:none;
+      padding:10px 12px;
+      border-radius:8px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    button.secondary{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .small{font-size:.85rem}
+    .inline{display:inline-flex;gap:8px;align-items:center}
+    .tos{font-size:.8rem;color:var(--muted)}
+    .switch{cursor:pointer;color:var(--accent);font-weight:600}
+    .message{padding:8px 10px;border-radius:8px;font-weight:600}
+    .message.ok{background:rgba(22,163,74,0.12);color:var(--success);border:1px solid rgba(22,163,74,0.12)}
+    .message.err{background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.08)}
+    .footer{margin-top:14px;color:var(--muted);font-size:.82rem}
+    @media (max-width:920px){
+      .container{grid-template-columns:1fr; padding:0 12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <!-- Left: Info + quick login -->
+    <section class="hero card" aria-labelledby="title">
+      <h1 id="title">Sistema guía de rutas — La Paz (minibuses)</h1>
+      <p class="lead">Accede para guardar favoritas, descargar mapas y reportar paradas. Usa una cuenta o ingresa como invitado.</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="card" id="guestBtn" style="flex:1;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)">
+          Entrar como invitado
+        </button>
+        <button class="card" id="helpBtn" style="flex:1;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)">
+          Ayuda / Demo
+        </button>
+      </div>
+
+      <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:18px 0">
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1">
+          <strong>¿No tienes cuenta?</strong>
+          <div class="muted">Regístrate rápido y empieza a descargar mapas offline.</div>
+        </div>
+        <button id="showRegister" class="secondary">Crear cuenta</button>
+      </div>
+
+      <div class="footer">
+        <div><strong>Privacidad:</strong> Tu ubicación solo se guarda si lo autorizas.</div>
+        <div style="margin-top:6px">Conectar con: <span class="muted">/api/auth/* (endpoint ejemplo)</span></div>
+      </div>
+    </section>
+
+    <!-- Right: Tabs for Login / Register -->
+    <aside class="card" aria-labelledby="formTitle">
+      <h2 id="formTitle" style="margin:0 0 8px;font-size:1.1rem">Ingreso / Registro</h2>
+
+      <!-- Messages -->
+      <div id="msgBox" aria-live="polite" style="margin-bottom:12px"></div>
+
+      <!-- Tabs (simple) -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="tabLogin" class="secondary" style="flex:1">Ingreso</button>
+        <button id="tabRegister" class="secondary" style="flex:1">Registro</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" aria-label="Formulario de ingreso">
+        <label for="loginEmail">Correo o teléfono</label>
+        <input id="loginEmail" name="email" type="text" inputmode="email" placeholder="ej: usuario@correo.com o 79012345" required autocomplete="username"/>
+
+        <label for="loginPass">Contraseña</label>
+        <div style="display:flex;gap:8px">
+          <input id="loginPass" name="password" type="password" placeholder="Tu contraseña" required autocomplete="current-password" />
+          <button type="button" id="toggleLoginPass" class="secondary small">Mostrar</button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+          <label class="inline small"><input id="remember" type="checkbox" /> Recordarme</label>
+          <a href="#" id="forgot" class="muted small">Olvidé mi contraseña</a>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="submit">Ingresar</button>
+          <button type="button" id="toRegister" class="secondary">Ir a registro</button>
+        </div>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="registerForm" style="display:none" aria-label="Formulario de registro">
+        <label for="regName">Nombre completo</label>
+        <input id="regName" name="name" type="text" placeholder="Tu nombre completo" required autocomplete="name"/>
+
+        <label for="regEmail">Correo electrónico</label>
+        <input id="regEmail" name="email" type="email" placeholder="usuario@correo.com" required autocomplete="email"/>
+
+        <label for="regPhone">Teléfono (opcional)</label>
+        <input id="regPhone" name="phone" type="tel" placeholder="79012345" pattern="[0-9]{7,10}" />
+
+        <label for="regPass">Contraseña</label>
+        <div style="display:flex;gap:8px">
+          <input id="regPass" name="password" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password"/>
+          <button type="button" id="toggleRegPass" class="secondary small">Mostrar</button>
+        </div>
+
+        <label class="tos"><input id="agree" type="checkbox" required/> Acepto los Términos y Política de privacidad</label>
+
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="submit">Crear cuenta</button>
+          <button type="button" id="toLogin" class="secondary">Volver a ingresar</button>
+        </div>
+      </form>
+
+      <div style="margin-top:12px;color:var(--muted);font-size:.9rem">
+        ¿Eres representante de sindicato? <a href="#" id="adminLink" style="color:var(--accent);font-weight:600">Panel administrativo</a>.
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // --- Utilidades DOM ---
+    const q = s => document.querySelector(s);
+    const msgBox = q('#msgBox');
+
+    function showMsg(text, type='ok'){
+      msgBox.innerHTML = `<div class="message ${type === 'ok' ? 'ok' : 'err'}">${text}</div>`;
+      setTimeout(()=> { if(msgBox.innerHTML) msgBox.innerHTML = ''; }, 6000);
+    }
+
+    // Tabs
+    const loginForm = q('#loginForm');
+    const registerForm = q('#registerForm');
+    const tabLogin = q('#tabLogin');
+    const tabRegister = q('#tabRegister');
+    const showRegisterBtn = q('#showRegister');
+    const toRegister = q('#toRegister');
+    const toLogin = q('#toLogin');
+
+    function showLogin(){ loginForm.style.display='block'; registerForm.style.display='none'; }
+    function showRegister(){ loginForm.style.display='none'; registerForm.style.display='block'; }
+
+    tabLogin.addEventListener('click', showLogin);
+    tabRegister.addEventListener('click', showRegister);
+    showRegisterBtn.addEventListener('click', showRegister);
+    toRegister.addEventListener('click', showRegister);
+    toLogin.addEventListener('click', showLogin);
+
+    // Toggle password visibility
+    q('#toggleLoginPass').addEventListener('click', ()=> {
+      const p = q('#loginPass');
+      p.type = p.type === 'password' ? 'text' : 'password';
+      q('#toggleLoginPass').textContent = p.type === 'password' ? 'Mostrar' : 'Ocultar';
+    });
+    q('#toggleRegPass').addEventListener('click', ()=> {
+      const p = q('#regPass');
+      p.type = p.type === 'password' ? 'text' : 'password';
+      q('#toggleRegPass').textContent = p.type === 'password' ? 'Mostrar' : 'Ocultar';
+    });
+
+    // Guest button: demo local behaviour (no backend)
+    q('#guestBtn').addEventListener('click', () => {
+      localStorage.setItem('user', JSON.stringify({name: 'Invitado', guest: true}));
+      showMsg('Entraste como invitado. Tus datos no se guardaron en el servidor.', 'ok');
+    });
+
+    // ---------- HANDLERS ----------
+    // Helper to POST JSON and handle response (example)
+    async function postJSON(url, data){
+      const resp = await fetch(url, {
+        method:'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const json = await resp.json().catch(()=> null);
+      return {ok: resp.ok, status: resp.status, json};
+    }
+
+    // LOGIN submit
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = q('#loginEmail').value.trim();
+      const password = q('#loginPass').value;
+
+      if(!email || !password) return showMsg('Completa correo y contraseña.', 'err');
+
+      // disable submit
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Ingresando...';
+
+      // Example API call - ajusta a tu endpoint real
+      try {
+        const res = await postJSON('/api/auth/login', { identifier: email, password });
+        if(res.ok && res.json && res.json.token){
+          // Guarda token si quieres persistir sesión
+          const token = res.json.token;
+          localStorage.setItem('jwt', token);
+          localStorage.setItem('user', JSON.stringify(res.json.user || {identifier: email}));
+          showMsg('Ingreso exitoso. Redirigiendo...', 'ok');
+          // Aquí podrías redirigir: window.location = '/app';
+        } else {
+          const msg = (res.json && (res.json.message || JSON.stringify(res.json))) || 'Error en credenciales';
+          showMsg(msg, 'err');
+        }
+      } catch(err){
+        console.error(err);
+        showMsg('Error de conexión al servidor.', 'err');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Ingresar';
+      }
+    });
+
+    // REGISTER submit
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = q('#regName').value.trim();
+      const email = q('#regEmail').value.trim();
+      const phone = q('#regPhone').value.trim();
+      const password = q('#regPass').value;
+      const agree = q('#agree').checked;
+
+      if(!name || !email || !password || !agree) return showMsg('Completa todos los campos y acepta los términos.', 'err');
+
+      const submitBtn = registerForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta...';
+
+      try {
+        // Ajusta endpoint y payload a tu API
+        const res = await postJSON('/api/auth/register', { name, email, phone, password });
+        if(res.ok && res.json){
+          showMsg('Cuenta creada. Puedes iniciar sesión.', 'ok');
+          showLogin();
+        } else {
+          const msg = (res.json && (res.json.message || JSON.stringify(res.json))) || 'Error al crear cuenta';
+          showMsg(msg, 'err');
+        }
+      } catch(err){
+        console.error(err);
+        showMsg('Error de conexión al servidor.', 'err');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear cuenta';
+      }
+    });
+
+    // Forgot password (demo)
+    q('#forgot').addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const email = q('#loginEmail').value.trim();
+      if(!email) return showMsg('Ingresa tu correo para resetear contraseña.', 'err');
+      // Aquí llamarías a /api/auth/forgot-password
+      showMsg('Se ha enviado un enlace de recuperación (simulado).', 'ok');
+    });
+
+    // Help / Demo
+    q('#helpBtn').addEventListener('click', () => {
+      showMsg('Demo local: prueba crear cuenta (no persistirá si no hay backend).', 'ok');
+    });
+
+    // Admin link (demo)
+    q('#adminLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      // redirect to admin panel route
+      showMsg('Redirigiendo al panel administrativo (demo).', 'ok');
+      // window.location = '/admin';
+    });
+
+    // Optional: auto-fill dev convenience
+    if(location.search.includes('dev')){
+      q('#regName').value = 'Gabriel I. Jimenez';
+      q('#regEmail').value = 'gabriel@example.com';
+      q('#regPhone').value = '79012345';
+      q('#regPass').value = '123456';
+    }
+  </script>
+</body>
+</html>

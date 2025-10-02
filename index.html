@@ -3,38 +3,80 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mapa de Rutas - La Paz</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>GPS Transporte La Paz</title>
+  https://unpkg.com/leaflet/dist/leaflet.css
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header, footer { background: #333; color: white; padding: 10px; text-align: center; }
-    .container { display: flex; flex-direction: column; height: 100vh; }
-    .map-panel { flex: 1; }
-    .map-box { width: 100%; height: 100%; }
-    .info-box { padding: 10px; background: #f9f9f9; border-top: 1px solid #ccc; }
-    .info-box h2 { margin-top: 0; }
-    .line-card { background: #fff; border: 1px solid #ddd; margin: 5px 0; padding: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header, footer {
+      background-color: #004d40;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+    .panel {
+      margin-bottom: 10px;
+    }
+    .map-box {
+      height: 400px;
+      width: 100%;
+    }
+    .buttons {
+      margin-top: 10px;
+    }
+    .buttons button {
+      margin-right: 5px;
+    }
+    .results {
+      margin-top: 10px;
+      background-color: #e0f2f1;
+      padding: 10px;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #eee;
+    }
+    .dark-mode header, .dark-mode footer {
+      background-color: #222;
+    }
+    .dark-mode .results {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Mapa de Rutas — La Paz, Bolivia</h1>
+    <h1>GPS Transporte — La Paz, Bolivia</h1>
+    <div class="buttons">
+      <button onclick="toggleDarkMode()">🌙 Modo Oscuro</button>
+      <button onclick="toggleLanguage()">🌐 English</button>
+      agregar_linea.html➕ Agregar Línea</button>
+      ver_rutas.html📍 Ver Todas las Rutas</button>
+    </div>
   </header>
 
   <main class="container">
-    <section class="map-panel">
-      <div id="map" class="map-box"></div>
+    <section class="panel">
+      <label for="dest">Destino:</label>
+      <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
+      <div class="buttons">
+        <button onclick="marcarUbicacion()">📍 Mi ubicación</button>
+        <button onclick="marcarDestino()">📌 Marcar destino</button>
+      </div>
+      <div id="results" class="results"></div>
     </section>
-    <section class="info-box">
-      <h2>Líneas Cercanas</h2>
-      <div class="line-card">
-        <strong>Línea Amarilla</strong><br>
-        Parada 10: Cementerio → Hospital Juan XXIII
-      </div>
-      <div class="line-card">
-        <strong>Línea Verde</strong><br>
-        Parada X: Cementerio → Munaypata
-      </div>
+
+    <section class="panel map-panel">
+      <div id="map" class="map-box"></div>
     </section>
   </main>
 
@@ -42,36 +84,45 @@
     <p>Mapa con Leaflet + OpenStreetMap</p>
   </footer>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  https://unpkg.com/leaflet/dist/leaflet.js</script>
   <script>
-    var map = L.map('map').setView([-16.5, -68.15], 14);
-
+    let map = L.map('map').setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    var parada = L.marker([-16.495, -68.133]).addTo(map)
-      .bindPopup('Parada 10: Cementerio');
+    let marcadorUsuario = L.marker([-16.5, -68.15]).addTo(map).bindPopup("Tu ubicación");
+    let marcadorDestino = null;
 
-    var rutaAmarilla = L.polyline([
-      [-16.495, -68.133],
-      [-16.49, -68.13],
-      [-16.485, -68.125]
-    ], {color: 'yellow'}).addTo(map).bindPopup('Línea Amarilla');
+    function marcarUbicacion() {
+      map.setView([-16.5, -68.15], 14);
+      marcadorUsuario.openPopup();
+    }
 
-    var rutaVerde = L.polyline([
-      [-16.495, -68.133],
-      [-16.49, -68.135],
-      [-16.485, -68.14]
-    ], {color: 'green'}).addTo(map).bindPopup('Línea Verde');
+    function marcarDestino() {
+      if (marcadorDestino) map.removeLayer(marcadorDestino);
+      marcadorDestino = L.marker([-16.49, -68.13]).addTo(map).bindPopup("Destino marcado").openPopup();
+    }
 
-    var ubicacion = L.circleMarker([-16.5, -68.15], {
-      radius: 8,
-      color: 'blue',
-      fillColor: '#30f',
-      fillOpacity: 0.8
-    }).addTo(map).bindPopup('Tu ubicación');
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    let idioma = "es";
+    function toggleLanguage() {
+      idioma = idioma === "es" ? "en" : "es";
+      document.querySelector("h1").innerText = idioma === "es" ? "GPS Transporte — La Paz, Bolivia" : "GPS Transport — La Paz, Bolivia";
+      document.querySelector("label[for='dest']").innerText = idioma === "es" ? "Destino:" : "Destination:";
+      document.getElementById("dest").placeholder = idioma === "es" ? "Ej: Plaza Murillo" : "Ex: Plaza Murillo";
+      document.querySelectorAll(".buttons button")[0].innerText = idioma === "es" ? "🌙 Modo Oscuro" : "🌙 Dark Mode";
+      document.querySelectorAll(".buttons button")[1].innerText = idioma === "es" ? "🌐 English" : "🌐 Español";
+      document.querySelectorAll(".buttons button")[2].innerText = idioma === "es" ? "➕ Agregar Línea" : "➕ Add Line";
+      document.querySelectorAll(".buttons button")[3].innerText = idioma === "es" ? "📍 Ver Todas las Rutas" : "📍 View All Routes";
+      document.querySelectorAll(".buttons button")[4].innerText = idioma === "es" ? "📍 Mi ubicación" : "📍 My Location";
+      document.querySelectorAll(".buttons button")[5].innerText = idioma === "es" ? "📌 Marcar destino" : "📌 Mark Destination";
+      document.querySelector("footer p").innerText = idioma === "es" ? "Mapa con Leaflet + OpenStreetMap" : "Map with Leaflet + OpenStreetMap";
+    }
   </script>
 </body>
 </html>

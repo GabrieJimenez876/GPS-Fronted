@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agregar Nueva Línea de Minibús</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Agregar Nueva Línea de Minibús</h2>
+    <form id="lineaForm">
+      <label for="nombre">Nombre de la Línea:</label>
+      <input type="text" id="nombre" name="nombre" required>
+
+      <label for="codigo">Código:</label>
+      <input type="text" id="codigo" name="codigo" required>
+
+      <label for="sindicato">Sindicato:</label>
+      <input type="text" id="sindicato" name="sindicato" required>
+
+      <label for="paradas">Paradas (una por línea):</label>
+      <textarea id="paradas" name="paradas" rows="4" placeholder="Ej: Cementerio
+Hospital Juan XXIII
+Munaypata" required></textarea>
+
+      <label for="recorrido">Recorrido (calles o coordenadas):</label>
+      <textarea id="recorrido" name="recorrido" rows="4" placeholder="Ej: Av. Buenos Aires → Calle 21 → Plaza Murillo" required></textarea>
+
+      <button type="submit">Guardar Línea</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('lineaForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Línea guardada correctamente (simulado).');
+      // Aquí puedes agregar la lógica para enviar los datos al backend
+    });
+  </script>
+</body>
+</html>

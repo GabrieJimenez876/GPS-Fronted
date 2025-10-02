@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ver Todas las Rutas</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header, footer { background-color: #333; color: white; text-align: center; padding: 10px; }
+    main { display: flex; flex-direction: column; height: 100vh; }
+    #map { flex: 2; }
+    .info-panel { flex: 1; overflow-y: auto; padding: 10px; background-color: #f4f4f4; }
+    .linea-card { background: white; margin-bottom: 10px; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mapa de Rutas Registradas</h1>
+  </header>
+  <main>
+    <div id="map"></div>
+    <div class="info-panel" id="infoPanel">
+      <h2>Detalles de Líneas</h2>
+      <div class="linea-card">
+        <strong>Línea Amarilla</strong><br/>
+        Sindicato: Sindicato Central<br/>
+        Paradas: Cementerio, Hospital Juan XXIII, Plaza del Estudiante
+      </div>
+      <div class="linea-card">
+        <strong>Línea Verde</strong><br/>
+        Sindicato: Sindicato Munaypata<br/>
+        Paradas: Cementerio, Munaypata, Mercado Yungas
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>Proyecto GPS - La Paz, Bolivia</p>
+  </footer>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([-16.5, -68.15], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Línea Amarilla
+    var rutaAmarilla = [
+      [-16.495, -68.133],
+      [-16.49, -68.13],
+      [-16.485, -68.125]
+    ];
+    L.polyline(rutaAmarilla, {color: 'yellow'}).addTo(map);
+
+    // Línea Verde
+    var rutaVerde = [
+      [-16.495, -68.133],
+      [-16.49, -68.135],
+      [-16.485, -68.14]
+    ];
+    L.polyline(rutaVerde, {color: 'green'}).addTo(map);
+
+    // Marcadores de paradas
+    L.marker([-16.495, -68.133]).addTo(map).bindPopup('Parada: Cementerio');
+    L.marker([-16.49, -68.13]).addTo(map).bindPopup('Parada: Hospital Juan XXIII');
+    L.marker([-16.485, -68.125]).addTo(map).bindPopup('Parada: Plaza del Estudiante');
+    L.marker([-16.49, -68.135]).addTo(map).bindPopup('Parada: Munaypata');
+    L.marker([-16.485, -68.14]).addTo(map).bindPopup('Parada: Mercado Yungas');
+  </script>
+</body>
+</html>

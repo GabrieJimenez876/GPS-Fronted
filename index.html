@@ -1,45 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sistema de Rutas con Mapa Real</title>
-
-  <!-- Estilos de Leaflet -->
+  <title>Mapa de Rutas - La Paz</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header, footer { background: #333; color: white; padding: 10px; text-align: center; }
+    .container { display: flex; flex-direction: column; height: 100vh; }
+    .map-panel { flex: 1; }
+    .map-box { width: 100%; height: 100%; }
+    .info-box { padding: 10px; background: #f9f9f9; border-top: 1px solid #ccc; }
+    .info-box h2 { margin-top: 0; }
+    .line-card { background: #fff; border: 1px solid #ddd; margin: 5px 0; padding: 10px; }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <h1>Sistema de Rutas — Demo con Mapa Real</h1>
+  <header>
+    <h1>Mapa de Rutas — La Paz, Bolivia</h1>
   </header>
 
   <main class="container">
-    <!-- Panel de búsqueda -->
-    <section class="panel">
-      <label for="dest">Destino:</label>
-      <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
-
-      <div class="buttons">
-        <button id="locateBtn">📍 Mi ubicación</button>
-        <button id="markBtn">📌 Marcar destino</button>
-      </div>
-
-      <div id="results" class="results"></div>
-    </section>
-
-    <!-- Mapa real -->
-    <section class="panel map-panel">
+    <section class="map-panel">
       <div id="map" class="map-box"></div>
+    </section>
+    <section class="info-box">
+      <h2>Líneas Cercanas</h2>
+      <div class="line-card">
+        <strong>Línea Amarilla</strong><br>
+        Parada 10: Cementerio → Hospital Juan XXIII
+      </div>
+      <div class="line-card">
+        <strong>Línea Verde</strong><br>
+        Parada X: Cementerio → Munaypata
+      </div>
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer>
     <p>Mapa con Leaflet + OpenStreetMap</p>
   </footer>
 
-  <!-- Scripts de Leaflet -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+  <script>
+    var map = L.map('map').setView([-16.5, -68.15], 14);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    var parada = L.marker([-16.495, -68.133]).addTo(map)
+      .bindPopup('Parada 10: Cementerio');
+
+    var rutaAmarilla = L.polyline([
+      [-16.495, -68.133],
+      [-16.49, -68.13],
+      [-16.485, -68.125]
+    ], {color: 'yellow'}).addTo(map).bindPopup('Línea Amarilla');
+
+    var rutaVerde = L.polyline([
+      [-16.495, -68.133],
+      [-16.49, -68.135],
+      [-16.485, -68.14]
+    ], {color: 'green'}).addTo(map).bindPopup('Línea Verde');
+
+    var ubicacion = L.circleMarker([-16.5, -68.15], {
+      radius: 8,
+      color: 'blue',
+      fillColor: '#30f',
+      fillOpacity: 0.8
+    }).addTo(map).bindPopup('Tu ubicación');
+  </script>
 </body>
 </html>

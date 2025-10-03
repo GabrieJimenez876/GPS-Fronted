@@ -11,7 +11,7 @@ class AppTheme {
       foregroundColor: Colors.white,
     ),
     textTheme: TextTheme(
-      bodyText2: TextStyle(color: Colors.black),
+      bodyMedium: TextStyle(color: Colors.black),
     ),
   );
 
@@ -24,7 +24,7 @@ class AppTheme {
       foregroundColor: Colors.white,
     ),
     textTheme: TextTheme(
-      bodyText2: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white),
     ),
   );
 }

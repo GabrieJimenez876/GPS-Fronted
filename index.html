@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>GPS Transporte La Paz</title>
-  https://unpkg.com/leaflet/dist/leaflet.css
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -59,8 +59,8 @@
     <div class="buttons">
       <button onclick="toggleDarkMode()">🌙 Modo Oscuro</button>
       <button onclick="toggleLanguage()">🌐 English</button>
-      agregar_linea.html➕ Agregar Línea</button>
-      ver_rutas.html📍 Ver Todas las Rutas</button>
+      <button onclick="location.href='agregar_linea.html'">➕ Agregar Línea</button>
+      <button onclick="location.href='ver_rutas.html'">📍 Ver Todas las Rutas</button>
     </div>
   </header>
 
@@ -84,7 +84,7 @@
     <p>Mapa con Leaflet + OpenStreetMap</p>
   </footer>
 
-  https://unpkg.com/leaflet/dist/leaflet.js</script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     let map = L.map('map').setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

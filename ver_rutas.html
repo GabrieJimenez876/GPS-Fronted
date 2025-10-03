@@ -1,31 +1,36 @@
+
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Ver Todas las Rutas</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
+<meta charset="utf-8"/>
+<title>Ver Todas las Rutas</title>
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+<style>
     body { font-family: Arial; margin: 0; }
     header { background-color: #004d40; color: white; padding: 10px; text-align: center; }
     #map { height: 500px; }
     .info { padding: 10px; background-color: #e0f2f1; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background-color: #004d40; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Rutas Registradas</h2>
-  </header>
-  <div id="map"></div>
-  <div class="info">
-    <h3>Líneas Cercanas</h3>
-    <ul>
-      <li><strong>Línea Amarilla:</strong> Cementerio → Hospital Juan XXIII</li>
-      <li><strong>Línea Verde:</strong> Cementerio → Munaypata</li>
-    </ul>
-  </div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
+<header>
+<h2>Rutas Registradas</h2>
+</header>
+<div id="map"></div>
+<div class="info">
+<h3>Líneas Cercanas</h3>
+<ul>
+<li><strong>Línea Amarilla:</strong> Cementerio → Hospital Juan XXIII</li>
+<li><strong>Línea Verde:</strong> Cementerio → Munaypata</li>
+</ul>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
     let map = L.map('map').setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
@@ -47,5 +52,46 @@
       [-16.485, -68.14]
     ], {color: 'green'}).addTo(map).bindPopup("Línea Verde");
   </script>
+
+<div class="info">
+<h3>Listado Oficial de Rutas de Minibuses en La Paz</h3>
+<table>
+<thead>
+<tr>
+<th>N°</th>
+<th>OPERADOR</th>
+<th>TIPO DE VEHÍCULO</th>
+<th>RUTA</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>CH</td></tr>
+<tr><td>2</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>J</td></tr>
+<tr><td>3</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>M</td></tr>
+<tr><td>4</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>O</td></tr>
+<tr><td>5</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>P</td></tr>
+<tr><td>6</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>Q</td></tr>
+<tr><td>7</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>T</td></tr>
+<tr><td>8</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>V</td></tr>
+<tr><td>9</td><td>SINDICATO PEDRO DOMINGO MURILLO</td><td>MICROBUS</td><td>W</td></tr>
+<tr><td>10</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>X</td></tr>
+<tr><td>11</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>Y</td></tr>
+<tr><td>12</td><td>SINDICATO PEDRO DOMINGO MURILLO</td><td>MICROBUS</td><td>Z</td></tr>
+<tr><td>13</td><td>SINDICATO LITORAL</td><td>MICROBUS</td><td>1</td></tr>
+<tr><td>14</td><td>SINDICATO EDUARDO AVAROA</td><td>BUS</td><td>2</td></tr>
+<tr><td>15</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>3</td></tr>
+<tr><td>16</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>5</td></tr>
+<tr><td>564</td><td>SINDICATO SAN CRISTÓBAL</td><td>MINIBUS</td><td>977</td></tr>
+<tr><td>565</td><td>SINDICATO 14 DE SEPTIEMBRE</td><td>MINIBUS</td><td>978</td></tr>
+<tr><td>566</td><td>SINDICATO SAN CRISTÓBAL</td><td>MINIBUS</td><td>979</td></tr>
+<tr><td>567</td><td>ASOCIACIÓN MINISUR</td><td>MINIBUS</td><td>980</td></tr>
+<tr><td>568</td><td>ASOCIACIÓN SEÑOR DE MAYO</td><td>MINIBUS</td><td>981</td></tr>
+<tr><td>569</td><td>COOPERATIVA DE TRANSPORTES KUPINI</td><td>MINIBUS</td><td>982</td></tr>
+<tr><td>570</td><td>SINDICATO SAN JUAN</td><td>MINIBUS</td><td>983</td></tr>
+<tr><td>571</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MINIBUS</td><td>984</td></tr>
+<tr><td>572</td><td>SINDICATO 8 DE DICIEMBRE</td><td>MINIBUS</td><td>985</td></tr>
+</tbody>
+</table>
+</div>
 </body>
 </html>

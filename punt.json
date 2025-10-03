@@ -1,0 +1,62 @@
+[
+  {
+    "nombre": "Cementerio General",
+    "lat": -16.495,
+    "lng": -68.133,
+    "tipo": "Parada"
+  },
+  {
+    "nombre": "Hospital Juan XXIII",
+    "lat": -16.485,
+    "lng": -68.125,
+    "tipo": "Parada"
+  },
+  {
+    "nombre": "Terminal de Buses",
+    "lat": -16.5,
+    "lng": -68.14,
+    "tipo": "Punto de interés"
+  },
+  {
+    "nombre": "Ceja de El Alto",
+    "lat": -16.5,
+    "lng": -68.18,
+    "tipo": "Punto de interés"
+  },
+  {
+    "nombre": "Miraflores",
+    "lat": -16.51,
+    "lng": -68.12,
+    "tipo": "Zona"
+  },
+  {
+    "nombre": "Estación Teleférico Amarillo",
+    "lat": -16.505,
+    "lng": -68.135,
+    "tipo": "Teleférico"
+  },
+  {
+    "nombre": "Estación Teleférico Rojo",
+    "lat": -16.495,
+    "lng": -68.145,
+    "tipo": "Teleférico"
+  },
+  {
+    "nombre": "Parada Munaypata",
+    "lat": -16.48,
+    "lng": -68.14,
+    "tipo": "Parada"
+  },
+  {
+    "nombre": "Parada Prado",
+    "lat": -16.52,
+    "lng": -68.13,
+    "tipo": "Parada"
+  },
+  {
+    "nombre": "Parada Sopocachi",
+    "lat": -16.515,
+    "lng": -68.125,
+    "tipo": "Parada"
+  }
+]

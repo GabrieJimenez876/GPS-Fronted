@@ -4,12 +4,14 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
 class MapaPage extends StatefulWidget {
+  const MapaPage({super.key});
+
   @override
-  _MapaPageState createState() => _MapaPageState();
+  State<MapaPage> createState() => _MapaPageState();
 }
 
 class _MapaPageState extends State<MapaPage> {
-  LatLng ubicacionActual = LatLng(-16.5, -68.15); // Centro de La Paz
+  LatLng ubicacionActual = const LatLng(-16.5, -68.15);
 
   @override
   void initState() {
@@ -36,20 +38,21 @@ class _MapaPageState extends State<MapaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Mapa de Transporte La Paz')),
+      appBar: AppBar(title: const Text('Mapa de Transporte La Paz')),
       body: Column(
         children: [
           Expanded(
             flex: 3,
             child: FlutterMap(
               options: MapOptions(
-                center: ubicacionActual,
-                zoom: 14.0,
-                maxBounds: LatLngBounds(
-                  LatLng(-16.55, -68.25),
-                  LatLng(-16.45, -68.05),
-                ),
-              ),
+                initialCenter: ubicacionActual,
+                initialZoom: 14.0,
+                cameraConstraint: CameraConstraint.contain(bounds: LatLngBounds(
+      const LatLng(-16.55, -68.25),
+      const LatLng(-16.45, -68.05),
+    ),
+  ),
+),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -59,18 +62,22 @@ class _MapaPageState extends State<MapaPage> {
                   markers: [
                     Marker(
                       point: ubicacionActual,
-                      builder: (ctx) => Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
                     ),
                     Marker(
-                      point: LatLng(-16.495, -68.133), // Ejemplo parada
-                      builder: (ctx) => Icon(Icons.bus_alert, color: Colors.red, size: 30),
+                      point: const LatLng(-16.495, -68.133),
+                      width: 30,
+                      height: 30,
+                      child: const Icon(Icons.bus_alert, color: Colors.red, size: 30),
                     ),
                   ],
                 ),
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: [
+                      points: const [
                         LatLng(-16.495, -68.133),
                         LatLng(-16.49, -68.13),
                         LatLng(-16.485, -68.125),
@@ -79,7 +86,7 @@ class _MapaPageState extends State<MapaPage> {
                       color: Colors.yellow,
                     ),
                     Polyline(
-                      points: [
+                      points: const [
                         LatLng(-16.495, -68.133),
                         LatLng(-16.49, -68.135),
                         LatLng(-16.485, -68.14),
@@ -95,8 +102,8 @@ class _MapaPageState extends State<MapaPage> {
           Expanded(
             flex: 2,
             child: ListView(
-              padding: EdgeInsets.all(8),
-              children: [
+              padding: const EdgeInsets.all(8),
+              children: const [
                 Text('Líneas cercanas:', style: TextStyle(fontWeight: FontWeight.bold)),
                 Card(
                   child: ListTile(

@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 
 class AgregarLineaPage extends StatefulWidget {
+  const AgregarLineaPage({super.key});
+
   @override
-  _AgregarLineaPageState createState() => _AgregarLineaPageState();
+  State<AgregarLineaPage> createState() => _AgregarLineaPageState();
 }
 
 class _AgregarLineaPageState extends State<AgregarLineaPage> {
@@ -28,14 +29,13 @@ class _AgregarLineaPageState extends State<AgregarLineaPage> {
   void guardarLinea() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // Aquí se puede enviar la información al backend
-      print('Nombre: \$nombre');
-      print('Código: \$codigo');
-      print('Sindicato: \$sindicato');
-      print('Paradas: \$paradas');
-      print('Recorrido: \$recorrido');
+      print('Nombre: $nombre');
+      print('Código: $codigo');
+      print('Sindicato: $sindicato');
+      print('Paradas: $paradas');
+      print('Recorrido: $recorrido');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Línea guardada correctamente')),
+        const SnackBar(content: Text('Línea guardada correctamente')),
       );
     }
   }
@@ -43,45 +43,45 @@ class _AgregarLineaPageState extends State<AgregarLineaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Agregar Nueva Línea')),
+      appBar: AppBar(title: const Text('Agregar Nueva Línea')),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Nombre de la línea'),
+                decoration: const InputDecoration(labelText: 'Nombre de la línea'),
                 onSaved: (value) => nombre = value ?? '',
                 validator: (value) => value!.isEmpty ? 'Ingrese el nombre' : null,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Código'),
+                decoration: const InputDecoration(labelText: 'Código'),
                 onSaved: (value) => codigo = value ?? '',
                 validator: (value) => value!.isEmpty ? 'Ingrese el código' : null,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Sindicato'),
+                decoration: const InputDecoration(labelText: 'Sindicato'),
                 onSaved: (value) => sindicato = value ?? '',
                 validator: (value) => value!.isEmpty ? 'Ingrese el sindicato' : null,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Recorrido (calles o coordenadas)'),
+                decoration: const InputDecoration(labelText: 'Recorrido (calles o coordenadas)'),
                 onSaved: (value) => recorrido = value ?? '',
                 validator: (value) => value!.isEmpty ? 'Ingrese el recorrido' : null,
               ),
-              SizedBox(height: 16),
-              Text('Paradas:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              const Text('Paradas:', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: paradaController,
-                      decoration: InputDecoration(hintText: 'Nombre de la parada'),
+                      decoration: const InputDecoration(hintText: 'Nombre de la parada'),
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.add),
+                    icon: const Icon(Icons.add),
                     onPressed: agregarParada,
                   ),
                 ],
@@ -89,10 +89,10 @@ class _AgregarLineaPageState extends State<AgregarLineaPage> {
               Wrap(
                 children: paradas.map((p) => Chip(label: Text(p))).toList(),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: guardarLinea,
-                child: Text('Guardar Línea'),
+                child: const Text('Guardar Línea'),
               ),
             ],
           ),

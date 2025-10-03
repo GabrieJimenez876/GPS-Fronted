@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -6,11 +5,11 @@ class AppTheme {
     brightness: Brightness.light,
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.blue,
       foregroundColor: Colors.white,
     ),
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.black),
     ),
   );
@@ -19,11 +18,11 @@ class AppTheme {
     brightness: Brightness.dark,
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.black,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
     ),
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.white),
     ),
   );

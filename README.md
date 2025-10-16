@@ -15,9 +15,6 @@ Este proyecto tiene como objetivo desarrollar una aplicación móvil y web para 
 Stop-Service ssh-agent
 Start-Service ssh-agent
 
-# Eliminar claves antiguas
-cd ~/.ssh
-Remove-Item id_* -Force
 
 # Limpiar agente SSH
 ssh-add -D

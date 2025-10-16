@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>GPS Transporte — La Paz</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --fg:#222;
+      --primary:#004d40;
+      --accent:#15c9b7;
+      --surface:#fff;
+      --muted:#e8f6f4;
+      --border:#d9d9d9;
+      --radius:10px;
+      --shadow:0 6px 18px rgba(0,0,0,.08);
+
+      --icon-size:16px;   
+      --btn-h:42px;       
+      --btn-fz:14px;      
+      --map-height:520px;
+      --max-width:1100px;
+    }
+
+    /* Estilos base */
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); color:var(--fg);}
+
+    /* Header */
+    header{ background:var(--primary); color:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:1000;}
+    .header-inner{ max-width:var(--max-width); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+    
+    /* Brand */
+    .brand{ display:flex; gap:12px; align-items:center; width:100%; }
+    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#031a17; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
+    .brand h1{ margin:0; font-size:18px; }
+
+    /* Navegación */
+    .nav-row{ display:flex; gap:8px; align-items:center; width:100%; flex-wrap:wrap; justify-content:space-between; }
+    .nav-left { display:flex; gap:8px; align-items:center; }
+    .nav-right { margin-left:auto; display:flex; gap:8px; }
+    
+    /* Botones */
+    .nav-btn{ 
+      height:var(--btn-h); 
+      padding:0 12px; 
+      display:inline-flex; 
+      gap:8px; 
+      align-items:center; 
+      border-radius:8px; 
+      background:rgba(255,255,255,0.95); 
+      color:var(--primary); 
+      border:1px solid rgba(255,255,255,0.08); 
+      cursor:pointer; 
+      font-size:var(--btn-fz);
+    }
+    .nav-btn.primary{ 
+      background:var(--accent); 
+      color:#fff; 
+      border:1px solid var(--accent);
+    }
+    .nav-btn .fa { 
+      font-size:var(--icon-size); 
+      line-height:1; 
+      color:var(--primary);
+    }
+    .nav-btn.primary .fa { color:#fff; }
+
+    /* Dropdown */
+    .menu-item{ position:relative; }
+    .dropdown{ 
+      position:absolute; 
+      top:calc(100% + 8px); 
+      left:0; 
+      background:var(--surface); 
+      border:1px solid var(--border); 
+      border-radius:8px; 
+      min-width:220px; 
+      display:none; 
+      z-index:30; 
+      box-shadow:var(--shadow);
+    }
+    .menu-item:hover .dropdown{ display:block; }
+    .dropdown a{ 
+      display:block; 
+      padding:10px 12px; 
+      color:var(--fg); 
+      text-decoration:none;
+    }
+
+    /* Main layout */
+    main{ max-width:var(--max-width); margin:16px auto; padding:0 12px; }
+    .grid{ display:grid; gap:12px; grid-template-columns:1fr; }
+    @media(min-width:880px){ .grid{ grid-template-columns:360px 1fr; } }
+
+    /* Panels */
+    .panel{ 
+      background:var(--surface); 
+      border:1px solid var(--border); 
+      border-radius:var(--radius); 
+      padding:14px; 
+      box-shadow:var(--shadow);
+    }
+    .map-box{ 
+      height:var(--map-height); 
+      border-radius:8px; 
+      overflow:hidden; 
+      border:1px solid var(--border);
+    }
+
+    /* Forms */
+    .input-row{ display:flex; gap:10px; align-items:center; width:100%; }
+    .input-row label{ min-width:86px; }
+    .input-row input[type="text"],
+    .input-row input[type="email"],
+    .input-row input[type="password"]{ 
+      flex:1; 
+      height:40px; 
+      padding:0 12px; 
+      border-radius:8px; 
+      border:1px solid var(--border); 
+      font-size:15px;
+    }
+
+    /* Modales */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.45);
+      z-index:1001;
+    }
+    .modal{
+      width:min(520px,92vw);
+      background:#fff;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .modal-header{
+      background:var(--primary);
+      color:#fff;
+      padding:12px 16px;
+    }
+    .modal-body{
+      padding:16px;
+      display:grid;
+      gap:12px;
+    }
+    .modal-footer{
+      padding:12px 16px;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      border-top:1px solid #eee;
+    }
+
+    /* Footer */
+    footer{
+      margin-top:18px;
+      padding:12px 0;
+      background:var(--primary);
+      color:#fff;
+    }
+    .footer-inner{
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:0 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .socials{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    .social-link{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:30px;
+      height:30px;
+      background:#fff;
+      border-radius:6px;
+      text-decoration:none;
+      border:1px solid rgba(255,255,255,0.1);
+      transition:transform 0.2s;
+    }
+    .social-link:hover{
+      transform:scale(1.1);
+    }
+    .social-link img{
+      width:16px;
+      height:16px;
+      object-fit:contain;
+    }
+
+    /* Dark mode */
+    .dark-mode{
+      --bg:#121212;
+      --fg:#e6e6e6;
+      --surface:#1b1b1b;
+      --muted:#242424;
+      --border:#2b2b2b;
+      --primary:#0aa089;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="logo" aria-hidden="true">LP</div>
+        <div>
+          <h1 id="appTitle">GPS Transporte — La Paz</h1>
+          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="nav-row">
+        <div class="nav-left">
+          <div class="menu-item">
+            <button class="nav-btn" id="btnRoutes">
+              <i class="fa fa-location-dot"></i>
+              <span>Rutas</span>
+            </button>
+            <div class="dropdown">
+              <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
+              <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
+              <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
+              <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
+            </div>
+          </div>
+
+          <button class="nav-btn" id="btnGuide">
+            <i class="fa fa-book"></i>
+            <span>Guía</span>
+          </button>
+          
+          <button class="nav-btn" id="btnDark">
+            <i class="fa fa-moon"></i>
+            <span>Modo</span>
+          </button>
+          
+          <button class="nav-btn" id="btnLang">
+            <i class="fa fa-language"></i>
+            <span>English</span>
+          </button>
+        </div>
+
+        <div class="nav-right">
+          <!-- Admin button (hidden by default) -->
+          <div class="menu-item" id="adminSection" style="display:none">
+            <button class="nav-btn">
+              <i class="fa fa-wrench"></i>
+              <span>Admin</span>
+            </button>
+            <div class="dropdown">
+              <a href="agregar_linea.html">➕ Agregar línea</a>
+              <a href="base_datos.html">📄 Ver base de datos</a>
+              <a href="sindicatos.html">🤝 Sindicatos</a>
+            </div>
+          </div>
+
+          <button class="nav-btn" id="btnRegister">
+            <i class="fa fa-user-plus"></i>
+            <span>Registrarse</span>
+          </button>
+
+          <button class="nav-btn primary" id="btnLogin">
+            <i class="fa fa-user"></i>
+            <span>Iniciar sesión</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content here -->
+  <main>
+    <!-- Existing content -->
+  </main>
+
+  <!-- Registro Modal -->
+  <div class="modal-backdrop" id="registerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0">Crear cuenta</h3>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label for="regName">Nombre completo</label>
+          <input type="text" id="regName" class="input-row" required>
+        </div>
+        <div>
+          <label for="regEmail">Correo electrónico</label>
+          <input type="email" id="regEmail" class="input-row" required>
+        </div>
+        <div>
+          <label for="regPassword">Contraseña</label>
+          <input type="password" id="regPassword" class="input-row" required>
+        </div>
+        <div>
+          <label for="regConfirmPassword">Confirmar contraseña</label>
+          <input type="password" id="regConfirmPassword" class="input-row" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="nav-btn" onclick="closeRegisterModal()">Cancelar</button>
+        <button class="nav-btn primary" onclick="register()">Registrarse</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0">Iniciar sesión</h3>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label for="loginEmail">Correo electrónico</label>
+          <input type="email" id="loginEmail" class="input-row" required>
+        </div>
+        <div>
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" class="input-row" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="nav-btn" onclick="closeLoginModal()">Cancelar</button>
+        <button class="nav-btn primary" onclick="login()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / +591 76522444</div>
+      <div class="socials">
+        <a href="#" class="social-link" title="Facebook">
+          <img src="img/fac.png" alt="Facebook" width="16" height="16">
+        </a>
+        <a href="#" class="social-link" title="Twitter">
+          <img src="img/twitter.png" alt="Twitter" width="16" height="16">
+        </a>
+        <a href="#" class="social-link" title="Instagram">
+          <img src="img/instagram.png" alt="Instagram" width="16" height="16">
+        </a>
+        <a href="#" class="social-link" title="Telegram">
+          <img src="img/telegram.png" alt="Telegram" width="16" height="16">
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // DOM Elements
+    const $ = s => document.querySelector(s);
+    const loginModal = $('#loginModal');
+    const registerModal = $('#registerModal');
+    const adminSection = $('#adminSection');
+    
+    // Buttons
+    const btnLogin = $('#btnLogin');
+    const btnRegister = $('#btnRegister');
+    const btnDark = $('#btnDark');
+    const btnLang = $('#btnLang');
+    
+    // Local storage keys
+    const USERS_KEY = 'gps_users';
+    const CURRENT_USER_KEY = 'gps_current_user';
+    
+    // Admin credentials
+    const ADMIN_EMAIL = 'admin@admin.com';
+    const ADMIN_PASSWORD = 'admin123';
+
+    // Event Listeners
+    btnLogin.addEventListener('click', () => loginModal.style.display = 'flex');
+    btnRegister.addEventListener('click', () => registerModal.style.display = 'flex');
+    btnDark.addEventListener('click', () => document.body.classList.toggle('dark-mode'));
+    btnLang.addEventListener('click', toggleLanguage);
+
+    // Modal Controls
+    function closeLoginModal() {
+      loginModal.style.display = 'none';
+      $('#loginEmail').value = '';
+      $('#loginPassword').value = '';
+    }
+
+    function closeRegisterModal() {
+      registerModal.style.display = 'none';
+      $('#regName').value = '';
+      $('#regEmail').value = '';
+      $('#regPassword').value = '';
+      $('#regConfirmPassword').value = '';
+    }
+
+    // User Management
+    function getUsers() {
+      const users = localStorage.getItem(USERS_KEY);
+      return users ? JSON.parse(users) : [];
+    }
+
+    function saveUser(user) {
+      const users = getUsers();
+      users.push(user);
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function register() {
+      const name = $('#regName').value.trim();
+      const email = $('#regEmail').value.trim();
+      const password = $('#regPassword').value;
+      const confirmPassword = $('#regConfirmPassword').value;
+
+      if (!email.includes('@')) {
+        alert('El correo debe contener @');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+
+      const users = getUsers();
+      if (users.some(u => u.email === email)) {
+        alert('Este correo ya está registrado');
+        return;
+      }
+
+      saveUser({ name, email, password });
+      alert('Usuario registrado exitosamente');
+      closeRegisterModal();
+    }
+
+    function login() {
+      const email = $('#loginEmail').value.trim();
+      const password = $('#loginPassword').value;
+
+      if (!email.includes('@')) {
+        alert('El correo debe contener @');
+        return;
+      }
+
+      // Check admin credentials
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        adminSection.style.display = 'block';
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({ isAdmin: true }));
+        closeLoginModal();
+        updateUI(true);
+        return;
+      }
+
+      // Check regular users
+      const users = getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (user) {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({ isAdmin: false }));
+        closeLoginModal();
+        updateUI(false);
+      } else {
+        alert('Credenciales incorrectas');
+      }
+    }
+
+    function updateUI(isAdmin) {
+      btnLogin.style.display = 'none';
+      btnRegister.style.display = 'none';
+      adminSection.style.display = isAdmin ? 'block' : 'none';
+    }
+
+    // Language Toggle
+    function toggleLanguage() {
+      const h1 = $('#appTitle');
+      if (btnLang.textContent.includes('English')) {
+        btnLang.innerHTML = '<i class="fa fa-language"></i><span>Español</span>';
+        h1.textContent = 'GPS Transport — La Paz';
+      } else {
+        btnLang.innerHTML = '<i class="fa fa-language"></i><span>English</span>';
+        h1.textContent = 'GPS Transporte — La Paz';
+      }
+    }
+
+    // Check session on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const currentUser = localStorage.getItem(CURRENT_USER_KEY);
+      if (currentUser) {
+        const { isAdmin } = JSON.parse(currentUser);
+        updateUI(isAdmin);
+      }
+    });
+  </script>
+</body>
+</html>

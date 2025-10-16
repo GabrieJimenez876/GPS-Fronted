@@ -1,31 +1,25 @@
-// ...existing code...
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <title>GPS Transporte — La Paz</title>
-  <!-- Se han eliminado meta tags adicionales por petición del autor -->
-  <!-- Leaflet (CSS) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-  <!-- Iconos (Font Awesome) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
 
   <style>
-    /* Variables centrales para colores/tamaños */
     :root{
       --bg:#f4f4f4;
       --fg:#222;
-      --primary:#00695c;
-      --accent:#009688;
+      --primary:#00423b;
+      --accent:#15c9b7;
       --surface:#fff;
       --muted:#e8f6f4;
       --border:#d9d9d9;
       --radius:10px;
       --shadow:0 6px 18px rgba(0,0,0,.08);
 
-      --icon-size:16px;   /* tamaño de íconos en botones */
-      --btn-h:42px;       /* altura de botones nav */
-      --btn-fz:14px;      /* tamaño fuente en botones */
+      --icon-size:16px;   /* tamaño botones*/
+      --btn-h:42px;       /* altura de botones*/
+      --btn-fz:14px;      /* tamaño fuente en botones*/
       --map-height:520px;
       --max-width:1100px;
     }
@@ -37,7 +31,7 @@
     header{ background:var(--primary); color:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:1000;}
     .header-inner{ max-width:var(--max-width); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
     .brand{ display:flex; gap:12px; align-items:center; width:100%; }
-    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#004d40; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
+    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#031a17; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
     .brand h1{ margin:0; font-size:18px; }
 
     /* fila de navegación (alineada L→R) */
@@ -85,8 +79,27 @@
     /* footer */
     footer{ margin-top:18px; padding:12px 0; background:transparent; color:var(--fg); }
     .footer-inner{ max-width:var(--max-width); margin:0 auto; padding:0 12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
-    .socials{ display:flex; gap:10px; align-items:center; }
-    .socials a{ color:var(--primary); background:#fff; width:30px; height:30px; display:inline-grid; place-items:center; border-radius:6px; text-decoration:none; border:1px solid rgba(0,0,0,0.06); }
+    .socials{ display:flex; gap:16px; align-items:center; }
+    .social-link{ 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      background: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform 0.2s;
+    }
+    .social-link:hover {
+      transform: scale(1.1);
+    }
+    .social-link img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
 
     /* dark mode */
     .dark-mode{ --bg:#121212; --fg:#e6e6e6; --surface:#1b1b1b; --muted:#242424; --border:#2b2b2b; --primary:#0aa089; }
@@ -129,7 +142,7 @@
           </div>
         </div>
 
-        <!-- Iniciar sesión como último elemento -->
+        <!--Iniciar sesión-->
         <button class="nav-btn primary" id="btnLogin"><i class="fa fa-user-lock"></i><span class="label">Iniciar sesión</span></button>
       </nav>
     </div>
@@ -158,13 +171,17 @@
 
         <div>
           <h3 style="margin:6px 0 8px 0">Lugares rápidos</h3>
-          <!-- Nuevos lugares rápidos solicitados -->
-          <div class="list-item" onclick="quickPlace('terminal')"><i class="fa fa-square-check"></i><span>Terminal</span></div>
-          <div class="list-item" onclick="quickPlace('cementerio')"><i class="fa fa-square-check"></i><span>Cementerio</span></div>
-          <div class="list-item" onclick="quickPlace('prado')"><i class="fa fa-square-check"></i><span>Prado</span></div>
-          <div class="list-item" onclick="quickPlace('achachical')"><i class="fa fa-square-check"></i><span>Achachical</span></div>
-          <div class="list-item" onclick="quickPlace('umsa')"><i class="fa fa-square-check"></i><span>UMSA</span></div>
+          <!-- lugares solicitados -->
           <div class="list-item" onclick="quickPlace('plaza estudiante')"><i class="fa fa-square-check"></i><span>Plaza Estudiante</span></div>
+          <div class="list-item" onclick="quickPlace('plaza murillo')"><i class="fa fa-square-check"></i><span>Plaza Murillo</span></div>
+          <div class="list-item" onclick="quickPlace('miraflores')"><i class="fa fa-square-check"></i><span>Miraflores</span></div>
+          <div class="list-item" onclick="quickPlace('prado')"><i class="fa fa-square-check"></i><span>Prado</span></div>
+          <div class="list-item" onclick="quickPlace('terminal')"><i class="fa fa-square-check"></i><span>Terminal</span></div>
+          <div class="list-item" onclick="quickPlace('umsa')"><i class="fa fa-square-check"></i><span>UMSA</span></div>
+          <div class="list-item" onclick="quickPlace('cementerio')"><i class="fa fa-square-check"></i><span>Cementerio</span></div>
+          <div class="list-item" onclick="quickPlace('teleferico central')"><i class="fa fa-square-check"></i><span>Teleférico Central</span></div>
+          <div class="list-item" onclick="quickPlace('ceja')"><i class="fa fa-square-check"></i><span>Ceja</span></div>
+          <div class="list-item" onclick="quickPlace('achachical')"><i class="fa fa-square-check"></i><span>Achachicala</span></div>
           <div class="list-item" onclick="quickPlace('villa victoria')"><i class="fa fa-square-check"></i><span>Villa Victoria</span></div>
         </div>
       </section>
@@ -174,15 +191,23 @@
       </section>
     </div>
   </main>
-
+<!-- imagenes y logos -->
   <footer>
     <div class="footer-inner">
-      <div>Contacto: lapazbus@lapaz.bo — Tel: 2652444 / 61022444</div>
+      <div>Contacto: lapazbus@lapaz.bo — Tel: 2652444 / +591 76522444</div>
       <div class="socials" aria-label="Redes sociales">
-        <a href="#" title="Facebook" id="soc-fb"><i class="fa fa-facebook-f"></i></a>
-        <a href="#" title="X / Twitter" id="soc-x"><i class="fa fa-x-twitter"></i></a>
-        <a href="#" title="Instagram" id="soc-ig"><i class="fa fa-instagram"></i></a>
-        <a href="#" title="Telegram" id="soc-tg"><i class="fa fa-telegram"></i></a>
+        <a href="#" title="Facebook" class="social-link">
+          <img src="img/fac.png" alt="Facebook" width="15" height="15">
+        </a>
+        <a href="#" title="X / Twitter" class="social-link">
+          <img src="img/X.png" alt="X / Twitter" width="10" height="10">
+        </a>
+        <a href="#" title="whatsapp" class="social-link">
+          <img src="img/was.jpeg" alt="whatsapp" width="10" height="10">
+        </a>
+        <a href="#" title="Telegram" class="social-link">
+          <img src="img/tel.jpg" alt="Telegram" width="15" height="15">
+        </a>
       </div>
     </div>
   </footer>
@@ -209,10 +234,12 @@
     <div class="modal" role="document" aria-labelledby="loginTitle">
       <div class="modal-body">
         <h3 id="loginTitle">Iniciar sesión</h3>
+
+  <!-- cuadro de login -->
         <form id="loginForm" onsubmit="return false;">
           <div style="display:flex;flex-direction:column;gap:8px;">
             <label for="email">Correo</label>
-            <input id="email" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #ddd;border-radius:6px;" required />
+            <input id="email" type="email" placeholder="un_correo_de@ejemplo.com" style="padding:8px;border:1px solid #ddd;border-radius:6px;" required />
             <label for="pass">Contraseña</label>
             <input id="pass" type="password" placeholder="Contraseña" style="padding:8px;border:1px solid #ddd;border-radius:6px;" required />
           </div>
@@ -229,10 +256,6 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    /* -----------------------------------------------------------
-       Código JavaScript con comentarios en Español (según pedido)
-       ----------------------------------------------------------- */
-
     /* Inicializa el mapa centrado en La Paz y aplica límites aproximados */
     const map = L.map('map', { zoomControl:true }).setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
@@ -419,16 +442,9 @@
       $('#dest').placeholder = currentLang === 'es' ? 'Ej: Plaza Murillo' : 'Ex: Plaza Murillo';
     });
 
-    /* Inicialización: ajustar tamaños de iconos si es necesario, y localmente mejorar proporciones */
     (function adjustIcons(){
-      // ejemplo: asegurar que iconos dentro de .nav-btn estén centrados y proporcionados
       $$('.nav-btn .fa').forEach(i=> i.style.width = '18px');
     })();
-
-    /* -----------------------------------------------------------
-       Fin del script principal
-       ----------------------------------------------------------- */
   </script>
 </body>
 </html>
-// ...existing code...

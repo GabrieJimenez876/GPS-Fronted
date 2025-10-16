@@ -1,97 +1,303 @@
 
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<title>Ver Todas las Rutas</title>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-<style>
-    body { font-family: Arial; margin: 0; }
-    header { background-color: #004d40; color: white; padding: 10px; text-align: center; }
-    #map { height: 500px; }
-    .info { padding: 10px; background-color: #e0f2f1; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    th { background-color: #004d40; color: white; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ver Rutas — GPS Transporte La Paz</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <style>
+    :root{ --c-primary:#004d40; --c-bg:#f6f7f8; --c-fg:#1f2937; --c-panel:#ffffff; --c-border:#e5e7eb; --radius:12px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--c-bg);color:var(--c-fg)}
+    header{position:sticky;top:0;z-index:20;background:var(--c-primary);color:#fff}
+    .header-inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:36px;height:36px;border-radius:50%;background:#00a58c;display:grid;place-items:center;font-weight:700}
+    .brand h1{font-size:18px;margin:0}
+    nav{flex:1;display:flex;justify-content:center}
+    .menu{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .btn{height:42px;padding:0 14px;border:1px solid #9ee7db;border-radius:8px;background:#e6fffa;color:#083b35;cursor:pointer}
+    .btn.primary{background:#00a58c;color:#fff;border-color:#00a58c}
+    .menu-item{position:relative}
+    .dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:240px;background:#fff;border:1px solid var(--c-border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);display:none;padding:6px;z-index:30}
+    .dropdown a{display:block;padding:10px 12px;border-radius:8px;color:#111;text-decoration:none}
+    .dropdown a:hover{background:#f3f4f6}
+    .menu-item:hover .dropdown{display:block}
+    .profile-area{display:flex;align-items:center;gap:10px}
+    .container{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:14px}
+    .panel{background:var(--c-panel);border:1px solid var(--c-border);border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .panel header{padding:12px 14px;border-bottom:1px solid var(--c-border)}
+    .panel .content{padding:12px 14px}
+    footer{background:var(--c-primary);color:#fff;margin-top:14px}
+    .footer-inner{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:10px}
+    .socials{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .socials a{display:inline-flex;align-items:center;gap:6px;background:#00695c;color:#fff;text-decoration:none;padding:4px 8px;border-radius:8px}
+    .socials svg{width:16px;height:16px;fill:#fff}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{width:min(520px,92vw);background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal header{background:#00a58c;color:#fff;padding:12px 16px}
+    .modal .content{padding:16px;display:grid;gap:10px}
+    .modal .footer{padding:12px 16px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee}
+    input[type="text"],input[type="email"],input[type="password"]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px}
+    .dark body{background:#121212;color:#e6e6e6}
+  </style>
+
+  <style>
+    .page{max-width:1200px;margin:0 auto;padding:14px;display:grid;grid-template-columns:360px 1fr;gap:14px}
+    #map{height:70vh;min-height:520px;border-radius:12px;border:1px solid var(--c-border);overflow:hidden}
+    .route-header{display:flex;flex-direction:column;gap:6px}
+    .route-title{font-weight:700;font-size:18px;margin:0}
+    .route-meta{color:#374151;font-size:13px}
+    .stop-list{list-style:none;margin:10px 0 0 0;padding:0;display:grid;gap:8px;max-height:calc(100vh - 260px);overflow:auto}
+    .stop-item{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--c-border);border-radius:10px;background:#fafafa}
+    .stop-badge{min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;background:#6b7280}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+    .table th{background:var(--c-primary);color:#fff;text-align:left}
+    @media (max-width:980px){ .page{grid-template-columns:1fr} #map{height:60vh} }
   </style>
 </head>
 <body>
-<header>
-<h2>Rutas Registradas</h2>
-</header>
-<div id="map"></div>
-<div class="info">
-<h3>Líneas Cercanas</h3>
-<ul>
-<li><strong>Línea Amarilla:</strong> Cementerio → Hospital Juan XXIII</li>
-<li><strong>Línea Verde:</strong> Cementerio → Munaypata</li>
-</ul>
-</div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-    let map = L.map('map').setView([-16.5, -68.15], 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
+  
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">LP</div>
+        <h1>GPS Transporte — La Paz</h1>
+      </div>
+      <nav>
+        <div class="menu">
+          <div class="menu-item">
+            <button class="btn">📍 Rutas</button>
+            <div class="dropdown" aria-label="submenu rutas">
+              <a href="ver_rutas.html">Ver todas las rutas →</a>
+            </div>
+          </div>
+          <button class="btn" id="btnGuide">📘 Guía</button>
+          <button class="btn" id="btnDark">🌙 Modo</button>
+          <button class="btn" id="btnLang">🌐 English</button>
+          <div class="menu-item">
+            <button class="btn">🛠️ Admin</button>
+            <div class="dropdown" aria-label="submenu admin">
+              <a href="agregar_linea.html">➕ Agregar línea</a>
+              <a href="base_datos.html">📄 Ver base de datos</a>
+              <a href="sindicatos.html">🤝 Sindicatos</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="profile-area">
+        <button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
 
-    L.marker([-16.495, -68.133]).addTo(map).bindPopup("Parada: Cementerio");
-    L.marker([-16.485, -68.125]).addTo(map).bindPopup("Parada: Hospital Juan XXIII");
+  <main class="page">
+    <aside class="panel" id="sidebar">
+      <header>
+        <div class="route-header">
+          <h2 class="route-title" id="routeTitle">Selecciona una ruta</h2>
+          <div class="route-meta" id="routeMeta">Operador · Vehículo · Sentido</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+            <button class="btn" id="btnClear">🧹 Limpiar</button>
+            <button class="btn" id="btnReverse" disabled>⇆ Alternar sentido</button>
+            <button class="btn" id="btnFit" disabled>🔎 Ajustar al mapa</button>
+          </div>
+        </div>
+      </header>
+      <div class="content">
+        <h3 style="margin:0 0 6px 0;">Paradas</h3>
+        <ul class="stop-list" id="stopList"><li class="stop-item" style="opacity:.7">No hay paradas cargadas.</li></ul>
+        <h3 style="margin:12px 0 6px 0;">Rutas disponibles</h3>
+        <div style="overflow:auto">
+          <table class="table" id="routesTable">
+            <thead><tr><th style="width:48px">N°</th><th>Operador</th><th>Vehículo</th><th>Ruta</th><th style="width:120px">Acción</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
+    <section class="panel" style="padding:10px">
+      <div id="map"></div>
+      <div class="content" style="background:var(--c-bg);border-radius:10px;margin-top:10px">
+        <h3 style="margin:0 0 6px 0;">Líneas Cercanas (ejemplo)</h3>
+        <ul style="margin:0;padding-left:18px"><li><strong>Línea Amarilla:</strong> Cementerio → Hospital Juan XXIII</li><li><strong>Línea Verde:</strong> Cementerio → Munaypata</li></ul>
+      </div>
+    </section>
+  </main>
+  
+  <footer>
+    <div class="footer-inner">
+      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / 61022444</div>
+      <div class="socials" aria-label="redes sociales">
+        <a href="#" title="Facebook" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.08 5.66 21.2 10.44 22v-7.01H7.9v-2.92h2.54V9.84c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.92h-2.34V22C18.34 21.2 22 17.08 22 12.07z"></path></svg>
+          <span>Facebook</span>
+        </a>
+        <a href="#" title="X/Twitter" aria-label="X/Twitter">
+          <svg viewBox="0 0 24 24"><path d="M3 3h5.3l4.1 6.2L16.7 3H21l-7.2 10.2L21 21h-5.3l-4.2-6.1L7.3 21H3l7.8-10.8L3 3z"></path></svg>
+          <span>Twitter</span>
+        </a>
+        <a href="#" title="Instagram" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm6.75-1.5a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.75 6z"></path></svg>
+          <span>Instagram</span>
+        </a>
+        <a href="#" title="Telegram" aria-label="Telegram">
+          <svg viewBox="0 0 24 24"><path d="M9.04 15.47 8.8 19.7a.94.94 0 0 0 .73-.35l1.75-1.67 3.63 2.67c.67.37 1.15.18 1.33-.62l2.42-11.34c.21-.93-.34-1.3-1-1.07L3.95 11.1c-.9.35-.89.84-.16 1.07l3.6 1.12 8.38-5.29c.39-.24.75-.11.46.15l-7.19 6.32z"></path></svg>
+          <span>Telegram</span>
+        </a>
+      </div>
+    </div>
+  </footer>
 
-    L.polyline([
-      [-16.495, -68.133],
-      [-16.49, -68.13],
-      [-16.485, -68.125]
-    ], {color: 'yellow'}).addTo(map).bindPopup("Línea Amarilla");
+  
+  <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal">
+      <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
+      <div class="content">
+        <label for="email">Correo</label>
+        <input type="email" id="email" placeholder="usuario@gmail.com"/>
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••"/>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseLogin">Cerrar</button>
+        <button class="btn primary" id="btnDoLogin">Ingresar</button>
+      </div>
+    </div>
+  </div>
+  <div class="backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal">
+      <header><h3 id="guideTitle" style="margin:0">Guía rápida</h3></header>
+      <div class="content"><p>Explora las rutas, administra datos y consulta sindicatos.</p></div>
+      <div class="footer"><button class="btn primary" id="btnCloseGuide">Entendido</button></div>
+    </div>
+  </div>
 
-    L.polyline([
-      [-16.495, -68.133],
-      [-16.49, -68.135],
-      [-16.485, -68.14]
-    ], {color: 'green'}).addTo(map).bindPopup("Línea Verde");
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    const map = L.map('map').setView([-16.5, -68.15], 13);
+    const bounds = L.latLngBounds(L.latLng(-16.62,-68.24), L.latLng(-16.43,-68.02));
+    map.setMaxBounds(bounds); map.on('drag', ()=> map.panInsideBounds(bounds,{animate:false}));
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
+    const routeLayer = L.layerGroup().addTo(map);
+
+    const ROUTES = {
+      amarilla: { id:1, name:'Línea Amarilla', operator:'—', vehicle:'Microbus', color:'#f1c40f',
+        stops:[
+          {name:'Cementerio', lat:-16.495, lng:-68.133},
+          {name:'Av. Principal', lat:-16.492, lng:-68.131},
+          {name:'Plaza intermedia', lat:-16.49, lng:-68.130},
+          {name:'Hospital Juan XXIII', lat:-16.485, lng:-68.125}
+        ],
+        path:[[-16.495,-68.133],[-16.493,-68.132],[-16.491,-68.131],[-16.49,-68.130],[-16.488,-68.128],[-16.485,-68.125]] },
+      verde: { id:2, name:'Línea Verde', operator:'—', vehicle:'Microbus', color:'#2ecc71',
+        stops:[
+          {name:'Cementerio', lat:-16.495, lng:-68.133},
+          {name:'Cruce', lat:-16.492, lng:-68.136},
+          {name:'Bajada', lat:-16.489, lng:-68.138},
+          {name:'Munaypata', lat:-16.485, lng:-68.140}
+        ],
+        path:[[-16.495,-68.133],[-16.493,-68.134],[-16.491,-68.135],[-16.489,-68.138],[-16.487,-68.139],[-16.485,-68.140]] },
+      puma_achumani: { id:3, name:'PumaKatari — Achumani', operator:'La Paz BUS', vehicle:'Bus articulado', color:'#00a58c',
+        stops:[
+          {name:'Achumani (inicio)', lat:-16.555, lng:-68.078},
+          {name:'Av. Strongest',    lat:-16.545, lng:-68.087},
+          {name:'Los Pinos',        lat:-16.535, lng:-68.095},
+          {name:'Irpavi',           lat:-16.525, lng:-68.103},
+          {name:'Calacoto',         lat:-16.517, lng:-68.106},
+          {name:'San Miguel',       lat:-16.514, lng:-68.110}
+        ],
+        path:[[-16.555,-68.078],[-16.548,-68.084],[-16.541,-68.090],[-16.535,-68.095],[-16.529,-68.100],[-16.525,-68.103],[-16.521,-68.105],[-16.517,-68.106],[-16.515,-68.108],[-16.514,-68.110]] }
+    };
+
+    const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s));
+    const stopList = $('#stopList'); const routeTitle = $('#routeTitle'); const routeMeta = $('#routeMeta');
+    const btnReverse = $('#btnReverse'); const btnFit = $('#btnFit');
+    let currentKey = null; let reversed = false;
+
+    function renderRoutesTable(){
+      const tbody = document.querySelector('#routesTable tbody'); tbody.innerHTML='';
+      const rows = [
+        {n:1, op:'—', veh:'Microbus', ruta:'Línea Amarilla', key:'amarilla'},
+        {n:2, op:'—', veh:'Microbus', ruta:'Línea Verde', key:'verde'},
+        {n:3, op:'La Paz BUS', veh:'Bus articulado', ruta:'PumaKatari — Achumani', key:'puma_achumani'}
+      ];
+      for(const r of rows){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.n}</td><td>${r.op}</td><td>${r.veh}</td><td>${r.ruta}</td><td><button class="btn" data-show="${r.key}">👁️ Ver ruta</button></td>`;
+        tbody.appendChild(tr);
+      }
+      $$('button[data-show]').forEach(b=> b.addEventListener('click', ()=> showRoute(b.getAttribute('data-show'))));
+    }
+
+    function clearRoute(){
+      routeLayer.clearLayers();
+      stopList.innerHTML = '<li class="stop-item" style="opacity:.7">No hay paradas cargadas.</li>';
+      routeTitle.textContent = 'Selecciona una ruta';
+      routeMeta.textContent = 'Operador · Vehículo · Sentido';
+      currentKey = null; reversed = false; btnReverse.disabled = true; btnFit.disabled = true;
+    }
+
+    function fitToLayer(){
+      const layers = routeLayer.getLayers(); if(!layers.length) return;
+      const b = L.latLngBounds([]);
+      layers.forEach(l=>{ if(l.getBounds) b.extend(l.getBounds()); else if(l.getLatLng) b.extend(l.getLatLng()); });
+      if(b.isValid()) map.fitBounds(b.pad(0.15));
+    }
+
+    function showRoute(key){
+      const data = ROUTES[key]; if(!data) return; currentKey = key; routeLayer.clearLayers();
+      const path = reversed ? [...data.path].reverse() : data.path;
+      L.polyline(path, {color:data.color, weight:5, opacity:0.9}).addTo(routeLayer);
+      const list = reversed ? [...data.stops].reverse() : data.stops;
+      stopList.innerHTML = '';
+      list.forEach((s,idx)=>{
+        const icon = L.divIcon({ className:'stop-icon', html:`<div class="stop-badge" style="background:${data.color};">${idx+1}</div>`, iconSize:[26,26], iconAnchor:[13,13] });
+        L.marker([s.lat, s.lng], {icon}).addTo(routeLayer).bindPopup(`<b>${idx+1}. ${s.name}</b><br>${data.name}`);
+        const li = document.createElement('li');
+        li.className = 'stop-item'; li.innerHTML = `<span class="stop-badge" style="background:${data.color};">${idx+1}</span><span class="stop-name">${s.name}</span>`;
+        li.addEventListener('click', ()=> map.setView([s.lat, s.lng], 15));
+        stopList.appendChild(li);
+      });
+      routeTitle.textContent = data.name;
+      routeMeta.textContent = `${data.operator || 'Operador desconocido'} · ${data.vehicle || '—'} · ${reversed ? 'Sentido B' : 'Sentido A'}`;
+      btnReverse.disabled = false; btnFit.disabled = false; fitToLayer();
+    }
+
+    document.getElementById('btnClear').addEventListener('click', clearRoute);
+    document.getElementById('btnFit').addEventListener('click', fitToLayer);
+    document.getElementById('btnReverse').addEventListener('click', ()=>{ if(!currentKey) return; reversed=!reversed; showRoute(currentKey); });
+
+    renderRoutesTable();
+
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if(params.get('route')) showRoute(params.get('route'));
+  </script>
+  
+  <script>
+    const $ = s=>document.querySelector(s);
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const btnDark = document.getElementById('btnDark');
+      if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));
+      const btnLang = document.getElementById('btnLang');
+      if(btnLang){ let lang='es'; btnLang.addEventListener('click', ()=>{ lang=(lang==='es')?'en':'es'; btnLang.textContent=(lang==='es')?'🌐 English':'🌐 Español'; const h1=document.querySelector('h1'); if(h1) h1.textContent=(lang==='es')?'GPS Transporte — La Paz':'GPS Transport — La Paz'; }); }
+      const loginBackdrop = document.getElementById('loginBackdrop');
+      const btnLogin = document.getElementById('btnLogin');
+      const btnCloseLogin = document.getElementById('btnCloseLogin');
+      const btnDoLogin = document.getElementById('btnDoLogin');
+      if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
+      if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
+      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; alert('Sesión iniciada (demo)'); });
+      const guideBackdrop = document.getElementById('guideBackdrop');
+      const btnGuide = document.getElementById('btnGuide');
+      const btnCloseGuide = document.getElementById('btnCloseGuide');
+      if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
+      if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
+    });
   </script>
 
-<div class="info">
-<h3>Listado Oficial de Rutas de Minibuses en La Paz</h3>
-<table>
-<thead>
-<tr>
-<th>N°</th>
-<th>OPERADOR</th>
-<th>TIPO DE VEHÍCULO</th>
-<th>RUTA</th>
-</tr>
-</thead>
-<tbody>
-<tr><td>1</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>CH</td></tr>
-<tr><td>2</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>J</td></tr>
-<tr><td>3</td><td>SINDICATO EDUARDO AVAROA</td><td>MICROBUS</td><td>M</td></tr>
-<tr><td>4</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>O</td></tr>
-<tr><td>5</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>P</td></tr>
-<tr><td>6</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>Q</td></tr>
-<tr><td>7</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>T</td></tr>
-<tr><td>8</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MICROBUS</td><td>V</td></tr>
-<tr><td>9</td><td>SINDICATO PEDRO DOMINGO MURILLO</td><td>MICROBUS</td><td>W</td></tr>
-<tr><td>10</td><td>SINDICATO VILLA VICTORIA</td><td>MICROBUS</td><td>X</td></tr>
-<tr><td>11</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>Y</td></tr>
-<tr><td>12</td><td>SINDICATO PEDRO DOMINGO MURILLO</td><td>MICROBUS</td><td>Z</td></tr>
-<tr><td>13</td><td>SINDICATO LITORAL</td><td>MICROBUS</td><td>1</td></tr>
-<tr><td>14</td><td>SINDICATO EDUARDO AVAROA</td><td>BUS</td><td>2</td></tr>
-<tr><td>15</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>3</td></tr>
-<tr><td>16</td><td>SINDICATO SAN CRISTÓBAL</td><td>MICROBUS</td><td>5</td></tr>
-<tr><td>564</td><td>SINDICATO SAN CRISTÓBAL</td><td>MINIBUS</td><td>977</td></tr>
-<tr><td>565</td><td>SINDICATO 14 DE SEPTIEMBRE</td><td>MINIBUS</td><td>978</td></tr>
-<tr><td>566</td><td>SINDICATO SAN CRISTÓBAL</td><td>MINIBUS</td><td>979</td></tr>
-<tr><td>567</td><td>ASOCIACIÓN MINISUR</td><td>MINIBUS</td><td>980</td></tr>
-<tr><td>568</td><td>ASOCIACIÓN SEÑOR DE MAYO</td><td>MINIBUS</td><td>981</td></tr>
-<tr><td>569</td><td>COOPERATIVA DE TRANSPORTES KUPINI</td><td>MINIBUS</td><td>982</td></tr>
-<tr><td>570</td><td>SINDICATO SAN JUAN</td><td>MINIBUS</td><td>983</td></tr>
-<tr><td>571</td><td>SINDICATO SIMÓN BOLÍVAR</td><td>MINIBUS</td><td>984</td></tr>
-<tr><td>572</td><td>SINDICATO 8 DE DICIEMBRE</td><td>MINIBUS</td><td>985</td></tr>
-</tbody>
-</table>
-</div>
 </body>
 </html>

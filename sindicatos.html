@@ -1,146 +1,96 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Sindicatos — GPS Transporte La Paz</title>
-
-   <style>
-    :root{
-      --bg:#f4f4f4;
-      --fg:#222;
-      --primary:#00423b;
-      --accent:#15c9b7;
-      --surface:#fff;
-      --muted:#e8f6f4;
-      --border:#d9d9d9;
-      --radius:10px;
-      --shadow:0 6px 18px rgba(0,0,0,.08);
-
-      --icon-size:16px;   /* tamaño botones*/
-      --btn-h:42px;       /* altura de botones*/
-      --btn-fz:14px;      /* tamaño fuente en botones*/
-      --map-height:520px;
-      --max-width:1100px;
-    }
-
+  
+  <style>
+    :root{ --c-primary:#004d40; --c-bg:#f6f7f8; --c-fg:#1f2937; --c-panel:#ffffff; --c-border:#e5e7eb; --radius:12px; }
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); color:var(--fg);}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--c-bg);color:var(--c-fg)}
+    header{position:sticky;top:0;z-index:20;background:var(--c-primary);color:#fff}
+    .header-inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:36px;height:36px;border-radius:50%;background:#00a58c;display:grid;place-items:center;font-weight:700}
+    .brand h1{font-size:18px;margin:0}
+    nav{flex:1;display:flex;justify-content:center}
+    .menu{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .btn{height:42px;padding:0 14px;border:1px solid #9ee7db;border-radius:8px;background:#e6fffa;color:#083b35;cursor:pointer}
+    .btn.primary{background:#00a58c;color:#fff;border-color:#00a58c}
+    .menu-item{position:relative}
+    .dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:240px;background:#fff;border:1px solid var(--c-border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);display:none;padding:6px;z-index:30}
+    .dropdown a{display:block;padding:10px 12px;border-radius:8px;color:#111;text-decoration:none}
+    .dropdown a:hover{background:#f3f4f6}
+    .menu-item:hover .dropdown{display:block}
+    .profile-area{display:flex;align-items:center;gap:10px}
+    .container{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:14px}
+    .panel{background:var(--c-panel);border:1px solid var(--c-border);border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .panel header{padding:12px 14px;border-bottom:1px solid var(--c-border)}
+    .panel .content{padding:12px 14px}
+    footer{background:var(--c-primary);color:#fff;margin-top:14px}
+    .footer-inner{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:10px}
+    .socials{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .socials a{display:inline-flex;align-items:center;gap:6px;background:#00695c;color:#fff;text-decoration:none;padding:4px 8px;border-radius:8px}
+    .socials svg{width:16px;height:16px;fill:#fff}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{width:min(520px,92vw);background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal header{background:#00a58c;color:#fff;padding:12px 16px}
+    .modal .content{padding:16px;display:grid;gap:10px}
+    .modal .footer{padding:12px 16px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee}
+    input[type="text"],input[type="email"],input[type="password"]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px}
+    .dark body{background:#121212;color:#e6e6e6}
+  </style>
 
-    /* HEADER: logo arriba y fila de botones en línea debajo (según pedido) */
-    header{ background:var(--primary); color:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:1000;}
-    .header-inner{ max-width:var(--max-width); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
-    .brand{ display:flex; gap:12px; align-items:center; width:100%; }
-    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#031a17; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
-    .brand h1{ margin:0; font-size:18px; }
-
-    /* fila de navegación (alineada L→R) */
-    .nav-row{ display:flex; gap:8px; align-items:center; width:100%; flex-wrap:wrap; }
-    .nav-btn{ height:var(--btn-h); padding:0 12px; display:inline-flex; gap:8px; align-items:center; border-radius:8px; background:rgba(255,255,255,0.95); color:var(--primary); border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:var(--btn-fz); box-shadow:none; }
-    .nav-btn.primary{ background:var(--accent); color:#fff; border:1px solid var(--accent); }
-    .nav-btn .fa { font-size:var(--icon-size); line-height:1; color:var(--primary); }
-    .nav-btn.primary .fa { color: #fff; }
-
-    /* dropdown simple */
-    .menu-item{ position:relative; }
-    .dropdown{ position:absolute; top:calc(100% + 8px); left:0; background:var(--surface); border:1px solid var(--border); border-radius:8px; min-width:220px; display:none; z-index:30; box-shadow:var(--shadow); }
-    .menu-item:hover .dropdown{ display:block; }
-    .dropdown a{ display:block; padding:10px 12px; color:var(--fg); text-decoration:none; }
-
-    /* main layout */
-    main{ max-width:var(--max-width); margin:16px auto; padding:0 12px; }
-    .grid{ display:grid; gap:12px; grid-template-columns: 1fr; }
-    @media(min-width: 880px){ .grid{ grid-template-columns: 360px 1fr; } }
-
-    .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); }
-    .map-box{ height:var(--map-height); border-radius:8px; overflow:hidden; border:1px solid var(--border); }
-
-    .input-row{ display:flex; gap:10px; align-items:center; width:100%; }
-    .input-row label{ min-width:86px; }
-    .input-row input[type="text"]{ flex:1; height:40px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:15px; }
-
-    /* fila de botones del panel destino (alineados en línea) */
-    .button-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .btn-lg{ height:44px; padding:0 14px; border-radius:8px; background:var(--primary); color:#fff; border:none; font-size:15px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;}
-    .btn-outline{ background:#fff; color:var(--primary); border:1px solid rgba(0,0,0,0.06); }
-
-    .results{ margin-top:10px; background:var(--muted); padding:10px; border-radius:8px; border:1px solid #b2dfdb; font-size:14px; }
-
-    /* lista de lugares rápidos */
-    .list-item{ display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:pointer; }
-    .list-item .fa{ width:24px; text-align:center; color:var(--primary); }
-
-    /* modal genérico */
-    .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); z-index:1001; }
-    .modal{ width:min(520px,92vw); background:#fff; border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
-    .modal .modal-body{ padding:16px; }
-    .modal .modal-footer{ padding:12px; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #eee; }
-
-    /* footer */
-    footer{ margin-top:18px; padding:12px 0; background:transparent; color:var(--fg); }
-    .footer-inner{ max-width:var(--max-width); margin:0 auto; padding:0 12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
-    .socials{ display:flex; gap:16px; align-items:center; }
-    .social-link{ 
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      background: #fff;
-      border-radius: 6px;
-      text-decoration: none;
-      border: 1px solid rgba(0,0,0,0.06);
-      transition: transform 0.2s;
-    }
-    .social-link:hover {
-      transform: scale(1.1);
-    }
-    .social-link img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-    }
-
-    /* dark mode */
-    .dark-mode{ --bg:#121212; --fg:#e6e6e6; --surface:#1b1b1b; --muted:#242424; --border:#2b2b2b; --primary:#0aa089; }
+  <style>
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .card{background:var(--c-panel);border:1px solid var(--c-border);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);cursor:pointer}
+    .card:hover{transform:translateY(-1px)}
+    .card h3{margin:0 0 6px 0}
+    .card p{margin:0;color:#374151}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+    .table th{background:var(--c-primary);color:#fff;text-align:left}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
   </style>
 </head>
-<header>
+<body>
+  
+  <header>
     <div class="header-inner">
-      <!-- Brand (logo + título) -->
       <div class="brand">
         <div class="logo" aria-hidden="true">LP</div>
-        <div>
-          <h1 id="appTitle">GPS Transporte — La Paz</h1>
-          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
-        </div>
+        <h1>GPS Transporte — La Paz</h1>
       </div>
-
-      <!-- Nav en línea (orden: Rutas · Guía · Modo · English · Admin · Iniciar sesión) -->
-      <nav class="nav-row" aria-label="Navegación principal">
-        <div class="menu-item">
-          <button class="nav-btn" id="btnRoutes"><i class="fa fa-location-dot"></i><span class="label">Rutas</span></button>
-          <div class="dropdown" aria-label="submenu rutas">
-            <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
-            <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
-            <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
-            <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
+      <nav>
+        <div class="menu">
+          <div class="menu-item">
+            <button class="btn">📍 Rutas</button>
+            <div class="dropdown" aria-label="submenu rutas">
+              <a href="ver_rutas.html">Ver todas las rutas →</a>
+            </div>
+          </div>
+          <button class="btn" id="btnGuide">📘 Guía</button>
+          <button class="btn" id="btnDark">🌙 Modo</button>
+          <button class="btn" id="btnLang">🌐 English</button>
+          <div class="menu-item">
+            <button class="btn">🛠️ Admin</button>
+            <div class="dropdown" aria-label="submenu admin">
+              <a href="agregar_linea.html">➕ Agregar línea</a>
+              <a href="base_datos.html">📄 Ver base de datos</a>
+              <a href="sindicatos.html">🤝 Sindicatos</a>
+            </div>
           </div>
         </div>
+      </nav>
+      <div class="profile-area">
+        <button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
 
-        <button class="nav-btn" id="btnGuide"><i class="fa fa-book"></i><span class="label">Guía</span></button>
-        <button class="nav-btn" id="btnDark"><i class="fa fa-moon"></i><span class="label">Modo</span></button>
-        <button class="nav-btn" id="btnLang"><i class="fa fa-language"></i><span class="label">English</span></button>
-
-        <div class="menu-item">
-          <button class="nav-btn" id="btnAdmin"><i class="fa fa-wrench"></i><span class="label">Admin</span></button>
-          <div class="dropdown" aria-label="submenu admin">
-            <a href="agregar_linea.html">➕ Agregar línea</a>
-            <a href="base_datos.html">📄 Ver base de datos</a>
-            <a href="sindicatos.html">🤝 Sindicatos</a>
-          </div>
-        </div>
-        <button class="nav-btn" id="btnLogin"><i class="fa fa-user"></i><span class="label">Iniciar sesión</span></button>
-      </nav> 
-      <main class="container">
+  <main class="container">
     <section>
       <h2 style="margin:0 0 10px 0">Sindicatos (demo)</h2>
       <div class="grid" id="gridSindicatos"></div>
@@ -179,7 +129,9 @@
       </div>
     </div>
   </footer>
-<div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+
+  
+  <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <div class="modal">
       <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
       <div class="content">
@@ -194,6 +146,62 @@
       </div>
     </div>
   </div>
-      
+  <div class="backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal">
+      <header><h3 id="guideTitle" style="margin:0">Guía rápida</h3></header>
+      <div class="content"><p>Explora las rutas, administra datos y consulta sindicatos.</p></div>
+      <div class="footer"><button class="btn primary" id="btnCloseGuide">Entendido</button></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s=>document.querySelector(s);
+    const SINDICATOS = [
+      { nombre:'SINDICATO EDUARDO AVAROA', contacto:'—', lineas:[{id:1, ruta:'Línea Amarilla', vehiculo:'Microbus', key:'amarilla'}] },
+      { nombre:'SINDICATO SAN CRISTÓBAL', contacto:'—', lineas:[{id:2, ruta:'Línea Verde', vehiculo:'Microbus', key:'verde'}] },
+      { nombre:'LA PAZ BUS (PumaKatari)', contacto:'lapazbus@lapaz.bo', lineas:[{id:3, ruta:'PumaKatari — Achumani', vehiculo:'Bus articulado', key:'puma_achumani'}] }
+    ];
+    function renderGrid(){
+      const grid = document.getElementById('gridSindicatos'); grid.innerHTML='';
+      SINDICATOS.forEach((s,i)=>{
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `<h3>${s.nombre}</h3><p>${s.lineas.length} línea(s) registradas</p><p style="font-size:13px;color:#555">Contacto: ${s.contacto}</p>`;
+        card.addEventListener('click', ()=> selectSindicato(i)); grid.appendChild(card);
+      });
+    }
+    function selectSindicato(idx){
+      const s = SINDICATOS[idx]; document.getElementById('selTitle').textContent = s.nombre;
+      const tbody = document.querySelector('#tableLines tbody'); tbody.innerHTML='';
+      s.lineas.forEach(l=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${l.id}</td><td>${l.ruta}</td><td>${l.vehiculo}</td><td><a class="btn" href="ver_rutas.html#route=${l.key}">👁️ Ver ruta</a></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    renderGrid();
+  </script>
+  
+  <script>
+    const $ = s=>document.querySelector(s);
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const btnDark = document.getElementById('btnDark');
+      if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));
+      const btnLang = document.getElementById('btnLang');
+      if(btnLang){ let lang='es'; btnLang.addEventListener('click', ()=>{ lang=(lang==='es')?'en':'es'; btnLang.textContent=(lang==='es')?'🌐 English':'🌐 Español'; const h1=document.querySelector('h1'); if(h1) h1.textContent=(lang==='es')?'GPS Transporte — La Paz':'GPS Transport — La Paz'; }); }
+      const loginBackdrop = document.getElementById('loginBackdrop');
+      const btnLogin = document.getElementById('btnLogin');
+      const btnCloseLogin = document.getElementById('btnCloseLogin');
+      const btnDoLogin = document.getElementById('btnDoLogin');
+      if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
+      if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
+      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; alert('Sesión iniciada (demo)'); });
+      const guideBackdrop = document.getElementById('guideBackdrop');
+      const btnGuide = document.getElementById('btnGuide');
+      const btnCloseGuide = document.getElementById('btnCloseGuide');
+      if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
+      if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
+    });
+  </script>
+
 </body>
 </html>

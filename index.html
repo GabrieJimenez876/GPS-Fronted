@@ -1,32 +1,31 @@
+// ...existing code...
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>GPS Transporte — La Paz</title>
-
-  <!-- Leaflet -->
+  <!-- Se han eliminado meta tags adicionales por petición del autor -->
+  <!-- Leaflet (CSS) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-  <!-- Icon set (Font Awesome) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="" crossorigin="anonymous"/>
+  <!-- Iconos (Font Awesome) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
 
   <style>
-    /* Theme variables: central place to tune colors & sizes */
+    /* Variables centrales para colores/tamaños */
     :root{
       --bg:#f4f4f4;
       --fg:#222;
       --primary:#00695c;
-      --surface:#ffffff;
-      --muted:#e0f2f1;
+      --accent:#009688;
+      --surface:#fff;
+      --muted:#e8f6f4;
       --border:#d9d9d9;
       --radius:10px;
       --shadow:0 6px 18px rgba(0,0,0,.08);
 
-      /* icon / button sizing */
-      --icon-size:18px;
-      --btn-h:44px;
-      --btn-fz:15px;
+      --icon-size:16px;   /* tamaño de íconos en botones */
+      --btn-h:42px;       /* altura de botones nav */
+      --btn-fz:14px;      /* tamaño fuente en botones */
       --map-height:520px;
       --max-width:1100px;
     }
@@ -34,22 +33,25 @@
     *{box-sizing:border-box}
     html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); color:var(--fg);}
 
+    /* HEADER: logo arriba y fila de botones en línea debajo (según pedido) */
     header{ background:var(--primary); color:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:1000;}
-    .header-inner{ max-width:var(--max-width); margin:0 auto; display:flex; gap:12px; align-items:center; padding:12px; justify-content:space-between; flex-wrap:wrap;}
-    .brand{ display:flex; align-items:center; gap:12px;}
-    .brand .logo{ width:44px; height:44px; border-radius:10px; background:#004d40; display:grid; place-items:center; font-weight:700; color:#fff; }
+    .header-inner{ max-width:var(--max-width); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+    .brand{ display:flex; gap:12px; align-items:center; width:100%; }
+    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#004d40; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
     .brand h1{ margin:0; font-size:18px; }
 
-    nav{ display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
-    .nav-btn{ height:var(--btn-h); padding:0 12px; display:inline-flex; gap:8px; align-items:center; border-radius:8px; background:#fff; color:var(--primary); border:1px solid #cfece6; cursor:pointer; font-size:var(--btn-fz); }
-    .nav-btn.primary{ background:var(--primary); color:#fff; border:1px solid var(--primary); }
-    .nav-btn .fa { font-size:var(--icon-size); line-height:1; }
+    /* fila de navegación (alineada L→R) */
+    .nav-row{ display:flex; gap:8px; align-items:center; width:100%; flex-wrap:wrap; }
+    .nav-btn{ height:var(--btn-h); padding:0 12px; display:inline-flex; gap:8px; align-items:center; border-radius:8px; background:rgba(255,255,255,0.95); color:var(--primary); border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:var(--btn-fz); box-shadow:none; }
+    .nav-btn.primary{ background:var(--accent); color:#fff; border:1px solid var(--accent); }
+    .nav-btn .fa { font-size:var(--icon-size); line-height:1; color:var(--primary); }
+    .nav-btn.primary .fa { color: #fff; }
 
-    /* dropdown */
+    /* dropdown simple */
     .menu-item{ position:relative; }
-    .dropdown{ position:absolute; top:calc(100% + 8px); left:0; background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow); min-width:220px; display:none; z-index:30;}
-    .dropdown a{ display:block; padding:10px 12px; color:var(--fg); text-decoration:none; }
+    .dropdown{ position:absolute; top:calc(100% + 8px); left:0; background:var(--surface); border:1px solid var(--border); border-radius:8px; min-width:220px; display:none; z-index:30; box-shadow:var(--shadow); }
     .menu-item:hover .dropdown{ display:block; }
+    .dropdown a{ display:block; padding:10px 12px; color:var(--fg); text-decoration:none; }
 
     /* main layout */
     main{ max-width:var(--max-width); margin:16px auto; padding:0 12px; }
@@ -59,26 +61,32 @@
     .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow); }
     .map-box{ height:var(--map-height); border-radius:8px; overflow:hidden; border:1px solid var(--border); }
 
-    .input-row{ display:flex; gap:10px; align-items:center; }
-    .input-row input[type="text"]{ flex:1; height:var(--btn-h); padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:15px; }
+    .input-row{ display:flex; gap:10px; align-items:center; width:100%; }
+    .input-row label{ min-width:86px; }
+    .input-row input[type="text"]{ flex:1; height:40px; padding:0 12px; border-radius:8px; border:1px solid var(--border); font-size:15px; }
 
+    /* fila de botones del panel destino (alineados en línea) */
     .button-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .btn-lg{ height:50px; padding:0 14px; border-radius:8px; background:var(--primary); color:#fff; border:none; font-size:15px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;}
-    .btn-outline{ background:#fff; color:var(--primary); border:1px solid #cfece6; }
+    .btn-lg{ height:44px; padding:0 14px; border-radius:8px; background:var(--primary); color:#fff; border:none; font-size:15px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;}
+    .btn-outline{ background:#fff; color:var(--primary); border:1px solid rgba(0,0,0,0.06); }
 
     .results{ margin-top:10px; background:var(--muted); padding:10px; border-radius:8px; border:1px solid #b2dfdb; font-size:14px; }
 
-    /* Footer */
-    footer{ margin-top:18px; padding:12px 0; background:transparent; color:var(--fg); }
-    .footer-inner{ max-width:var(--max-width); margin:0 auto; padding:0 12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-
-    /* modal simple */
-    .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); z-index:1001; }
-    .modal{ width:min(560px,92vw); background:#fff; border-radius:10px; overflow:hidden; }
-
-    /* compact icon sizing for sidebar items */
-    .list-item{ display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:default; }
+    /* lista de lugares rápidos */
+    .list-item{ display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:pointer; }
     .list-item .fa{ width:24px; text-align:center; color:var(--primary); }
+
+    /* modal genérico */
+    .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); z-index:1001; }
+    .modal{ width:min(520px,92vw); background:#fff; border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+    .modal .modal-body{ padding:16px; }
+    .modal .modal-footer{ padding:12px; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #eee; }
+
+    /* footer */
+    footer{ margin-top:18px; padding:12px 0; background:transparent; color:var(--fg); }
+    .footer-inner{ max-width:var(--max-width); margin:0 auto; padding:0 12px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
+    .socials{ display:flex; gap:10px; align-items:center; }
+    .socials a{ color:var(--primary); background:#fff; width:30px; height:30px; display:inline-grid; place-items:center; border-radius:6px; text-decoration:none; border:1px solid rgba(0,0,0,0.06); }
 
     /* dark mode */
     .dark-mode{ --bg:#121212; --fg:#e6e6e6; --surface:#1b1b1b; --muted:#242424; --border:#2b2b2b; --primary:#0aa089; }
@@ -87,41 +95,43 @@
 <body>
   <header>
     <div class="header-inner">
+      <!-- Brand (logo + título) -->
       <div class="brand">
         <div class="logo" aria-hidden="true">LP</div>
-        <h1 id="appTitle">GPS Transporte — La Paz</h1>
+        <div>
+          <h1 id="appTitle">GPS Transporte — La Paz</h1>
+          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+        </div>
       </div>
 
-      <nav>
-        <div class="menu">
-          <div class="menu-item">
-            <button class="nav-btn" id="btnRoutes"><i class="fa fa-location-dot"></i><span class="label">Rutas</span></button>
-            <div class="dropdown" aria-label="submenu rutas">
-              <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
-              <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
-              <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
-              <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
-            </div>
-          </div>
-
-          <button class="nav-btn" id="btnGuide"><i class="fa fa-book"></i><span class="label">Guía</span></button>
-          <button class="nav-btn" id="btnDark"><i class="fa fa-moon"></i><span class="label">Modo</span></button>
-          <button class="nav-btn" id="btnLang"><i class="fa fa-language"></i><span class="label">English</span></button>
-
-          <div class="menu-item">
-            <button class="nav-btn"><i class="fa fa-wrench"></i><span class="label">Admin</span></button>
-            <div class="dropdown" aria-label="submenu admin">
-              <a href="agregar_linea.html">➕ Agregar línea</a>
-              <a href="base_datos.html">📄 Ver base de datos</a>
-              <a href="sindicatos.html">🤝 Sindicatos</a>
-            </div>
+      <!-- Nav en línea (orden: Rutas · Guía · Modo · English · Admin · Iniciar sesión) -->
+      <nav class="nav-row" aria-label="Navegación principal">
+        <div class="menu-item">
+          <button class="nav-btn" id="btnRoutes"><i class="fa fa-location-dot"></i><span class="label">Rutas</span></button>
+          <div class="dropdown" aria-label="submenu rutas">
+            <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
+            <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
+            <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
+            <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
           </div>
         </div>
-      </nav>
 
-      <div id="profileArea">
+        <button class="nav-btn" id="btnGuide"><i class="fa fa-book"></i><span class="label">Guía</span></button>
+        <button class="nav-btn" id="btnDark"><i class="fa fa-moon"></i><span class="label">Modo</span></button>
+        <button class="nav-btn" id="btnLang"><i class="fa fa-language"></i><span class="label">English</span></button>
+
+        <div class="menu-item">
+          <button class="nav-btn" id="btnAdmin"><i class="fa fa-wrench"></i><span class="label">Admin</span></button>
+          <div class="dropdown" aria-label="submenu admin">
+            <a href="agregar_linea.html">➕ Agregar línea</a>
+            <a href="base_datos.html">📄 Ver base de datos</a>
+            <a href="sindicatos.html">🤝 Sindicatos</a>
+          </div>
+        </div>
+
+        <!-- Iniciar sesión como último elemento -->
         <button class="nav-btn primary" id="btnLogin"><i class="fa fa-user-lock"></i><span class="label">Iniciar sesión</span></button>
-      </div>
+      </nav>
     </div>
   </header>
 
@@ -131,11 +141,12 @@
         <h2>Destino</h2>
 
         <div class="input-row" style="margin-top:8px;">
-          <label for="dest" style="min-width:86px">Destino:</label>
+          <label for="dest">Destino:</label>
           <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
         </div>
 
-        <div class="button-row">
+        <!-- Botones en línea según pedido -->
+        <div class="button-row" style="margin-top:10px;">
           <button class="nav-btn btn-outline" id="btnMyLoc"><i class="fa fa-location-crosshairs"></i> Mi ubicación</button>
           <button class="btn-lg" id="btnMarkDest"><i class="fa fa-map-pin"></i> Marcar destino</button>
           <button class="nav-btn btn-outline" id="btnFindRoutes"><i class="fa fa-route"></i> Rutas</button>
@@ -147,9 +158,14 @@
 
         <div>
           <h3 style="margin:6px 0 8px 0">Lugares rápidos</h3>
-          <div class="list-item" onclick="quickPlace('plaza murillo')"><i class="fa fa-square-check"></i><span>Plaza Murillo</span></div>
-          <div class="list-item" onclick="quickPlace('miraflores')"><i class="fa fa-square-check"></i><span>Miraflores</span></div>
+          <!-- Nuevos lugares rápidos solicitados -->
           <div class="list-item" onclick="quickPlace('terminal')"><i class="fa fa-square-check"></i><span>Terminal</span></div>
+          <div class="list-item" onclick="quickPlace('cementerio')"><i class="fa fa-square-check"></i><span>Cementerio</span></div>
+          <div class="list-item" onclick="quickPlace('prado')"><i class="fa fa-square-check"></i><span>Prado</span></div>
+          <div class="list-item" onclick="quickPlace('achachical')"><i class="fa fa-square-check"></i><span>Achachical</span></div>
+          <div class="list-item" onclick="quickPlace('umsa')"><i class="fa fa-square-check"></i><span>UMSA</span></div>
+          <div class="list-item" onclick="quickPlace('plaza estudiante')"><i class="fa fa-square-check"></i><span>Plaza Estudiante</span></div>
+          <div class="list-item" onclick="quickPlace('villa victoria')"><i class="fa fa-square-check"></i><span>Villa Victoria</span></div>
         </div>
       </section>
 
@@ -162,56 +178,125 @@
   <footer>
     <div class="footer-inner">
       <div>Contacto: lapazbus@lapaz.bo — Tel: 2652444 / 61022444</div>
-      <div>Mapa: Leaflet + OpenStreetMap</div>
+      <div class="socials" aria-label="Redes sociales">
+        <a href="#" title="Facebook" id="soc-fb"><i class="fa fa-facebook-f"></i></a>
+        <a href="#" title="X / Twitter" id="soc-x"><i class="fa fa-x-twitter"></i></a>
+        <a href="#" title="Instagram" id="soc-ig"><i class="fa fa-instagram"></i></a>
+        <a href="#" title="Telegram" id="soc-tg"><i class="fa fa-telegram"></i></a>
+      </div>
     </div>
   </footer>
 
-  <!-- Leaflet + optional Dart / app hooks -->
+  <!-- Modales: Guía y Login -->
+  <div id="guideModal" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="guideTitle">
+      <div class="modal-body">
+        <h3 id="guideTitle">Guía rápida</h3>
+        <p>Esta guía explica cómo usar el mapa, marcar destinos y buscar rutas.</p>
+        <ul>
+          <li>Usa "Mi ubicación" para centrar el mapa en tu posición (si el navegador lo permite).</li>
+          <li>Usa "Marcar destino" para colocar un pin en el mapa.</li>
+          <li>Usa "Rutas" para consultar rutas entre dos puntos (requiere backend o JSON local).</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="nav-btn btn-outline" id="closeGuide">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loginModal" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="loginTitle">
+      <div class="modal-body">
+        <h3 id="loginTitle">Iniciar sesión</h3>
+        <form id="loginForm" onsubmit="return false;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label for="email">Correo</label>
+            <input id="email" type="email" placeholder="correo@ejemplo.com" style="padding:8px;border:1px solid #ddd;border-radius:6px;" required />
+            <label for="pass">Contraseña</label>
+            <input id="pass" type="password" placeholder="Contraseña" style="padding:8px;border:1px solid #ddd;border-radius:6px;" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="nav-btn btn-outline" id="closeLogin">Cerrar</button>
+        <button class="nav-btn primary" id="doLogin">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet (JS) -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    /* Small, tidy map & UI script. Keep adjustments centralized. */
+    /* -----------------------------------------------------------
+       Código JavaScript con comentarios en Español (según pedido)
+       ----------------------------------------------------------- */
+
+    /* Inicializa el mapa centrado en La Paz y aplica límites aproximados */
     const map = L.map('map', { zoomControl:true }).setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
 
+    // Límites aproximados de la ciudad de La Paz para evitar drag fuera de zona
     const lpBounds = L.latLngBounds([-16.62, -68.24], [-16.43, -68.02]);
     map.setMaxBounds(lpBounds);
     map.on('drag', () => map.panInsideBounds(lpBounds, { animate:false }));
 
+    // Marcador de usuario (inicial) y marcador de destino (a crear)
     let userMarker = L.marker([-16.5, -68.15]).addTo(map).bindPopup("Tu ubicación");
     let destMarker = null;
     let lastClicked = null;
-    map.on('click', e => lastClicked = e.latlng);
+    map.on('click', e => lastClicked = e.latlng); // guarda última posición click mapa
 
+    // Selectores rápidos
     const $ = s => document.querySelector(s);
     const $$ = s => Array.from(document.querySelectorAll(s));
     const results = $('#results');
 
-    // small common places table (use project JSON for larger set)
+    /* Tabla pequeña de lugares comunes (agregadas por petición) */
     const commonPlaces = {
-      "plaza murillo": [-16.5, -68.15],
-      "miraflores": [-16.509, -68.119],
-      "terminal": [-16.495, -68.150],
-      "ceja": [-16.495, -68.195],
-      "cementerio": [-16.51, -68.150],
-      "teleferico central": [-16.5, -68.135]
+      "plaza murillo": [-16.4989, -68.1549],
+      "miraflores": [-16.5090, -68.1190],
+      "terminal": [-16.4950, -68.1500],
+      "ceja": [-16.4950, -68.1950],
+      "cementerio": [-16.5095, -68.1500],
+      "teleferico central": [-16.5000, -68.1350],
+      "prado": [-16.5065, -68.1470],
+      "achachical": [-16.4860, -68.1320],
+      "umsa": [-16.5120, -68.1300],
+      "plaza estudiante": [-16.5080, -68.1325],
+      "villa victoria": [-16.5250, -68.1650]
     };
 
+    /**
+     * Marca el destino por nombre conocido o por el último click en el mapa.
+     * name: texto ingresado por el usuario (puede coincidir con commonPlaces)
+     */
     function markDestinationByName(name){
       let coords = null;
       if(name){
         const key = name.trim().toLowerCase();
         if(commonPlaces[key]) coords = commonPlaces[key];
       }
+      // si no hay coords y el usuario hizo click, usa el último click
       if(!coords && lastClicked) coords = [lastClicked.lat, lastClicked.lng];
+      // fallback central
       if(!coords) coords = [-16.5, -68.15];
+
+      // remueve marcador anterior y coloca uno nuevo
       if(destMarker) map.removeLayer(destMarker);
       destMarker = L.marker(coords).addTo(map).bindPopup("Destino: " + (name || "Sin nombre")).openPopup();
       map.setView(coords, 14);
       results.textContent = `Destino marcado (${coords[0].toFixed(5)}, ${coords[1].toFixed(5)})`;
     }
 
+    /* Evento para el botón "Marcar destino" */
     $('#btnMarkDest').addEventListener('click', ()=> markDestinationByName($('#dest').value));
+
+    /**
+     * Obtiene la ubicación del navegador y la marca en el mapa.
+     * Muestra mensajes de error si no está disponible o fuera de límites.
+     */
     $('#btnMyLoc').addEventListener('click', ()=>{
       if(!navigator.geolocation){ results.textContent = 'Geolocalización no disponible.'; return; }
       navigator.geolocation.getCurrentPosition(pos=>{
@@ -227,65 +312,123 @@
       }, { enableHighAccuracy:true, timeout:8000});
     });
 
+    /**
+     * Simula búsqueda de rutas entre marcador de usuario y destino.
+     * Actualmente devuelve texto; integrar backend o JSON si está disponible.
+     */
     $('#btnFindRoutes').addEventListener('click', ()=>{
       const u = userMarker ? userMarker.getLatLng() : null;
       const d = destMarker ? destMarker.getLatLng() : null;
       if(!u || !d){ results.textContent = 'Marca tu ubicación y un destino para buscar rutas.'; return; }
       results.innerHTML = `<strong>Rutas</strong><br>Desde: ${u.lat.toFixed(5)}, ${u.lng.toFixed(5)}<br>Hasta: ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}<br><em>Conectando al backend...</em>`;
-      // TODO: fetch routes from project API or local JSON
+      // TODO: fetch('/api/routes?from=...&to=...') -> renderizar rutas
     });
 
+    /**
+     * Llena el campo destino con un lugar rápido y lo marca en el mapa.
+     */
     function quickPlace(key){ $('#dest').value = key; markDestinationByName(key); }
 
-    // dark mode
+    /**
+     * Alterna modo oscuro (aplica la clase .dark-mode al body)
+     */
     $('#btnDark').addEventListener('click', ()=> document.body.classList.toggle('dark-mode'));
 
-    // language toggle: label swapping (kept minimal)
+    /* ---------------- Modales (Guía y Login) ---------------- */
+
+    // Abre y cierra modal guía
+    $('#btnGuide').addEventListener('click', ()=> openModal('#guideModal'));
+    $('#closeGuide').addEventListener('click', ()=> closeModal('#guideModal'));
+
+    // Abre y cierra modal login
+    $('#btnLogin').addEventListener('click', ()=> openModal('#loginModal'));
+    $('#closeLogin').addEventListener('click', ()=> closeModal('#loginModal'));
+
+    /**
+     * Abre un modal identificado por selector (mostrar backdrop)
+     * selector: '#loginModal' o '#guideModal'
+     */
+    function openModal(selector){
+      const el = document.querySelector(selector);
+      if(!el) return;
+      el.style.display = 'flex';
+      el.setAttribute('aria-hidden','false');
+    }
+
+    /**
+     * Cierra modal identificado por selector
+     */
+    function closeModal(selector){
+      const el = document.querySelector(selector);
+      if(!el) return;
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden','true');
+    }
+
+    /* Manejo del formulario de login: no redirecciona, muestra "Implementado" al enviar */
+    $('#doLogin').addEventListener('click', ()=>{
+      const email = $('#email').value.trim();
+      const pass = $('#pass').value;
+      // validación mínima
+      if(!email || !pass){ alert('Ingrese correo y contraseña'); return; }
+      // Simula autenticación: aquí iría fetch a API si está disponible
+      closeModal('#loginModal');
+
+      // Muestra mensaje "Implementado" cerca del área de resultados (petición del usuario)
+      showTemporaryBadge('Implementado', 3000);
+    });
+
+    /**
+     * Muestra una pequeña notificación temporal con texto dado.
+     * texto: string a mostrar
+     * ms: duración en ms
+     */
+    function showTemporaryBadge(text, ms){
+      // crear badge
+      const b = document.createElement('div');
+      b.textContent = text;
+      b.style.position = 'fixed';
+      b.style.right = '18px';
+      b.style.top = '78px';
+      b.style.background = 'var(--accent)';
+      b.style.color = '#fff';
+      b.style.padding = '8px 12px';
+      b.style.borderRadius = '8px';
+      b.style.boxShadow = '0 6px 18px rgba(0,0,0,.12)';
+      b.style.zIndex = 2000;
+      document.body.appendChild(b);
+      setTimeout(()=> b.style.opacity = '0.0', ms - 300);
+      setTimeout(()=> b.remove(), ms);
+    }
+
+    /* ---------------- Idioma (botón English) ---------------- */
     let currentLang = 'es';
     $('#btnLang').addEventListener('click', ()=>{
       currentLang = currentLang === 'es' ? 'en' : 'es';
-      // small set; extend using project i18n JSON
       const labels = {
-        es: { routes:'Rutas', guide:'Guía', login:'Iniciar sesión', myloc:'Mi ubicación', mark:'Marcar destino' },
-        en: { routes:'Routes', guide:'Guide', login:'Sign in', myloc:'My location', mark:'Mark destination' }
+        es: { routes:'Rutas', guide:'Guía', login:'Iniciar sesión', myloc:'Mi ubicación', mark:'Marcar destino', title:'GPS Transporte — La Paz' },
+        en: { routes:'Routes', guide:'Guide', login:'Sign in', myloc:'My location', mark:'Mark destination', title:'GPS Transport — La Paz' }
       };
       $('#btnRoutes .label').textContent = labels[currentLang].routes;
       $('#btnGuide .label').textContent = labels[currentLang].guide;
       $('#btnLogin .label').textContent = labels[currentLang].login;
       $('#btnMyLoc').innerHTML = `<i class="fa fa-location-crosshairs"></i> ${labels[currentLang].myloc}`;
       $('#btnMarkDest').innerHTML = `<i class="fa fa-map-pin"></i> ${labels[currentLang].mark}`;
-      $('#appTitle').textContent = currentLang==='es' ? 'GPS Transporte — La Paz' : 'GPS Transport — La Paz';
+      $('#appTitle').textContent = labels[currentLang].title;
+      // cambiar texto de placeholder
+      $('#dest').placeholder = currentLang === 'es' ? 'Ej: Plaza Murillo' : 'Ex: Plaza Murillo';
     });
 
-    // Attempt to load project JSON config (place config.json in same folder)
-    (async function loadConfig(){
-      try{
-        const res = await fetch('config.json');
-        if(!res.ok) return;
-        const cfg = await res.json();
-        // Example: apply primary color from config.json if present
-        if(cfg && cfg.theme && cfg.theme.primary){
-          document.documentElement.style.setProperty('--primary', cfg.theme.primary);
-        }
-        // load places list if provided
-        if(cfg && cfg.places){
-          Object.assign(commonPlaces, cfg.places);
-        }
-      }catch(e){}
+    /* Inicialización: ajustar tamaños de iconos si es necesario, y localmente mejorar proporciones */
+    (function adjustIcons(){
+      // ejemplo: asegurar que iconos dentro de .nav-btn estén centrados y proporcionados
+      $$('.nav-btn .fa').forEach(i=> i.style.width = '18px');
     })();
 
-    // Optionally load compiled Dart/Flutter web app if present (drop compiled main.dart.js in this folder)
-    (function tryLoadDart(){
-      const dartScriptPath = 'main.dart.js';
-      fetch(dartScriptPath, { method:'HEAD' }).then(r=>{
-        if(r.ok){
-          const s = document.createElement('script');
-          s.src = dartScriptPath;
-          s.defer = true;
-          document.body.appendChild(s);
-        }
-      }).catch(()=>{ /* no dart build present */ });
-    })();
+    /* -----------------------------------------------------------
+       Fin del script principal
+       ----------------------------------------------------------- */
   </script>
 </body>
 </html>
+// ...existing code...

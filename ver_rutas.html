@@ -89,7 +89,8 @@
         </div>
       </nav>
       <div class="profile-area">
-        <!-- login removed per request -->
+        <!-- Botón de inicio de sesión (coincide con index.html) -->
+        <button class="btn primary" id="btnLogin">Iniciar sesión</button>
       </div>
     </div>
   </header>
@@ -310,7 +311,7 @@
   </script>
   
   <script>
-    const $ = s=>document.querySelector(s);
+    // Reusar el helper definido en el script anterior; evitar redeclarar const globales
     window.addEventListener('DOMContentLoaded', ()=>{
       const btnDark = document.getElementById('btnDark');
       if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));

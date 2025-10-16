@@ -1,0 +1,25 @@
+﻿# Ignorar archivos comunes para Flutter, Node y editores
+.DS_Store
+*.log
+node_modules/
+.env
+
+# Flutter/Dart
+.build/
+.dart_tool/
+build/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+
+# VSCode
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+Icon\r
+

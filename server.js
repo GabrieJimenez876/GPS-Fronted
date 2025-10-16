@@ -5,22 +5,22 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// --- Mock Database (In a real app, this would be MongoDB or PostgreSQL) ---
+// --- Base de datos simulada (en una app real sería MongoDB o PostgreSQL) ---
 const transportLines = [];
 
-// --- Middleware Setup ---
-// Use body-parser to process form data (URL-encoded)
+// --- Configuración de middleware ---
+// Usamos body-parser para procesar datos de formularios (URL-encoded)
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files (like the HTML, if you moved it)
-// For simplicity, we'll serve the HTML directly below.
+// Servir archivos estáticos (por ejemplo si mueves el HTML a /public)
+// Por simplicidad, se inserta el HTML directamente en la ruta abajo.
 // app.use(express.static(path.join(__dirname, 'public')));
 
 
-// --- Route 1: Serve the Form (GET /) ---
+// --- Ruta 1: Servir el formulario (GET /) ---
 app.get('/', (req, res) => {
-    // We send the modified HTML directly so it works right away.
-    // The key change is adding method="POST" and action="/guardar_linea" to the form.
+  // Enviamos el HTML directamente para que funcione de inmediato.
+  // El formulario tiene method="POST" y action="/guardar_linea" para enviar datos al servidor.
     const formHtml = `
     <!DOCTYPE html>
     <html lang="es">
@@ -75,39 +75,39 @@ app.get('/', (req, res) => {
 });
 
 
-// --- Route 2: Process Form Submission (POST /guardar_linea) ---
+// --- Ruta 2: Procesar envío del formulario (POST /guardar_linea) ---
 app.post('/guardar_linea', (req, res) => {
-    // 1. Get data from the request body (thanks to body-parser)
-    const { nombre, codigo, sindicato, paradas, recorrido } = req.body;
+  // 1. Obtener datos del cuerpo de la petición (gracias a body-parser)
+  const { nombre, codigo, sindicato, paradas, recorrido } = req.body;
 
-    // 2. Process/Clean Data (e.g., convert the string of stops into an array)
-    const paradasArray = paradas ? paradas.split(',').map(p => p.trim()).filter(p => p.length > 0) : [];
+  // 2. Procesar/limpiar datos (por ejemplo convertir la cadena de paradas en un array)
+  const paradasArray = paradas ? paradas.split(',').map(p => p.trim()).filter(p => p.length > 0) : [];
 
-    // 3. Create the new line object
-    const newLine = {
-        nombre,
-        codigo,
-        sindicato,
-        paradas: paradasArray,
-        recorrido,
-        timestamp: new Date().toISOString()
-    };
+  // 3. Construir el objeto de la nueva línea
+  const newLine = {
+    nombre,
+    codigo,
+    sindicato,
+    paradas: paradasArray,
+    recorrido,
+    timestamp: new Date().toISOString()
+  };
     
-    // 4. Store the data (in our mock database)
-    transportLines.push(newLine);
+  // 4. Almacenar los datos (en nuestra base simulada)
+  transportLines.push(newLine);
 
-    // 5. Log the new entry in the console (for debugging)
-    console.log(`✅ Nueva Línea Guardada: ${newLine.nombre} (${newLine.codigo})`);
-    console.log('Datos:', newLine);
-    console.log('------------------------------');
+  // 5. Registrar la nueva entrada en la consola (para depuración)
+  console.log(`✅ Nueva Línea Guardada: ${newLine.nombre} (${newLine.codigo})`);
+  console.log('Datos:', newLine);
+  console.log('------------------------------');
 
-    // 6. Send a response to the user (Redirect back to the form or a success page)
-    res.redirect('/');
+  // 6. Responder al cliente (redirigir al formulario o a una página de éxito)
+  res.redirect('/');
 });
 
 
-// --- Start the Server ---
+// --- Iniciar el servidor ---
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor Express corriendo en http://localhost:${PORT}`);
-    console.log('Presiona Ctrl+C para detenerlo.');
+  console.log(`🚀 Servidor Express corriendo en http://localhost:${PORT}`);
+  console.log('Presiona Ctrl+C para detenerlo.');
 });

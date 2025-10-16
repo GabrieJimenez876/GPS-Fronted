@@ -344,7 +344,7 @@
       const d = destMarker ? destMarker.getLatLng() : null;
       if(!u || !d){ results.textContent = 'Marca tu ubicación y un destino para buscar rutas.'; return; }
       results.innerHTML = `<strong>Rutas</strong><br>Desde: ${u.lat.toFixed(5)}, ${u.lng.toFixed(5)}<br>Hasta: ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}<br><em>Conectando al backend...</em>`;
-      // TODO: fetch('/api/routes?from=...&to=...') -> renderizar rutas
+  // Pendiente: fetch('/api/routes?from=...&to=...') -> renderizar rutas
     });
 
     /**

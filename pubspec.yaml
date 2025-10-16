@@ -1,11 +1,31 @@
+##############################
+# pubspec.yaml
+# Metadatos del proyecto Flutter/Dart.
+# Edita las dependencias aquí y ejecuta `flutter pub get`
+# para sincronizar el lockfile (`pubspec.lock`).
+##############################
+
 name: proyecto_gps
+description: "Proyecto GPS — Frontend (mapas y visualización de rutas)"
+version: 0.0.1
+publish_to: none # Evita publicar este paquete en pub.dev
+
 environment:
   sdk: '>=3.9.0 <4.0.0'
 
 dependencies:
+  # SDK de Flutter (necesario para apps Flutter)
   flutter:
     sdk: flutter
+
+  # Mapa y utilidades geoespaciales
   flutter_map: ^8.2.2
   latlong2: ^0.9.0
+
+  # Geolocalización (paquete usado en la app)
   geolocator: ^14.0.2
+
+  # Cliente HTTP para peticiones a APIs
   http: ^1.1.0
+
+# Nota: No edites manualmente `pubspec.lock` salvo que sepas lo que haces.

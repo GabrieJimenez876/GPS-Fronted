@@ -1,1 +1,5 @@
-translations = {'es': {'title': 'Sistema de Rutas', 'add_line': 'Agregar Línea', 'view_routes': 'Ver Todas las Rutas', 'dark_mode': 'Modo Oscuro', 'language': 'Idioma', 'line_name': 'Nombre de la Línea', 'code': 'Código', 'syndicate': 'Sindicato', 'stops': 'Paradas', 'route': 'Recorrido', 'save': 'Guardar', 'cancel': 'Cancelar', 'search': 'Buscar', 'location': 'Ubicación Actual', 'destination': 'Destino', 'lines_nearby': 'Líneas Cercanas', 'map': 'Mapa', 'info': 'Información', 'logout': 'Cerrar Sesión'}, 'en': {'title': 'Route System', 'add_line': 'Add Line', 'view_routes': 'View All Routes', 'dark_mode': 'Dark Mode', 'language': 'Language', 'line_name': 'Line Name', 'code': 'Code', 'syndicate': 'Syndicate', 'stops': 'Stops', 'route': 'Route', 'save': 'Save', 'cancel': 'Cancel', 'search': 'Search', 'location': 'Current Location', 'destination': 'Destination', 'lines_nearby': 'Nearby Lines', 'map': 'Map', 'info': 'Information', 'logout': 'Logout'}}
+﻿Módulo de traducciones simple usado por páginas y scripts del proyecto.
+
+Contiene dos locales: 'es' (español) y 'en' (inglés).
+Puedes ampliarlo o reemplazarlo por un sistema de i18n más completo si el
+proyecto crece.

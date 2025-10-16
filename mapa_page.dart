@@ -21,6 +21,7 @@ class _MapaPageState extends State<MapaPage> {
 
   Future<void> obtenerUbicacion() async {
     bool servicio = await Geolocator.isLocationServiceEnabled();
+    // Si el servicio de geolocalización no está activado, no continuar
     if (!servicio) return;
 
     LocationPermission permiso = await Geolocator.checkPermission();
@@ -29,6 +30,7 @@ class _MapaPageState extends State<MapaPage> {
       if (permiso == LocationPermission.deniedForever) return;
     }
 
+    // Obtener la posición actual y actualizar el estado para centrar el mapa
     Position posicion = await Geolocator.getCurrentPosition();
     setState(() {
       ubicacionActual = LatLng(posicion.latitude, posicion.longitude);
@@ -44,6 +46,7 @@ class _MapaPageState extends State<MapaPage> {
           Expanded(
             flex: 3,
             child: FlutterMap(
+              // Configuración del mapa: centro inicial y restricciones de cámara
               options: MapOptions(
                 initialCenter: ubicacionActual,
                 initialZoom: 14.0,
@@ -58,6 +61,7 @@ class _MapaPageState extends State<MapaPage> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.transporte_la_paz',
                 ),
+                // Capa de marcadores: ubicación del usuario y paradas de ejemplo
                 MarkerLayer(
                   markers: [
                     Marker(
@@ -74,6 +78,7 @@ class _MapaPageState extends State<MapaPage> {
                     ),
                   ],
                 ),
+                // Capas de polilíneas para mostrar recorridos de ejemplo
                 PolylineLayer(
                   polylines: [
                     Polyline(

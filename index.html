@@ -192,6 +192,30 @@
     </div>
   </main>
 <!-- imagenes y logos -->
+  <!-- Modal de inicio de sesión -->
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal">
+      <div class="modal-body">
+        <h3 style="margin:0 0 16px">Iniciar sesión</h3>
+        
+        <div style="margin-bottom:12px">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" style="width:100%; margin-top:4px" placeholder="ejemplo@dominio.com" required>
+        </div>
+        
+        <div style="margin-bottom:12px">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" style="width:100%; margin-top:4px" placeholder="Contraseña" required>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="nav-btn" onclick="closeLoginModal()">Cancelar</button>
+        <button class="nav-btn primary" onclick="login()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="footer-inner">
       <div>Contacto: lapazbus@lapaz.bo — Tel: 2652444 / +591 76522444</div>
@@ -276,21 +300,20 @@
     const $$ = s => Array.from(document.querySelectorAll(s));
     const results = $('#results');
 
-    /* Tabla pequeña de lugares comunes (agregadas por petición) */
-    const commonPlaces = {
-      "plaza murillo": [-16.4989, -68.1549],
-      "miraflores": [-16.5090, -68.1190],
-      "terminal": [-16.4950, -68.1500],
-      "ceja": [-16.4950, -68.1950],
-      "cementerio": [-16.5095, -68.1500],
-      "teleferico central": [-16.5000, -68.1350],
-      "prado": [-16.5065, -68.1470],
-      "achachical": [-16.4860, -68.1320],
-      "umsa": [-16.5120, -68.1300],
-      "plaza estudiante": [-16.5080, -68.1325],
-      "villa victoria": [-16.5250, -68.1650]
+    /* Tabla mejorada de lugares comunes con coordenadas exactas */
+      const commonPlaces = {
+      "plaza estudiante": [-16.5041, -68.1311],     // Plaza del Estudiante / Franz Tamayo
+      "plaza murillo": [-16.4958, -68.1336],        // Centro de la plaza
+      "miraflores": [-16.4989, -68.1219],          // Plaza Triangular (zona central de Miraflores)
+      "prado": [-16.5050, -68.1345],                // El Obelisco, punto central del Paseo del Prado
+      "terminal": [-16.4887, -68.1418],             // Terminal de Buses de La Paz
+      "umsa": [-16.5042, -68.1331],                 // Monoblock Central UMSA, Avenida Villazón
+      "cementerio": [-16.4969, -68.1517],           // Cementerio General de La Paz
+      "teleferico central": [-16.4897, -68.1335],    // Estación Central Teleférico (Línea Roja)
+      "ceja": [-16.5029, -68.1751],                 // Punto central en La Ceja de El Alto
+      "achachicala": [-16.4839, -68.1350],          // Cruce Achachicala (referencia de la zona)
+      "villa victoria": [-16.5248, -68.1639]        // Referencia aproximada de la zona (basado en GR5W+PJG)
     };
-
     /**
      * Marca el destino por nombre conocido o por el último click en el mapa.
      * name: texto ingresado por el usuario (puede coincidir con commonPlaces)

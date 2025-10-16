@@ -185,25 +185,28 @@
     const routeLayer = L.layerGroup().addTo(map);
 
     const ROUTES = {
-      amarilla: { id:1, name:'Línea Amarilla', operator:'—', vehicle:'Microbus', color:'#f1c40f',
+      amarilla: { id:1, name:'Línea 10', operator:'Sindicato villa victoria', vehicle:'minibus', color:'#f1c40f',
         stops:[
-          {name:'Cementerio', lat:-16.495, lng:-68.133},
-          {name:'Av. Principal', lat:-16.492, lng:-68.131},
-          {name:'Plaza intermedia', lat:-16.49, lng:-68.130},
-          {name:'Hospital Juan XXIII', lat:-16.485, lng:-68.125}
+          {name: 'Plaza Eguino', lat: -16.485, lng: -68.125},
+          {name: 'Calatayud', lat: -16.487, lng: -68.127},
+          {name: 'Cementerio', lat: -16.489, lng: -68.129},
+          {name: 'Uyustus', lat: -16.491, lng: -68.130},
+          {name: 'Villa Victoria', lat: -16.492, lng: -68.131},
+          {name: 'Av. Republica', lat: -16.494, lng: -68.132},
+          {name: 'Hospital Juan XXIII', lat: -16.496, lng: -68.134}
         ],
         path:[[-16.495,-68.133],[-16.493,-68.132],[-16.491,-68.131],[-16.49,-68.130],[-16.488,-68.128],[-16.485,-68.125]] },
       verde: { id:2, name:'Línea Verde', operator:'—', vehicle:'Microbus', color:'#2ecc71',
         stops:[
-          {name:'Cementerio', lat:-16.495, lng:-68.133},
+          {name: 'Cementerio', lat: -16.489, lng: -68.129},
           {name:'Cruce', lat:-16.492, lng:-68.136},
           {name:'Bajada', lat:-16.489, lng:-68.138},
           {name:'Munaypata', lat:-16.485, lng:-68.140}
         ],
-        path:[[-16.495,-68.133],[-16.493,-68.134],[-16.491,-68.135],[-16.489,-68.138],[-16.487,-68.139],[-16.485,-68.140]] },
-      puma_achumani: { id:3, name:'PumaKatari — Achumani', operator:'La Paz BUS', vehicle:'Bus articulado', color:'#00a58c',
+        path:[[-16.495,-68.133],[-16.493,-68.135],[-16.49,-68.137],[-16.487,-68.139],[-16.485,-68.140]] },
+      puma_achumani: { id:3, name:'PumaKatari — Achumani', operator:'La Paz BUS', vehicle:'Pumakatari', color:'#00a58c',
         stops:[
-          {name:'Achumani (inicio)', lat:-16.555, lng:-68.078},
+          {name:'Achumani', lat:-16.555, lng:-68.078},
           {name:'Av. Strongest',    lat:-16.545, lng:-68.087},
           {name:'Los Pinos',        lat:-16.535, lng:-68.095},
           {name:'Irpavi',           lat:-16.525, lng:-68.103},
@@ -213,7 +216,7 @@
         path:[[-16.555,-68.078],[-16.548,-68.084],[-16.541,-68.090],[-16.535,-68.095],[-16.529,-68.100],[-16.525,-68.103],[-16.521,-68.105],[-16.517,-68.106],[-16.515,-68.108],[-16.514,-68.110]] }
     };
 
-    const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s));
+    const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s)); 
     const stopList = $('#stopList'); const routeTitle = $('#routeTitle'); const routeMeta = $('#routeMeta');
     const btnReverse = $('#btnReverse'); const btnFit = $('#btnFit');
     let currentKey = null; let reversed = false;
@@ -221,7 +224,7 @@
     function renderRoutesTable(){
       const tbody = document.querySelector('#routesTable tbody'); tbody.innerHTML='';
       const rows = [
-        {n:1, op:'—', veh:'Microbus', ruta:'Línea Amarilla', key:'amarilla'},
+        {n:1, op:'Sindicato Villa Victoria', veh:'Minibus', ruta:'parada 10', key:'amarilla'},
         {n:2, op:'—', veh:'Microbus', ruta:'Línea Verde', key:'verde'},
         {n:3, op:'La Paz BUS', veh:'Bus articulado', ruta:'PumaKatari — Achumani', key:'puma_achumani'}
       ];

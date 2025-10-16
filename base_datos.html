@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Base de Datos — GPS Transporte La Paz</title>
+  
+  <style>
+    :root{ --c-primary:#004d40; --c-bg:#f6f7f8; --c-fg:#1f2937; --c-panel:#ffffff; --c-border:#e5e7eb; --radius:12px; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--c-bg);color:var(--c-fg)}
+    header{position:sticky;top:0;z-index:20;background:var(--c-primary);color:#fff}
+    .header-inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:36px;height:36px;border-radius:50%;background:#00a58c;display:grid;place-items:center;font-weight:700}
+    .brand h1{font-size:18px;margin:0}
+    nav{flex:1;display:flex;justify-content:center}
+    .menu{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .btn{height:42px;padding:0 14px;border:1px solid #9ee7db;border-radius:8px;background:#e6fffa;color:#083b35;cursor:pointer}
+    .btn.primary{background:#00a58c;color:#fff;border-color:#00a58c}
+    .menu-item{position:relative}
+    .dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:240px;background:#fff;border:1px solid var(--c-border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);display:none;padding:6px;z-index:30}
+    .dropdown a{display:block;padding:10px 12px;border-radius:8px;color:#111;text-decoration:none}
+    .dropdown a:hover{background:#f3f4f6}
+    .menu-item:hover .dropdown{display:block}
+    .profile-area{display:flex;align-items:center;gap:10px}
+    .container{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:14px}
+    .panel{background:var(--c-panel);border:1px solid var(--c-border);border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .panel header{padding:12px 14px;border-bottom:1px solid var(--c-border)}
+    .panel .content{padding:12px 14px}
+    footer{background:var(--c-primary);color:#fff;margin-top:14px}
+    .footer-inner{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:10px}
+    .socials{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .socials a{display:inline-flex;align-items:center;gap:6px;background:#00695c;color:#fff;text-decoration:none;padding:4px 8px;border-radius:8px}
+    .socials svg{width:16px;height:16px;fill:#fff}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{width:min(520px,92vw);background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal header{background:#00a58c;color:#fff;padding:12px 16px}
+    .modal .content{padding:16px;display:grid;gap:10px}
+    .modal .footer{padding:12px 16px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee}
+    input[type="text"],input[type="email"],input[type="password"]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px}
+    .dark body{background:#121212;color:#e6e6e6}
+  </style>
+
+  <style>
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+    .toolbar input[type=text]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px;min-width:240px}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
+    .table th{background:var(--c-primary);color:#fff;text-align:left}
+    .table tr:nth-child(even){background:#f8f8f8}
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">LP</div>
+        <h1>GPS Transporte — La Paz</h1>
+      </div>
+      <nav>
+        <div class="menu">
+          <div class="menu-item">
+            <button class="btn">📍 Rutas</button>
+            <div class="dropdown" aria-label="submenu rutas">
+              <a href="ver_rutas.html">Ver todas las rutas →</a>
+            </div>
+          </div>
+          <button class="btn" id="btnGuide">📘 Guía</button>
+          <button class="btn" id="btnDark">🌙 Modo</button>
+          <button class="btn" id="btnLang">🌐 English</button>
+          <div class="menu-item">
+            <button class="btn">🛠️ Admin</button>
+            <div class="dropdown" aria-label="submenu admin">
+              <a href="agregar_linea.html">➕ Agregar línea</a>
+              <a href="base_datos.html">📄 Ver base de datos</a>
+              <a href="sindicatos.html">🤝 Sindicatos</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div class="profile-area">
+        <button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <header><h2 style="margin:0">Base de datos (demo)</h2></header>
+      <div class="content">
+        <div class="toolbar">
+          <input type="text" id="search" placeholder="Buscar por ruta, operador o vehículo"/>
+          <button class="btn" id="btnExport">⬇️ Exportar JSON</button>
+          <label class="btn" for="fileImport" style="cursor:pointer">⬆️ Importar JSON</label>
+          <input type="file" id="fileImport" accept="application/json" style="display:none"/>
+        </div>
+        <div style="overflow:auto">
+          <table class="table" id="dbTable">
+            <thead><tr><th style="width:56px">ID</th><th>Ruta</th><th>Operador</th><th>Vehículo</th><th style="width:120px">Acción</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p style="margin-top:8px;color:#374151">* Datos ilustrativos. Conectaré esta vista a tu API SQLite cuando me pases el endpoint.</p>
+      </div>
+    </section>
+  </main>
+  
+  <footer>
+    <div class="footer-inner">
+      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / 61022444</div>
+      <div class="socials" aria-label="redes sociales">
+        <a href="#" title="Facebook" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.08 5.66 21.2 10.44 22v-7.01H7.9v-2.92h2.54V9.84c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.92h-2.34V22C18.34 21.2 22 17.08 22 12.07z"></path></svg>
+          <span>Facebook</span>
+        </a>
+        <a href="#" title="X/Twitter" aria-label="X/Twitter">
+          <svg viewBox="0 0 24 24"><path d="M3 3h5.3l4.1 6.2L16.7 3H21l-7.2 10.2L21 21h-5.3l-4.2-6.1L7.3 21H3l7.8-10.8L3 3z"></path></svg>
+          <span>Twitter</span>
+        </a>
+        <a href="#" title="Instagram" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm6.75-1.5a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.75 6z"></path></svg>
+          <span>Instagram</span>
+        </a>
+        <a href="#" title="Telegram" aria-label="Telegram">
+          <svg viewBox="0 0 24 24"><path d="M9.04 15.47 8.8 19.7a.94.94 0 0 0 .73-.35l1.75-1.67 3.63 2.67c.67.37 1.15.18 1.33-.62l2.42-11.34c.21-.93-.34-1.3-1-1.07L3.95 11.1c-.9.35-.89.84-.16 1.07l3.6 1.12 8.38-5.29c.39-.24.75-.11.46.15l-7.19 6.32z"></path></svg>
+          <span>Telegram</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  
+  <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal">
+      <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
+      <div class="content">
+        <label for="email">Correo</label>
+        <input type="email" id="email" placeholder="usuario@gmail.com"/>
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••"/>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseLogin">Cerrar</button>
+        <button class="btn primary" id="btnDoLogin">Ingresar</button>
+      </div>
+    </div>
+  </div>
+  <div class="backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal">
+      <header><h3 id="guideTitle" style="margin:0">Guía rápida</h3></header>
+      <div class="content"><p>Explora las rutas, administra datos y consulta sindicatos.</p></div>
+      <div class="footer"><button class="btn primary" id="btnCloseGuide">Entendido</button></div>
+    </div>
+  </div>
+
+  <script>
+    let DATA = [
+      { id:1, ruta:'Línea Amarilla', operador:'—', vehiculo:'Microbus', key:'amarilla' },
+      { id:2, ruta:'Línea Verde', operador:'—', vehiculo:'Microbus', key:'verde' },
+      { id:3, ruta:'PumaKatari — Achumani', operador:'La Paz BUS', vehiculo:'Bus articulado', key:'puma_achumani' }
+    ];
+    const $ = s=>document.querySelector(s);
+    function renderTable(rows){
+      const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML='';
+      rows.forEach(row=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.id}</td><td>${row.ruta}</td><td>${row.operador}</td><td>${row.vehiculo}</td>
+                        <td><a class="btn" href="ver_rutas.html#route=${row.key}">👁️ Ver ruta</a></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    renderTable(DATA);
+    document.getElementById('search').addEventListener('input', e=>{
+      const q = e.target.value.toLowerCase();
+      const rows = DATA.filter(r=> r.ruta.toLowerCase().includes(q) || r.operador.toLowerCase().includes(q) || r.vehiculo.toLowerCase().includes(q));
+      renderTable(rows);
+    });
+    document.getElementById('btnExport').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'base_datos_demo.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+    document.getElementById('fileImport').addEventListener('change', async e=>{
+      const f = e.target.files[0]; if(!f) return; const text = await f.text();
+      try{ const json = JSON.parse(text); if(Array.isArray(json)){ DATA = json; renderTable(DATA); } else alert('JSON inválido'); }
+      catch(err){ alert('No se pudo leer el JSON'); }
+    });
+  </script>
+  
+  <script>
+    const $ = s=>document.querySelector(s);
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const btnDark = document.getElementById('btnDark');
+      if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));
+      const btnLang = document.getElementById('btnLang');
+      if(btnLang){ let lang='es'; btnLang.addEventListener('click', ()=>{ lang=(lang==='es')?'en':'es'; btnLang.textContent=(lang==='es')?'🌐 English':'🌐 Español'; const h1=document.querySelector('h1'); if(h1) h1.textContent=(lang==='es')?'GPS Transporte — La Paz':'GPS Transport — La Paz'; }); }
+      const loginBackdrop = document.getElementById('loginBackdrop');
+      const btnLogin = document.getElementById('btnLogin');
+      const btnCloseLogin = document.getElementById('btnCloseLogin');
+      const btnDoLogin = document.getElementById('btnDoLogin');
+      if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
+      if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
+      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; alert('Sesión iniciada (demo)'); });
+      const guideBackdrop = document.getElementById('guideBackdrop');
+      const btnGuide = document.getElementById('btnGuide');
+      const btnCloseGuide = document.getElementById('btnCloseGuide');
+      if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
+      if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
+    });
+  </script>
+
+</body>
+</html>

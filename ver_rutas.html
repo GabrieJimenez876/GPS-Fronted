@@ -89,7 +89,7 @@
         </div>
       </nav>
       <div class="profile-area">
-        <button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>
+        <!-- login removed per request -->
       </div>
     </div>
   </header>
@@ -110,10 +110,13 @@
       <div class="content">
         <h3 style="margin:0 0 6px 0;">Paradas</h3>
         <ul class="stop-list" id="stopList"><li class="stop-item" style="opacity:.7">No hay paradas cargadas.</li></ul>
-        <h3 style="margin:12px 0 6px 0;">Rutas disponibles</h3>
-        <div style="overflow:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+          <h3 style="margin:0 0 6px 0;">Rutas disponibles</h3>
+          <button class="btn primary" id="btnAddRoute">➕ Agregar ruta</button>
+        </div>
+        <div style="overflow:auto;margin-top:8px">
           <table class="table" id="routesTable">
-            <thead><tr><th style="width:48px">N°</th><th>Operador</th><th>Vehículo</th><th>Ruta</th><th style="width:120px">Acción</th></tr></thead>
+            <thead><tr><th style="width:48px">N°</th><th>Operador</th><th>Vehículo</th><th>Ruta</th><th style="width:140px">Acción</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -176,6 +179,29 @@
     </div>
   </div>
 
+  <!-- Agregar Ruta Modal -->
+  <div class="backdrop" id="addRouteBackdrop" role="dialog" aria-modal="true" aria-labelledby="addRouteTitle" style="display:none">
+    <div class="modal">
+      <header><h3 id="addRouteTitle" style="margin:0">Agregar nueva ruta</h3></header>
+      <div class="content">
+        <label for="routeName">Nombre de la ruta</label>
+        <input type="text" id="routeName" placeholder="Ej: Línea Amarilla" />
+        <label for="routeOperator">Operador / Sindicato</label>
+        <input type="text" id="routeOperator" placeholder="Ej: Sindicato Villa Victoria" />
+        <label for="routeVehicle">Vehículo</label>
+        <input type="text" id="routeVehicle" placeholder="Ej: Minibus" />
+        <label for="routeColor">Color (hex)</label>
+        <input type="text" id="routeColor" placeholder="#f1c40f" />
+        <label for="routeStops">Paradas (una por línea: nombre,lat,lng)</label>
+        <textarea id="routeStops" rows="6" placeholder="Plaza Eguino,-16.493886,-68.140775\nCementerio,-16.49694,-68.15167"></textarea>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseAddRoute">Cancelar</button>
+        <button class="btn primary" id="btnSaveRoute">Guardar y previsualizar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     const map = L.map('map').setView([-16.5, -68.15], 13);
@@ -186,16 +212,19 @@
 
     const ROUTES = {
       amarilla: { id:1, name:'Línea 10', operator:'Sindicato villa victoria', vehicle:'minibus', color:'#f1c40f',
-        stops:[
-          {name: 'Plaza Eguino', lat: -16.485, lng: -68.125},
-          {name: 'Calatayud', lat: -16.487, lng: -68.127},
-          {name: 'Cementerio', lat: -16.489, lng: -68.129},
-          {name: 'Uyustus', lat: -16.491, lng: -68.130},
-          {name: 'Villa Victoria', lat: -16.492, lng: -68.131},
-          {name: 'Av. Republica', lat: -16.494, lng: -68.132},
-          {name: 'Hospital Juan XXIII', lat: -16.496, lng: -68.134}
+        stops:[    
+      { name: 'Plaza Eguino',        lat: -16.493886, lng: -68.140775 },
+      { name: 'Calatayud',           lat: -16.494602, lng: -68.148156 },
+      { name: 'Uyustus',             lat: -16.495260, lng: -68.148488 },
+      { name: 'Cementerio',          lat: -16.496940, lng: -68.151670 },
+      { name: 'Villa Victoria',      lat: -16.490990, lng: -68.151220 },
+      { name: 'Av. República',       lat: -16.491707, lng: -68.150905 },
+      { name: 'Hospital Juan XXIII', lat: -16.487520, lng: -68.157790 }
         ],
-        path:[[-16.495,-68.133],[-16.493,-68.132],[-16.491,-68.131],[-16.49,-68.130],[-16.488,-68.128],[-16.485,-68.125]] },
+        
+
+
+        path:[[-16.493886,-68.140775],[-16.494602,-68.148156],[-16.495260,-68.148488],[-16.496940,-68.151670],[-16.490990,-68.151220],[-16.491707,-68.150905],[-16.487520,-68.157790]] },
       verde: { id:2, name:'Línea Verde', operator:'—', vehicle:'Microbus', color:'#2ecc71',
         stops:[
           {name: 'Cementerio', lat: -16.489, lng: -68.129},

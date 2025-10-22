@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http; // Para cargar JSON desde web
 
 class MapaPage extends StatefulWidget {
   const MapaPage({super.key});
@@ -12,16 +14,18 @@ class MapaPage extends StatefulWidget {
 
 class _MapaPageState extends State<MapaPage> {
   LatLng ubicacionActual = const LatLng(-16.5, -68.15);
+  List<Marker> marcadores = [];
+  MapController mapController = MapController();
 
   @override
   void initState() {
     super.initState();
     obtenerUbicacion();
+    cargarMarcadoresDesdeJSON();
   }
 
   Future<void> obtenerUbicacion() async {
     bool servicio = await Geolocator.isLocationServiceEnabled();
-    // Si el servicio de geolocalización no está activado, no continuar
     if (!servicio) return;
 
     LocationPermission permiso = await Geolocator.checkPermission();
@@ -30,100 +34,70 @@ class _MapaPageState extends State<MapaPage> {
       if (permiso == LocationPermission.deniedForever) return;
     }
 
-    // Obtener la posición actual y actualizar el estado para centrar el mapa
-    Position posicion = await Geolocator.getCurrentPosition();
-    setState(() {
-      ubicacionActual = LatLng(posicion.latitude, posicion.longitude);
-    });
+    try {
+      Position posicion = await Geolocator.getCurrentPosition();
+      setState(() {
+        ubicacionActual = LatLng(posicion.latitude, posicion.longitude);
+        marcadores.add(Marker(
+          point: ubicacionActual,
+          child: const Icon(Icons.location_on, color: Colors.blue),
+        ));
+      });
+    } catch (e) {
+      debugPrint('Error obteniendo ubicación: $e');
+    }
+  }
+
+  Future<void> cargarMarcadoresDesdeJSON() async {
+    try {
+      final response = await http.get(Uri.parse('punt.json')); // Carga desde web
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        setState(() {
+          marcadores.addAll(data.map<Marker>((punto) => Marker(
+            point: LatLng(punto['lat'], punto['lng']),
+            child: const Icon(Icons.place, color: Colors.red),
+          )).toList());
+        });
+      }
+    } catch (e) {
+      debugPrint('Error cargando JSON: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mapa de Transporte La Paz')),
-      body: Column(
+      appBar: AppBar(title: const Text('Mapa - GPS Transporte')),
+      body: FlutterMap(
+        mapController: mapController,
+        options: MapOptions(
+          initialCenter: ubicacionActual,
+          initialZoom: 13.0,
+          // cameraConstraint can be added here when migrating fully to flutter_map v6
+          // e.g. cameraConstraint: CameraConstraint(...)
+        ),
         children: [
-          Expanded(
-            flex: 3,
-            child: FlutterMap(
-              // Configuración del mapa: centro inicial y restricciones de cámara
-              options: MapOptions(
-                initialCenter: ubicacionActual,
-                initialZoom: 14.0,
-                cameraConstraint: CameraConstraint.contain(bounds: LatLngBounds(
-      const LatLng(-16.55, -68.25),
-      const LatLng(-16.45, -68.05),
-    ),
-  ),
-),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.transporte_la_paz',
-                ),
-                // Capa de marcadores: ubicación del usuario y paradas de ejemplo
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: ubicacionActual,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
-                    ),
-                    Marker(
-                      point: const LatLng(-16.495, -68.133),
-                      width: 30,
-                      height: 30,
-                      child: const Icon(Icons.bus_alert, color: Colors.red, size: 30),
-                    ),
-                  ],
-                ),
-                // Capas de polilíneas para mostrar recorridos de ejemplo
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: const [
-                        LatLng(-16.495, -68.133),
-                        LatLng(-16.49, -68.13),
-                        LatLng(-16.485, -68.125),
-                      ],
-                      strokeWidth: 4.0,
-                      color: Colors.yellow,
-                    ),
-                    Polyline(
-                      points: const [
-                        LatLng(-16.495, -68.133),
-                        LatLng(-16.49, -68.135),
-                        LatLng(-16.485, -68.14),
-                      ],
-                      strokeWidth: 4.0,
-                      color: Colors.green,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.example.app',
           ),
-          Expanded(
-            flex: 2,
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: const [
-                Text('Líneas cercanas:', style: TextStyle(fontWeight: FontWeight.bold)),
-                Card(
-                  child: ListTile(
-                    title: Text('Línea Amarilla'),
-                    subtitle: Text('Parada 10: Cementerio → Hospital Juan XXIII'),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: Text('Línea Verde'),
-                    subtitle: Text('Parada X: Cementerio → Munaypata'),
-                  ),
-                ),
-              ],
-            ),
+          MarkerLayer(markers: marcadores),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () => Navigator.pushNamed(context, '/agregar_linea'),
+            child: const Icon(Icons.add),
+            tooltip: 'Agregar Línea',
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: obtenerUbicacion,
+            child: const Icon(Icons.my_location),
+            tooltip: 'Mi Ubicación',
           ),
         ],
       ),

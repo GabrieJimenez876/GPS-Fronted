@@ -199,40 +199,17 @@
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     const routeLayer = L.layerGroup().addTo(map);
 
-    const ROUTES = {
-      amarilla: { id:1, name:'Línea 10', operator:'Sindicato villa victoria', vehicle:'minibus', color:'#f1c40f',
-        stops:[    
-      { name: 'Plaza Eguino',        lat: -16.493886, lng: -68.140775 },
-      { name: 'Calatayud',           lat: -16.494602, lng: -68.148156 },
-      { name: 'Uyustus',             lat: -16.495260, lng: -68.148488 },
-      { name: 'Cementerio',          lat: -16.496940, lng: -68.151670 },
-      { name: 'Villa Victoria',      lat: -16.490990, lng: -68.151220 },
-      { name: 'Av. República',       lat: -16.491707, lng: -68.150905 },
-      { name: 'Hospital Juan XXIII', lat: -16.487520, lng: -68.157790 }
-        ],
-        
+    // Load routes from localStorage (key: 'gps_routes')
+    function loadRoutesFromStorage(){
+      try{ return JSON.parse(localStorage.getItem('gps_routes') || '[]'); }catch(e){ return []; }
+    }
 
-
-        path:[[-16.493886,-68.140775],[-16.494602,-68.148156],[-16.495260,-68.148488],[-16.496940,-68.151670],[-16.490990,-68.151220],[-16.491707,-68.150905],[-16.487520,-68.157790]] },
-      verde: { id:2, name:'Línea Verde', operator:'—', vehicle:'Microbus', color:'#2ecc71',
-        stops:[
-          {name: 'Cementerio', lat: -16.489, lng: -68.129},
-          {name:'Cruce', lat:-16.492, lng:-68.136},
-          {name:'Bajada', lat:-16.489, lng:-68.138},
-          {name:'Munaypata', lat:-16.485, lng:-68.140}
-        ],
-        path:[[-16.495,-68.133],[-16.493,-68.135],[-16.49,-68.137],[-16.487,-68.139],[-16.485,-68.140]] },
-      puma_achumani: { id:3, name:'PumaKatari — Achumani', operator:'La Paz BUS', vehicle:'Pumakatari', color:'#00a58c',
-        stops:[
-          {name:'Achumani', lat:-16.555, lng:-68.078},
-          {name:'Av. Strongest',    lat:-16.545, lng:-68.087},
-          {name:'Los Pinos',        lat:-16.535, lng:-68.095},
-          {name:'Irpavi',           lat:-16.525, lng:-68.103},
-          {name:'Calacoto',         lat:-16.517, lng:-68.106},
-          {name:'San Miguel',       lat:-16.514, lng:-68.110}
-        ],
-        path:[[-16.555,-68.078],[-16.548,-68.084],[-16.541,-68.090],[-16.535,-68.095],[-16.529,-68.100],[-16.525,-68.103],[-16.521,-68.105],[-16.517,-68.106],[-16.515,-68.108],[-16.514,-68.110]] }
-    };
+    const ROUTES_OBJ = (function(){
+      const arr = loadRoutesFromStorage();
+      const obj = {};
+      arr.forEach(r=> obj[r.key] = r);
+      return obj;
+    })();
 
     const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s)); 
     const stopList = $('#stopList'); const routeTitle = $('#routeTitle'); const routeMeta = $('#routeMeta');
@@ -241,16 +218,13 @@
 
     function renderRoutesTable(){
       const tbody = document.querySelector('#routesTable tbody'); tbody.innerHTML='';
-      const rows = [
-        {n:1, op:'Sindicato Villa Victoria', veh:'Minibus', ruta:'parada 10', key:'amarilla'},
-        {n:2, op:'—', veh:'Microbus', ruta:'Línea Verde', key:'verde'},
-        {n:3, op:'La Paz BUS', veh:'Bus articulado', ruta:'PumaKatari — Achumani', key:'puma_achumani'}
-      ];
-      for(const r of rows){
+      const arr = loadRoutesFromStorage();
+      if(!arr.length) tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>';
+      arr.forEach((r, i)=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.n}</td><td>${r.op}</td><td>${r.veh}</td><td>${r.ruta}</td><td><button class="btn" data-show="${r.key}">👁️ Ver ruta</button></td>`;
+        tr.innerHTML = `<td>${r.id || (i+1)}</td><td>${r.operator || '—'}</td><td>${r.vehicle || '—'}</td><td>${r.name || r.key}</td><td><button class="btn" data-show="${r.key}">👁️‍🗨 Ver ruta</button></td>`;
         tbody.appendChild(tr);
-      }
+      });
       $$('button[data-show]').forEach(b=> b.addEventListener('click', ()=> showRoute(b.getAttribute('data-show'))));
     }
 
@@ -270,9 +244,13 @@
     }
 
     function showRoute(key){
-      const data = ROUTES[key]; if(!data) return; currentKey = key; routeLayer.clearLayers();
+      const data = ROUTES_OBJ[key] || loadRoutesFromStorage().find(r=>r.key===key);
+      if(!data) { alert('Ruta no encontrada'); return; }
+      currentKey = key; routeLayer.clearLayers();
       const path = reversed ? [...data.path].reverse() : data.path;
-      L.polyline(path, {color:data.color, weight:5, opacity:0.9}).addTo(routeLayer);
+      // If path not provided, derive from stops
+      const pathCoords = (data.path && data.path.length) ? ((reversed? [...data.path].reverse(): data.path)) : data.stops.map(s=>[s.lat,s.lng]);
+      L.polyline(pathCoords, {color:data.color || '#2196f3', weight:5, opacity:0.9}).addTo(routeLayer);
       const list = reversed ? [...data.stops].reverse() : data.stops;
       stopList.innerHTML = '';
       list.forEach((s,idx)=>{
@@ -283,7 +261,7 @@
         li.addEventListener('click', ()=> map.setView([s.lat, s.lng], 15));
         stopList.appendChild(li);
       });
-      routeTitle.textContent = data.name;
+      routeTitle.textContent = data.name || data.key;
       routeMeta.textContent = `${data.operator || 'Operador desconocido'} · ${data.vehicle || '—'} · ${reversed ? 'Sentido B' : 'Sentido A'}`;
       btnReverse.disabled = false; btnFit.disabled = false; fitToLayer();
     }

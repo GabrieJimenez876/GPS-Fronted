@@ -156,35 +156,34 @@
   </div>
 
   <script>
-    let DATA = [
-      { id:1, ruta:'Línea Amarilla', operador:'—', vehiculo:'Microbus', key:'amarilla' },
-      { id:2, ruta:'Línea Verde', operador:'—', vehiculo:'Microbus', key:'verde' },
-      { id:3, ruta:'PumaKatari — Achumani', operador:'La Paz BUS', vehiculo:'Bus articulado', key:'puma_achumani' }
-    ];
     const $ = s=>document.querySelector(s);
+    function loadRoutes(){ try{ return JSON.parse(localStorage.getItem('gps_routes')||'[]'); }catch(e){ return []; } }
+    function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }
     function renderTable(rows){
       const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML='';
+      if(!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
       rows.forEach(row=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${row.id}</td><td>${row.ruta}</td><td>${row.operador}</td><td>${row.vehiculo}</td>
-                        <td><a class="btn" href="ver_rutas.html#route=${row.key}">👁️ Ver ruta</a></td>`;
+        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
+                        <td><a class="btn" href="ver_rutas.html#route=${row.key}">👁️‍🗨 Ver ruta</a></td>`;
         tbody.appendChild(tr);
       });
     }
-    renderTable(DATA);
+    // inicializa desde storage
+    let DATA = loadRoutes(); renderTable(DATA);
     document.getElementById('search').addEventListener('input', e=>{
       const q = e.target.value.toLowerCase();
-      const rows = DATA.filter(r=> r.ruta.toLowerCase().includes(q) || r.operador.toLowerCase().includes(q) || r.vehiculo.toLowerCase().includes(q));
+      const rows = DATA.filter(r=> (r.name||r.ruta||'').toLowerCase().includes(q) || (r.operator||r.operador||'').toLowerCase().includes(q) || (r.vehicle||r.vehiculo||'').toLowerCase().includes(q));
       renderTable(rows);
     });
     document.getElementById('btnExport').addEventListener('click', ()=>{
       const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'base_datos_demo.json';
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'base_datos.json';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     });
     document.getElementById('fileImport').addEventListener('change', async e=>{
       const f = e.target.files[0]; if(!f) return; const text = await f.text();
-      try{ const json = JSON.parse(text); if(Array.isArray(json)){ DATA = json; renderTable(DATA); } else alert('JSON inválido'); }
+      try{ const json = JSON.parse(text); if(Array.isArray(json)){ DATA = json; saveRoutes(DATA); renderTable(DATA); alert('Importado con éxito'); } else alert('JSON inválido'); }
       catch(err){ alert('No se pudo leer el JSON'); }
     });
   </script>

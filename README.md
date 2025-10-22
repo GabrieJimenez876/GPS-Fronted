@@ -81,8 +81,8 @@ flutter emulators --launch <emulator_id>; flutter run
 
 ## Credenciales de prueba
 
-- Usuario: `admin`
-- Contraseña: `1234`
+- Usuario: `admin@admin.com`
+- Contraseña: `admin123`
 
 Usa estas credenciales para pruebas locales en el backend/servicios que respeten autenticación.
 

@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Abrir index.html",
             // Ajusta la ruta al archivo `index.html` de tu proyecto si es necesario.
-            "file": "c:\\Users\\GABRIEL\\Desktop\\Proyecto-GPS\\index.html"
+            "file": "C:\\Users\\GABRIEL\\GPS-Fronted\\index.html"
         }
     ]
 }

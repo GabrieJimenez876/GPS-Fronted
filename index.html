@@ -281,19 +281,64 @@
             </div>
           </div>
 
-          <button class="nav-btn" id="btnRegister">
-            <i class="fa fa-user-plus"></i>
-            <span>Registrarse</span>
-          </button>
+          <div id="userArea">
+            <!-- visible when no session -->
+            <button class="nav-btn" id="btnRegister">
+              <i class="fa fa-user-plus"></i>
+              <span>Registrarse</span>
+            </button>
 
-          <button class="nav-btn primary" id="btnLogin">
-            <i class="fa fa-user"></i>
-            <span>Iniciar sesión</span>
-          </button>
+            <button class="nav-btn primary" id="btnLogin">
+              <i class="fa fa-user"></i>
+              <span>Iniciar sesión</span>
+            </button>
+
+            <!-- profile pill (hidden by default) -->
+            <div class="menu-item profile-wrap" id="profileWrap" style="display:none;">
+              <button class="nav-btn" id="btnProfile">
+                <span id="profileAvatar" style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--primary);font-weight:600;margin-right:8px;">A</span>
+                <div style="text-align:left;line-height:1;">
+                  <div id="profileName" style="font-size:13px;color:#fff;font-weight:600">User</div>
+                  <div id="profileEmail" style="font-size:11px;opacity:0.9;color:#eafaf7">email@example.com</div>
+                </div>
+              </button>
+              <div class="dropdown" id="profileDropdown">
+                <a href="#" id="btnSwitchUser">Cambiar usuario</a>
+                <a href="#" id="btnLogout">Cerrar sesión</a>
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
     </div>
   </header>
+
+  <!-- Guide Modal -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0">Guía rápida</h3>
+      </div>
+      <div class="modal-body">
+        <p><strong>Cómo usar:</strong></p>
+        <ol>
+          <li>Usa el campo <em>Destino</em> para escribir o elegir un lugar rápido.</li>
+          <li>Presiona <em>Mi ubicación</em> para ubicarte en el mapa.</li>
+          <li>Marca el destino con <em>Marcar destino</em> y luego <em>Rutas</em> para consultar opciones.</li>
+        </ol>
+        <p><strong>Usuarios y administración:</strong></p>
+        <ul>
+          <li>Regístrate para crear una cuenta; al registrarte, se iniciará sesión automáticamente.</li>
+          <li>Al iniciar sesión verás un pequeño perfil (nombre + correo) similar a una sesión de Google.</li>
+          <li>Los usuarios normales no verán el menú <em>Admin</em>. El usuario <code>admin@admin.com</code> mantiene el acceso de administrador.</li>
+          <li>Usa <em>Cerrar sesión</em> o <em>Cambiar usuario</em> en tu perfil para salir o iniciar otra cuenta.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="nav-btn" onclick="closeGuideModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Main content with map and panels -->
   <main>
@@ -507,8 +552,12 @@
     // Alterna modo oscuro
     $('#btnDark').addEventListener('click', () => document.body.classList.toggle('dark-mode'));
 
-    // Modales de guía (simplificado)
-    $('#btnGuide').addEventListener('click', () => alert('Guía: Usa el mapa para marcar destinos y buscar rutas.'));
+  // Modales de guía (abre modal más completa)
+  $('#btnGuide').addEventListener('click', () => guideModal.style.display = 'flex');
+
+  // Guide modal controls
+  const guideModal = $('#guideModal');
+  function closeGuideModal() { guideModal.style.display = 'none'; }
 
     // Idioma (botón English)
     let currentLang = 'es';
@@ -528,14 +577,20 @@
       $('#dest').placeholder = currentLang === 'es' ? 'Ej: Plaza Murillo' : 'Ex: Plaza Murillo';
     });
 
-    // DOM Elements para usuarios
-    const loginModal = $('#loginModal');
-    const registerModal = $('#registerModal');
-    const adminSection = $('#adminSection');
+  // DOM Elements para usuarios
+  const loginModal = $('#loginModal');
+  const registerModal = $('#registerModal');
+  const adminSection = $('#adminSection');
 
-    // Buttons
-    const btnLogin = $('#btnLogin');
-    const btnRegister = $('#btnRegister');
+  // Buttons / profile
+  const btnLogin = $('#btnLogin');
+  const btnRegister = $('#btnRegister');
+  const profileWrap = $('#profileWrap');
+  const profileNameEl = $('#profileName');
+  const profileEmailEl = $('#profileEmail');
+  const profileAvatar = $('#profileAvatar');
+  const btnLogout = $('#btnLogout');
+  const btnSwitchUser = $('#btnSwitchUser');
 
     // Local storage keys
     const USERS_KEY = 'gps_users';
@@ -545,9 +600,11 @@
     const ADMIN_EMAIL = 'admin@admin.com';
     const ADMIN_PASSWORD = 'admin123';
 
-    // Event Listeners
-    btnLogin.addEventListener('click', () => loginModal.style.display = 'flex');
-    btnRegister.addEventListener('click', () => registerModal.style.display = 'flex');
+  // Event Listeners
+  btnLogin.addEventListener('click', () => loginModal.style.display = 'flex');
+  btnRegister.addEventListener('click', () => registerModal.style.display = 'flex');
+  btnLogout && btnLogout.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+  btnSwitchUser && btnSwitchUser.addEventListener('click', (e) => { e.preventDefault(); switchUser(); });
 
     // Modal Controls
     function closeLoginModal() {
@@ -598,8 +655,13 @@
         return;
       }
 
-      saveUser({ name, email, password });
-      alert('Usuario registrado exitosamente');
+      const newUser = { name, email, password };
+      saveUser(newUser);
+      // auto-login user after register
+      const session = { isAdmin: false, name: name, email: email };
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+      updateUIForSession(session);
+      alert('Usuario registrado e iniciada la sesión');
       closeRegisterModal();
     }
 
@@ -614,10 +676,10 @@
 
       // Check admin credentials
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        adminSection.style.display = 'block';
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({ isAdmin: true }));
+        const session = { isAdmin: true, name: 'Admin', email: ADMIN_EMAIL };
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
         closeLoginModal();
-        updateUI(true);
+        updateUIForSession(session);
         return;
       }
 
@@ -626,26 +688,55 @@
       const user = users.find(u => u.email === email && u.password === password);
 
       if (user) {
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({ isAdmin: false }));
+        const session = { isAdmin: false, name: user.name || 'Usuario', email: user.email };
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
         closeLoginModal();
-        updateUI(false);
+        updateUIForSession(session);
       } else {
         alert('Credenciales incorrectas');
       }
     }
 
-    function updateUI(isAdmin) {
+    function updateUIForSession(session) {
+      // hide login/register and show profile pill
       btnLogin.style.display = 'none';
       btnRegister.style.display = 'none';
-      adminSection.style.display = isAdmin ? 'block' : 'none';
+      if (session && session.email) {
+        profileNameEl.textContent = session.name || session.email.split('@')[0];
+        profileEmailEl.textContent = session.email;
+        profileAvatar.textContent = (session.name || session.email).charAt(0).toUpperCase();
+        profileWrap.style.display = 'block';
+      } else {
+        profileWrap.style.display = 'none';
+      }
+      // admin visibility
+      adminSection.style.display = session && session.isAdmin ? 'block' : 'none';
+    }
+
+    function logout() {
+      localStorage.removeItem(CURRENT_USER_KEY);
+      profileWrap.style.display = 'none';
+      btnLogin.style.display = 'inline-flex';
+      btnRegister.style.display = 'inline-flex';
+      adminSection.style.display = 'none';
+    }
+
+    function switchUser() {
+      // simple switch: logout then open login modal
+      logout();
+      loginModal.style.display = 'flex';
     }
 
     // Check session on load
     window.addEventListener('DOMContentLoaded', () => {
       const currentUser = localStorage.getItem(CURRENT_USER_KEY);
       if (currentUser) {
-        const { isAdmin } = JSON.parse(currentUser);
-        updateUI(isAdmin);
+        try {
+          const session = JSON.parse(currentUser);
+          updateUIForSession(session);
+        } catch (e) {
+          console.error('session parse error', e);
+        }
       }
     });
 

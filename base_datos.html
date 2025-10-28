@@ -155,7 +155,6 @@
     </div>
   </div>
 
-  <script>
     const $ = s=>document.querySelector(s);
     function loadRoutes(){ try{ return JSON.parse(localStorage.getItem('gps_routes')||'[]'); }catch(e){ return []; } }
     function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }

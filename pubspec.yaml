@@ -11,12 +11,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+<<<<<<< HEAD
+
+  # Mapa y utilidades geoespaciales
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.1
+
+  # Geolocalización (paquete usado en la app)
+  geolocator: ^14.0.2
+
+  # Cliente HTTP para peticiones a APIs
+  http: ^1.1.0
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+  
+  # WebSocket para tracking en tiempo real
+  web_socket_channel: ^2.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+=======
   flutter_map: ^6.0.0
   latlong2: ^0.9.0
   geolocator: ^10.0.0
   http: ^1.1.0
   shared_preferences: ^2.2.0
   url_strategy: ^0.2.0
+>>>>>>> 5a8d9c18d3fa2f2d59362e90955668da3afda90c
 
 dev_dependencies:
   flutter_test:

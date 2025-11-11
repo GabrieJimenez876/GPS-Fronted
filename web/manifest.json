@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "gps_transporte",
     "short_name": "gps_transporte",
+=======
+    "name": "proyecto_gps",
+    "short_name": "proyecto_gps",
+>>>>>>> 3ad15d412ad428e80d3b86bf67b474c1ea29056a
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

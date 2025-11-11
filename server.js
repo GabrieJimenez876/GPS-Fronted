@@ -5,8 +5,37 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
+
+// Servir archivos estáticos desde el directorio raíz
+app.use(express.static(__dirname));
+
 // --- Base de datos simulada (en una app real sería MongoDB o PostgreSQL) ---
-const transportLines = [];
+const transportLines = [
+    {
+        nombre: "Línea 1 - Villa Fátima",
+        codigo: "VF-001",
+        sindicato: "Sindicato Villa Fátima",
+        paradas: ["Villa Fátima", "Terminal", "Plaza Eguino", "San Pedro", "Miraflores"],
+        recorrido: "Villa Fátima → Terminal → Plaza Eguino → San Pedro → Miraflores",
+        timestamp: new Date().toISOString()
+    },
+    {
+        nombre: "Línea 2 - Ceja El Alto",
+        codigo: "CA-002",
+        sindicato: "Sindicato Litoral",
+        paradas: ["Ceja El Alto", "16 de Julio", "Plaza Ballivián", "Cementerio", "Garita"],
+        recorrido: "Ceja El Alto → 16 de Julio → Plaza Ballivián → Cementerio → Garita",
+        timestamp: new Date().toISOString()
+    },
+    {
+        nombre: "Línea 3 - PUC",
+        codigo: "PUC-003",
+        sindicato: "Sindicato PUC",
+        paradas: ["Plaza Humboldt", "UMSA", "Plaza del Estudiante", "San Jorge", "Obrajes"],
+        recorrido: "Plaza Humboldt → UMSA → Plaza del Estudiante → San Jorge → Obrajes",
+        timestamp: new Date().toISOString()
+    }
+];
 
 // --- Configuración de middleware ---
 // Usamos body-parser para procesar datos de formularios (URL-encoded)
@@ -105,6 +134,101 @@ app.post('/guardar_linea', (req, res) => {
   res.redirect('/');
 });
 
+// --- Ruta 3: API para obtener todas las líneas ---
+app.get('/api/lineas', (req, res) => {
+  res.json(transportLines);
+});
+
+// --- Ruta 4: Vista de todas las líneas ---
+app.get('/ver_lineas', (req, res) => {
+  const linesHtml = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Líneas de Transporte</title>
+      <style>
+        body { font-family: Arial; padding: 20px; background-color: #f4f4f4; }
+        h2 { color: #004d40; }
+        .line-card { 
+          background: #fff; 
+          padding: 15px; 
+          margin: 10px 0; 
+          border-radius: 5px; 
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .line-header { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          margin-bottom: 10px;
+        }
+        .code { 
+          background: #004d40; 
+          color: white; 
+          padding: 4px 8px; 
+          border-radius: 4px; 
+          font-size: 0.9em;
+        }
+        .stops { 
+          display: flex; 
+          gap: 10px; 
+          flex-wrap: wrap; 
+          margin: 10px 0;
+        }
+        .stop { 
+          background: #e0f2f1; 
+          padding: 4px 8px; 
+          border-radius: 12px; 
+          font-size: 0.9em;
+        }
+        .route { 
+          color: #666; 
+          margin-top: 10px;
+        }
+        nav {
+          margin-bottom: 20px;
+        }
+        nav a {
+          background: #004d40;
+          color: white;
+          padding: 8px 16px;
+          text-decoration: none;
+          border-radius: 4px;
+          margin-right: 10px;
+        }
+        nav a:hover {
+          background: #00695c;
+        }
+      </style>
+    </head>
+    <body>
+      <nav>
+        <a href="/">🏠 Inicio</a>
+        <a href="/agregar_linea.html">➕ Agregar Línea</a>
+      </nav>
+      
+      <h2>Líneas de Transporte</h2>
+      ${transportLines.map(line => `
+        <div class="line-card">
+          <div class="line-header">
+            <h3>${line.nombre}</h3>
+            <span class="code">${line.codigo}</span>
+          </div>
+          <div>Sindicato: ${line.sindicato}</div>
+          <div class="stops">
+            ${line.paradas.map(stop => `
+              <span class="stop">${stop}</span>
+            `).join('')}
+          </div>
+          <div class="route">📍 ${line.recorrido}</div>
+        </div>
+      `).join('')}
+    </body>
+    </html>
+  `;
+  res.send(linesHtml);
+});
 
 // --- Iniciar el servidor ---
 app.listen(PORT, () => {

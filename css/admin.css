@@ -1,0 +1,159 @@
+/* Estilos para el panel de administración */
+.admin-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.admin-menu {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-btn {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.admin-btn:hover {
+  background: var(--accent);
+}
+
+.admin-btn.active {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px white;
+}
+
+/* Guía y pestañas */
+.guide-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+}
+
+.tab-content {
+  display: none;
+  padding: 15px 0;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Contenedor persistente de administración */
+.admin-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 300px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 900;
+  transition: transform 0.3s;
+}
+
+.admin-container.hidden {
+  transform: translateX(320px);
+}
+
+.admin-header {
+  background: var(--primary);
+  color: white;
+  padding: 15px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-body {
+  padding: 15px;
+}
+
+.admin-toggle {
+  position: absolute;
+  left: -40px;
+  top: 10px;
+  background: var(--primary);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/* Formularios de administración */
+.admin-form {
+  display: grid;
+  gap: 15px;
+}
+
+.form-group {
+  display: grid;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 15px;
+}

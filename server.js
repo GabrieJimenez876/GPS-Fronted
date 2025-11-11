@@ -40,6 +40,8 @@ const transportLines = [
 // --- Configuración de middleware ---
 // Usamos body-parser para procesar datos de formularios (URL-encoded)
 app.use(bodyParser.urlencoded({ extended: true }));
+// Aceptar JSON en requests (para API desde admin panel)
+app.use(express.json());
 
 // Servir archivos estáticos (por ejemplo si mueves el HTML a /public)
 // Por simplicidad, se inserta el HTML directamente en la ruta abajo.
@@ -106,19 +108,29 @@ app.get('/', (req, res) => {
 
 // --- Ruta 2: Procesar envío del formulario (POST /guardar_linea) ---
 app.post('/guardar_linea', (req, res) => {
-  // 1. Obtener datos del cuerpo de la petición (gracias a body-parser)
-  const { nombre, codigo, sindicato, paradas, recorrido } = req.body;
+  // 1. Obtener datos del cuerpo de la petición (soportamos JSON y form-urlencoded)
+  let nombre, codigo, sindicato, paradas, recorrido;
+  if (req.is('application/json')) {
+    ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
+  } else {
+    ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
+  }
 
-  // 2. Procesar/limpiar datos (por ejemplo convertir la cadena de paradas en un array)
-  const paradasArray = paradas ? paradas.split(',').map(p => p.trim()).filter(p => p.length > 0) : [];
+  // 2. Procesar/limpiar datos (paradas puede venir como array o como string separada por comas)
+  let paradasArray = [];
+  if (Array.isArray(paradas)) {
+    paradasArray = paradas.map(p => String(p).trim()).filter(p => p.length > 0);
+  } else if (typeof paradas === 'string') {
+    paradasArray = paradas.split(',').map(p => p.trim()).filter(p => p.length > 0);
+  }
 
   // 3. Construir el objeto de la nueva línea
   const newLine = {
-    nombre,
-    codigo,
-    sindicato,
+    nombre: nombre || 'Sin nombre',
+    codigo: codigo || `C-${Date.now()}`,
+    sindicato: sindicato || 'Sin sindicato',
     paradas: paradasArray,
-    recorrido,
+    recorrido: recorrido || '',
     timestamp: new Date().toISOString()
   };
     
@@ -130,8 +142,14 @@ app.post('/guardar_linea', (req, res) => {
   console.log('Datos:', newLine);
   console.log('------------------------------');
 
-  // 6. Responder al cliente (redirigir al formulario o a una página de éxito)
-  res.redirect('/');
+  // 6. Responder al cliente
+  if (req.is('application/json')) {
+    // Para peticiones AJAX desde el panel de admin, devolver JSON
+    res.json({ success: true, line: newLine });
+  } else {
+    // Redirigir para solicitudes de formulario tradicionales
+    res.redirect('/');
+  }
 });
 
 // --- Ruta 3: API para obtener todas las líneas ---

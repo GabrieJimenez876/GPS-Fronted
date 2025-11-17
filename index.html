@@ -4,6 +4,7 @@
   <title>GPS Transporte — La Paz</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="css/admin.css">
 
   <style>
     :root{
@@ -785,6 +786,36 @@
     (function adjustIcons() {
       $$('.nav-btn .fa').forEach(i => i.style.width = '18px');
     })();
+  </script>
+  <!-- Admin and Guide scripts -->
+  <script src="js/admin.js"></script>
+  <script src="js/guide.js"></script>
+  <script>
+    // Inicializar managers adicionales
+    // adminManager y guideManager se exponen globalmente para uso desde otras partes
+    window.adminManager = new AdminManager();
+    window.guideManager = new GuideManager();
+
+    // Si hay parámetro admin en la URL, mostrar la vista correspondiente
+    const params = new URLSearchParams(window.location.search);
+    const adminView = params.get('admin');
+    if (adminView) {
+      adminManager.showView(adminView, false);
+    }
+
+    // Vincular el botón Admin del header para abrir el panel al hacer clic
+    const adminBtn = document.querySelector('#adminSection .nav-btn');
+    if (adminBtn) {
+      adminBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Si no hay vista seleccionada, abrir agregarLinea por defecto
+        const view = adminManager.currentView || 'agregarLinea';
+        adminManager.showView(view);
+      });
+    }
+
+    // Restaurar última pestaña de la guía (si existe)
+    guideManager.restoreLastTab();
   </script>
 </body>
 </html>

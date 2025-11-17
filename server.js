@@ -5,12 +5,43 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
+
+// Servir archivos estáticos desde el directorio raíz
+app.use(express.static(__dirname));
+
 // --- Base de datos simulada (en una app real sería MongoDB o PostgreSQL) ---
-const transportLines = [];
+const transportLines = [
+    {
+        nombre: "Línea 1 - Villa Fátima",
+        codigo: "VF-001",
+        sindicato: "Sindicato Villa Fátima",
+        paradas: ["Villa Fátima", "Terminal", "Plaza Eguino", "San Pedro", "Miraflores"],
+        recorrido: "Villa Fátima → Terminal → Plaza Eguino → San Pedro → Miraflores",
+        timestamp: new Date().toISOString()
+    },
+    {
+        nombre: "Línea 2 - Ceja El Alto",
+        codigo: "CA-002",
+        sindicato: "Sindicato Litoral",
+        paradas: ["Ceja El Alto", "16 de Julio", "Plaza Ballivián", "Cementerio", "Garita"],
+        recorrido: "Ceja El Alto → 16 de Julio → Plaza Ballivián → Cementerio → Garita",
+        timestamp: new Date().toISOString()
+    },
+    {
+        nombre: "Línea 3 - PUC",
+        codigo: "PUC-003",
+        sindicato: "Sindicato PUC",
+        paradas: ["Plaza Humboldt", "UMSA", "Plaza del Estudiante", "San Jorge", "Obrajes"],
+        recorrido: "Plaza Humboldt → UMSA → Plaza del Estudiante → San Jorge → Obrajes",
+        timestamp: new Date().toISOString()
+    }
+];
 
 // --- Configuración de middleware ---
 // Usamos body-parser para procesar datos de formularios (URL-encoded)
 app.use(bodyParser.urlencoded({ extended: true }));
+// Aceptar JSON en requests (para API desde admin panel)
+app.use(express.json());
 
 // Servir archivos estáticos (por ejemplo si mueves el HTML a /public)
 // Por simplicidad, se inserta el HTML directamente en la ruta abajo.
@@ -77,19 +108,29 @@ app.get('/', (req, res) => {
 
 // --- Ruta 2: Procesar envío del formulario (POST /guardar_linea) ---
 app.post('/guardar_linea', (req, res) => {
-  // 1. Obtener datos del cuerpo de la petición (gracias a body-parser)
-  const { nombre, codigo, sindicato, paradas, recorrido } = req.body;
+  // 1. Obtener datos del cuerpo de la petición (soportamos JSON y form-urlencoded)
+  let nombre, codigo, sindicato, paradas, recorrido;
+  if (req.is('application/json')) {
+    ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
+  } else {
+    ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
+  }
 
-  // 2. Procesar/limpiar datos (por ejemplo convertir la cadena de paradas en un array)
-  const paradasArray = paradas ? paradas.split(',').map(p => p.trim()).filter(p => p.length > 0) : [];
+  // 2. Procesar/limpiar datos (paradas puede venir como array o como string separada por comas)
+  let paradasArray = [];
+  if (Array.isArray(paradas)) {
+    paradasArray = paradas.map(p => String(p).trim()).filter(p => p.length > 0);
+  } else if (typeof paradas === 'string') {
+    paradasArray = paradas.split(',').map(p => p.trim()).filter(p => p.length > 0);
+  }
 
   // 3. Construir el objeto de la nueva línea
   const newLine = {
-    nombre,
-    codigo,
-    sindicato,
+    nombre: nombre || 'Sin nombre',
+    codigo: codigo || `C-${Date.now()}`,
+    sindicato: sindicato || 'Sin sindicato',
     paradas: paradasArray,
-    recorrido,
+    recorrido: recorrido || '',
     timestamp: new Date().toISOString()
   };
     
@@ -101,10 +142,111 @@ app.post('/guardar_linea', (req, res) => {
   console.log('Datos:', newLine);
   console.log('------------------------------');
 
-  // 6. Responder al cliente (redirigir al formulario o a una página de éxito)
-  res.redirect('/');
+  // 6. Responder al cliente
+  if (req.is('application/json')) {
+    // Para peticiones AJAX desde el panel de admin, devolver JSON
+    res.json({ success: true, line: newLine });
+  } else {
+    // Redirigir para solicitudes de formulario tradicionales
+    res.redirect('/');
+  }
 });
 
+// --- Ruta 3: API para obtener todas las líneas ---
+app.get('/api/lineas', (req, res) => {
+  res.json(transportLines);
+});
+
+// --- Ruta 4: Vista de todas las líneas ---
+app.get('/ver_lineas', (req, res) => {
+  const linesHtml = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Líneas de Transporte</title>
+      <style>
+        body { font-family: Arial; padding: 20px; background-color: #f4f4f4; }
+        h2 { color: #004d40; }
+        .line-card { 
+          background: #fff; 
+          padding: 15px; 
+          margin: 10px 0; 
+          border-radius: 5px; 
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .line-header { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          margin-bottom: 10px;
+        }
+        .code { 
+          background: #004d40; 
+          color: white; 
+          padding: 4px 8px; 
+          border-radius: 4px; 
+          font-size: 0.9em;
+        }
+        .stops { 
+          display: flex; 
+          gap: 10px; 
+          flex-wrap: wrap; 
+          margin: 10px 0;
+        }
+        .stop { 
+          background: #e0f2f1; 
+          padding: 4px 8px; 
+          border-radius: 12px; 
+          font-size: 0.9em;
+        }
+        .route { 
+          color: #666; 
+          margin-top: 10px;
+        }
+        nav {
+          margin-bottom: 20px;
+        }
+        nav a {
+          background: #004d40;
+          color: white;
+          padding: 8px 16px;
+          text-decoration: none;
+          border-radius: 4px;
+          margin-right: 10px;
+        }
+        nav a:hover {
+          background: #00695c;
+        }
+      </style>
+    </head>
+    <body>
+      <nav>
+        <a href="/">🏠 Inicio</a>
+        <a href="/agregar_linea.html">➕ Agregar Línea</a>
+      </nav>
+      
+      <h2>Líneas de Transporte</h2>
+      ${transportLines.map(line => `
+        <div class="line-card">
+          <div class="line-header">
+            <h3>${line.nombre}</h3>
+            <span class="code">${line.codigo}</span>
+          </div>
+          <div>Sindicato: ${line.sindicato}</div>
+          <div class="stops">
+            ${line.paradas.map(stop => `
+              <span class="stop">${stop}</span>
+            `).join('')}
+          </div>
+          <div class="route">📍 ${line.recorrido}</div>
+        </div>
+      `).join('')}
+    </body>
+    </html>
+  `;
+  res.send(linesHtml);
+});
 
 // --- Iniciar el servidor ---
 app.listen(PORT, () => {

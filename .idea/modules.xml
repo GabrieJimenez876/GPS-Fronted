@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
+      <module fileurl="file://$PROJECT_DIR$/gps_transporte.iml" filepath="$PROJECT_DIR$/gps_transporte.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/gps_transporte_android.iml" filepath="$PROJECT_DIR$/android/gps_transporte_android.iml" />
+=======
       <module fileurl="file://$PROJECT_DIR$/proyecto_gps.iml" filepath="$PROJECT_DIR$/proyecto_gps.iml" />
       <module fileurl="file://$PROJECT_DIR$/android/proyecto_gps_android.iml" filepath="$PROJECT_DIR$/android/proyecto_gps_android.iml" />
+>>>>>>> 3ad15d412ad428e80d3b86bf67b474c1ea29056a
     </modules>
   </component>
 </project>

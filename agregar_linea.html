@@ -19,6 +19,13 @@
     .btn.primary{background:var(--c-primary);color:#fff}
     .btn.ghost{background:#fff;border:1px solid #ddd}
   </style>
+  <style>
+    /* Ensure header/menu and dropdowns render above maps if any */
+    .header-inner, .menu, .menu .btn, .profile-area, .dropdown { position: relative; z-index: 1100; }
+    .dropdown { z-index: 1110; }
+    #map, .map-box { position: relative; z-index: 0; }
+    .backdrop, .modal-backdrop { z-index: 1200; }
+  </style>
 </head>
 <body>
   <header><div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center"><div style="width:36px;height:36px;background:#00a58c;border-radius:8px;display:grid;place-items:center">LP</div><h1 style="margin:0;font-size:18px">Agregar Línea</h1></div></header>
@@ -79,6 +86,30 @@
       // redirect to ver_rutas to preview
       location.href = 'ver_rutas.html#route=' + encodeURIComponent(key);
     });
+  </script>
+
+  <!-- Shared session / profile helper (keeps behavior similar to index.html) -->
+  <script>
+    (function(){
+      const USERS_KEY = 'gps_users';
+      const CURRENT_USER_KEY = 'gps_current_user';
+      const ADMIN_EMAIL = 'admin@admin.com';
+      const ADMIN_PASSWORD = 'admin123';
+
+      function getUsers(){ try{ return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); }catch(e){return[]} }
+      function saveUser(user){ const u=getUsers(); u.push(user); localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+      function setCurrent(user){ localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user)); updateUIForSession(user); }
+      function getCurrent(){ try{ return JSON.parse(localStorage.getItem(CURRENT_USER_KEY)||'null'); }catch(e){return null} }
+
+      function ensureProfileWrap(){ let wrap = document.getElementById('profileWrap'); if(!wrap){ const area = document.querySelector('.profile-area'); if(area){ wrap = document.createElement('div'); wrap.id='profileWrap'; area.appendChild(wrap); } } return wrap; }
+
+      function updateUIForSession(session){ const wrap = ensureProfileWrap(); if(!wrap) return; wrap.innerHTML=''; if(!session){ wrap.innerHTML = '<button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>'; const btnLogin = document.getElementById('btnLogin'); if(btnLogin) btnLogin.addEventListener('click', ()=> alert('Abrir modal login (demo)')); }
+        else { const isAdmin = session.role==='admin'; wrap.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="font-weight:700">${session.name||session.email}</div><div style="font-size:12px;color:#eef">${isAdmin? 'Administrador':'Usuario'}</div><button class="btn" id="btnLogout">Salir</button></div>`; const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', ()=>{ localStorage.removeItem(CURRENT_USER_KEY); updateUIForSession(null); }); }
+      }
+
+      // initialize UI from storage
+      window.addEventListener('DOMContentLoaded', ()=>{ updateUIForSession(getCurrent()); });
+    })();
   </script>
 </body>
 </html>

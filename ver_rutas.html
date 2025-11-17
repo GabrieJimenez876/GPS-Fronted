@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ver Rutas — GPS Transporte La Paz</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
   
   <style>
     :root{ --c-primary:#004d40; --c-bg:#f6f7f8; --c-fg:#1f2937; --c-panel:#ffffff; --c-border:#e5e7eb; --radius:12px; }
@@ -45,6 +46,12 @@
   </style>
 
   <style>
+    /* UI z-index fixes so header/buttons and side panels float above leaflet map */
+    .header-inner, .menu, .menu .btn, .profile-area, .dropdown, .panel { position: relative; z-index: 1100; }
+    .dropdown { z-index: 1110; }
+    #map { position: relative; z-index: 0; }
+    .backdrop, .modal-backdrop { z-index: 1200; }
+
     .page{max-width:1200px;margin:0 auto;padding:14px;display:grid;grid-template-columns:360px 1fr;gap:14px}
     #map{height:70vh;min-height:520px;border-radius:12px;border:1px solid var(--c-border);overflow:hidden}
     .route-header{display:flex;flex-direction:column;gap:6px}
@@ -58,26 +65,178 @@
     .table th{background:var(--c-primary);color:#fff;text-align:left}
     @media (max-width:980px){ .page{grid-template-columns:1fr} #map{height:60vh} }
   </style>
+  <style>
+    /* nav compatibility for index-like header */
+    .nav-row { display:flex; gap:8px; align-items:center; width:100%; }
+    .nav-left { display:flex; gap:8px; align-items:center; }
+    .nav-right { margin-left:auto; display:flex; gap:8px; }
+    .nav-btn{ height:42px; padding:0 12px; display:inline-flex; gap:8px; align-items:center; border-radius:8px; background:rgba(255,255,255,0.95); color:var(--c-primary); border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:14px; }
+    .nav-btn.primary{ background:var(--c-primary); color:#fff; border-color:var(--c-primary); }
+    .nav-btn .fa{ font-size:16px; }
+  </style>
+ <script>
+    // Seed example routes into localStorage if none exist (so the map shows examples)
+    (function(){
+      try{
+        const key = 'gps_routes';
+        const current = JSON.parse(localStorage.getItem(key) || '[]');
+        
+        // --- NUEVA RUTA 201 ---
+        const route201 = {
+          id: 3,
+          key: 'R201',
+          name: 'Línea 201: El Tejar → Chasquipampa',
+          operator: 'Sindicato 14 de Septiembre',
+          vehicle: 'Autobús',
+          color: '#e74c3c', // Rojo distintivo
+          stops: [
+            { name: 'Av. Apumalla (Inicio)', lat: -16.4950, lng: -68.1510 }, // El Tejar / San Pedro
+            { name: 'Av. Perú', lat: -16.4940, lng: -68.1435 },
+            { name: 'Estación Central', lat: -16.4950, lng: -68.1300 },
+            { name: 'Pza. San Francisco / Av. Ismael Montes', lat: -16.4988, lng: -68.1373 },
+            { name: 'Pza. Del Estudiante / El Prado', lat: -16.5055, lng: -68.1350 },
+            { name: 'Obrajes Calle 0', lat: -16.5200, lng: -68.1130 }, // Cruce de la Costanera
+            { name: 'Obrajes Calle 7', lat: -16.5270, lng: -68.1090 }, 
+            { name: 'Calacoto Calle 8 (Pasarela Anapol)', lat: -16.5360, lng: -68.0890 },
+            { name: 'San Miguel (Iglesia)', lat: -16.5410, lng: -68.0825 },
+            { name: 'Achumani / Muñoz Reyes', lat: -16.5500, lng: -68.0670 },
+            { name: 'Final Chasquipampa', lat: -16.5600, lng: -68.0550 } // Fin de la ruta
+          ],
+          // Trayecto simulado para que se vea el recorrido en el mapa (más puntos para mejor visualización)
+          path: [
+            [-16.4950, -68.1510], [-16.4945, -68.1480], [-16.4940, -68.1435], [-16.4940, -68.1380], [-16.4988, -68.1373], 
+            [-16.5000, -68.1360], [-16.5055, -68.1350], [-16.5100, -68.1300], [-16.5150, -68.1250], 
+            [-16.5200, -68.1130], [-16.5230, -68.1100], [-16.5270, -68.1090], [-16.5300, -68.1050],
+            [-16.5360, -68.0890], [-16.5380, -68.0850], [-16.5410, -68.0825], [-16.5450, -68.0750],
+            [-16.5500, -68.0670], [-16.5550, -68.0600], [-16.5600, -68.0550]
+          ]
+        };
+        
+        const sample = [
+          {
+            id: 1,
+            key: 'amarilla',
+            name: 'Línea Amarilla',
+            operator: 'Sindicato Amarillo',
+            vehicle: 'Microbus',
+            color: '#f1c40f',
+            stops: [
+              { name: 'Cementerio', lat: -16.49694, lng: -68.15167 },
+              { name: 'Plaza Murillo', lat: -16.50066, lng: -68.13735 },
+              { name: 'Hospital Juan XXIII', lat: -16.5072, lng: -68.1325 }
+            ],
+            path: [[-16.49694,-68.15167],[-16.50066,-68.13735],[-16.5072,-68.1325]]
+          },
+          {
+            id: 2,
+            key: 'verde',
+            name: 'Línea Verde',
+            operator: 'Sindicato Verde',
+            vehicle: 'Minibus',
+            color: '#27ae60',
+            stops: [
+              { name: 'Munaypata', lat: -16.5012, lng: -68.1541 },
+              { name: 'Plaza Eguino', lat: -16.4982, lng: -68.1409 },
+              { name: 'Estación Central', lat: -16.4950, lng: -68.1300 }
+            ],
+            path: [[-16.5012,-68.1541],[-16.4982,-68.1409],[-16.4950,-68.13]]
+          },
+          route201 // Agregamos la nueva ruta
+      ];
+
+      if(!current || current.length === 0 || !current.find(r => r.key === 'R201')){
+        // Si no hay rutas o falta la R201, sobrescribe con el set completo
+        localStorage.setItem(key, JSON.stringify(sample));
+      }
+        
+    }catch(e){ console.warn('no se pudo seed routes', e); }
+    })();
+  </script>
 </head>
 <body>
-  
   <header>
     <div class="header-inner">
+      <!-- Brand -->
       <div class="brand">
         <div class="logo" aria-hidden="true">LP</div>
-        <h1>GPS Transporte — La Paz</h1>
+        <div>
+          <h1 id="appTitle">GPS Transporte — La Paz</h1>
+          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+        </div>
       </div>
-      <nav>
-        <div class="menu">
+
+      <!-- Navigation -->
+      <nav class="nav-row">
+        <div class="nav-left">
           <div class="menu-item">
-            <button class="btn">📍 Rutas</button>
-            <div class="dropdown" aria-label="submenu rutas">
-              <a href="ver_rutas.html">Ver todas las rutas →</a>
+            <button class="nav-btn" id="btnRoutes">
+              <i class="fa fa-location-dot"></i>
+              <span>Rutas</span>
+            </button>
+            <div class="dropdown">
+              <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
+              <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
+              <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
+              <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
             </div>
           </div>
-          <button class="btn" id="btnGuide">📘 Guía</button>
-          <button class="btn" id="btnDark">🌙 Modo</button>
-          <button class="btn" id="btnLang">🌐 English</button>
+
+          <button class="nav-btn" id="btnGuide">
+            <i class="fa fa-book"></i>
+            <span>Guía</span>
+          </button>
+          
+          <button class="nav-btn" id="btnDark">
+            <i class="fa fa-moon"></i>
+            <span>Modo</span>
+          </button>
+          
+          <button class="nav-btn" id="btnLang">
+            <i class="fa fa-language"></i>
+            <span>English</span>
+          </button>
+        </div>
+
+        <div class="nav-right">
+          <!-- Admin button (hidden by default) -->
+          <div class="menu-item" id="adminSection" style="display:none">
+            <button class="nav-btn">
+              <i class="fa fa-wrench"></i>
+              <span>Admin</span>
+            </button>
+            <div class="dropdown">
+              <a href="agregar_linea.html">➕ Agregar línea</a>
+              <a href="base_datos.html">📄 Ver base de datos</a>
+              <a href="sindicatos.html">🤝 Sindicatos</a>
+            </div>
+          </div>
+
+          <div id="userArea">
+            <!-- visible when no session -->
+            <button class="nav-btn" id="btnRegister">
+              <i class="fa fa-user-plus"></i>
+              <span>Registrarse</span>
+            </button>
+
+            <button class="nav-btn primary" id="btnLogin">
+              <i class="fa fa-user"></i>
+              <span>Iniciar sesión</span>
+            </button>
+
+            <!-- profile pill (hidden by default) -->
+            <div class="menu-item profile-wrap" id="profileWrap" style="display:none;">
+              <button class="nav-btn" id="btnProfile">
+                <span id="profileAvatar" style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--primary);font-weight:600;margin-right:8px;">A</span>
+                <div style="text-align:left;line-height:1;">
+                  <div id="profileName" style="font-size:13px;color:#fff;font-weight:600">User</div>
+                  <div id="profileEmail" style="font-size:11px;opacity:0.9;color:#eafaf7">email@example.com</div>
+                </div>
+              </button>
+              <div class="dropdown" id="profileDropdown">
+                <a href="#" id="btnSwitchUser">Cambiar usuario</a>
+                <a href="#" id="btnLogout">Cerrar sesión</a>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
@@ -289,13 +448,48 @@
       const btnDoLogin = document.getElementById('btnDoLogin');
       if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
       if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
-      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; alert('Sesión iniciada (demo)'); });
+      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; /* demo login handled by shared helper */ });
       const guideBackdrop = document.getElementById('guideBackdrop');
       const btnGuide = document.getElementById('btnGuide');
       const btnCloseGuide = document.getElementById('btnCloseGuide');
       if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
       if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
     });
+  </script>
+
+  <!-- Shared session / profile helper (keeps behavior similar to index.html) -->
+  <script>
+    (function(){
+      const USERS_KEY = 'gps_users';
+      const CURRENT_USER_KEY = 'gps_current_user';
+      const ADMIN_EMAIL = 'admin@admin.com';
+      const ADMIN_PASSWORD = 'admin123';
+
+      function getUsers(){ try{ return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); }catch(e){return[]} }
+      function saveUser(user){ const u=getUsers(); u.push(user); localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+      function setCurrent(user){ localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user)); updateUIForSession(user); }
+      function getCurrent(){ try{ return JSON.parse(localStorage.getItem(CURRENT_USER_KEY)||'null'); }catch(e){return null} }
+
+      function ensureProfileWrap(){ let wrap = document.getElementById('profileWrap'); if(!wrap){ const area = document.querySelector('.profile-area'); if(area){ wrap = document.createElement('div'); wrap.id='profileWrap'; area.appendChild(wrap); } } return wrap; }
+
+      function updateUIForSession(session){ const wrap = ensureProfileWrap(); if(!wrap) return; wrap.innerHTML=''; if(!session){ wrap.innerHTML = '<button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>'; const btnLogin = document.getElementById('btnLogin'); if(btnLogin) btnLogin.addEventListener('click', ()=> document.getElementById('loginBackdrop').style.display='flex'); }
+        else { const isAdmin = session.role==='admin'; wrap.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="font-weight:700">${session.name||session.email}</div><div style="font-size:12px;color:#eef">${isAdmin? 'Administrador':'Usuario'}</div><button class="btn" id="btnLogout">Salir</button></div>`; const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', ()=>{ localStorage.removeItem(CURRENT_USER_KEY); updateUIForSession(null); }); }
+      }
+
+      // wire demo login button
+      window.addEventListener('DOMContentLoaded', ()=>{
+        const btnDoLogin = document.getElementById('btnDoLogin');
+        if(btnDoLogin){ btnDoLogin.addEventListener('click', ()=>{
+          const email = (document.getElementById('email')||{}).value || 'user@example.com';
+          const pass = (document.getElementById('password')||{}).value || '';
+          if(email === ADMIN_EMAIL && pass === ADMIN_PASSWORD){ const admin = { name:'Administrador', email:ADMIN_EMAIL, role:'admin'}; setCurrent(admin); alert('Sesión iniciada: Admin'); }
+          else { const user = { name: email.split('@')[0], email, role:'user'}; setCurrent(user); alert('Sesión iniciada: ' + user.name); }
+          document.getElementById('loginBackdrop').style.display='none';
+        }); }
+        // initialize UI from storage
+        updateUIForSession(getCurrent());
+      });
+    })();
   </script>
 
 </body>

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Base de Datos — GPS Transporte La Paz</title>
-  
-  <style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Base de Datos — GPS Transporte La Paz</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
+    <style>
     :root{ --c-primary:#004d40; --c-bg:#f6f7f8; --c-fg:#1f2937; --c-panel:#ffffff; --c-border:#e5e7eb; --radius:12px; }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--c-bg);color:var(--c-fg)}
@@ -41,173 +41,592 @@
     input[type="text"],input[type="email"],input[type="password"]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px}
     .dark body{background:#121212;color:#e6e6e6}
   </style>
-
+	</style>
   <style>
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
-    .toolbar input[type=text]{height:42px;padding:0 12px;border:1px solid var(--c-border);border-radius:8px;min-width:240px}
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
-    .table th{background:var(--c-primary);color:#fff;text-align:left}
-    .table tr:nth-child(even){background:#f8f8f8}
+    /* Ensure header/menu and dropdowns render above maps */
+    .header-inner, .menu, .menu .btn, .profile-area, .dropdown { position: relative; z-index: 1100; }
+    .dropdown { z-index: 1110; }
+    #map, .map-box { position: relative; z-index: 0; }
+    .backdrop, .modal-backdrop { z-index: 1200; }
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .card{background:var(--c-panel);border:1px solid var(--c-border);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);cursor:pointer}
+    .card:hover{transform:translateY(-1px)}
+    .card h3{margin:0 0 6px 0}
+    .card p{margin:0;color:#374151}
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .table th {
+      background: #f8fafc;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 500;
+      color: #1f2937;
+      font-size: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #4b5563;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    .table tbody tr:hover {
+      background: #f8fafc;
+    }
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .table .btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      margin: 0 4px;
+    }
+    .table .btn.danger {
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+    .table .btn.danger:hover {
+      background: #fef2f2;
+    }
+    @media (max-width:980px) {
+      .grid { grid-template-columns: 1fr }
+      .table .btn { margin-bottom: 4px; display: block; text-align: left; }
+    }
+  </style>
+  <style>
+    /* database styles */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      position: relative;
+      flex: 1;
+    }
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      font-size: 14px;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--c-primary);
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .table th {
+      background: #f8fafc;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 500;
+      color: #1f2937;
+      font-size: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #4b5563;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    .table tbody tr:hover {
+      background: #f8fafc;
+    }
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .table .btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      margin: 0 4px;
+    }
+    .table .btn.danger {
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+    .table .btn.danger:hover {
+      background: #fef2f2;
+    }
+    @media (max-width:980px) {
+      .grid { grid-template-columns: 1fr }
+      .table .btn { margin-bottom: 4px; display: block; text-align: left; }
+    }
+
+    /* nav compatibility */
+    .nav-row { display:flex; gap:8px; align-items:center; width:100%; }
+    .nav-left { display:flex; gap:8px; align-items:center; }
+    .nav-right { margin-left:auto; display:flex; gap:8px; }
+    .nav-btn{ height:42px; padding:0 12px; display:inline-flex; gap:8px; align-items:center; border-radius:8px; background:rgba(255,255,255,0.95); color:var(--c-primary); border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:14px; }
+    .nav-btn.primary{ background:var(--c-primary); color:#fff; border-color:var(--c-primary); }
+    .nav-btn .fa{ font-size:16px; }
   </style>
 </head>
 <body>
-  
-  <header>
-    <div class="header-inner">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">LP</div>
-        <h1>GPS Transporte — La Paz</h1>
-      </div>
-      <nav>
-        <div class="menu">
-          <div class="menu-item">
-            <button class="btn">📍 Rutas</button>
-            <div class="dropdown" aria-label="submenu rutas">
-              <a href="ver_rutas.html">Ver todas las rutas →</a>
-            </div>
-          </div>
-          <button class="btn" id="btnGuide">📘 Guía</button>
-          <button class="btn" id="btnDark">🌙 Modo</button>
-          <button class="btn" id="btnLang">🌐 English</button>
-          <div class="menu-item">
-            <button class="btn">🛠️ Admin</button>
-            <div class="dropdown" aria-label="submenu admin">
-              <a href="agregar_linea.html">➕ Agregar línea</a>
-              <a href="base_datos.html">📄 Ver base de datos</a>
-              <a href="sindicatos.html">🤝 Sindicatos</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-      <div class="profile-area">
-        <button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>
-      </div>
-    </div>
-  </header>
+  
+	<header>
+		<div class="header-inner">
+			<!-- Brand -->
+			<div class="brand">
+				<div class="logo" aria-hidden="true">LP</div>
+				<div>
+					<h1 id="appTitle">GPS Transporte — La Paz</h1>
+					<div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+				</div>
+			</div>
+
+			<!-- Navigation -->
+			<nav class="nav-row">
+				<div class="nav-left">
+					<div class="menu-item">
+						<button class="nav-btn" id="btnRoutes">
+							<i class="fa fa-location-dot"></i>
+							<span>Rutas</span>
+						</button>
+						<div class="dropdown">
+							<a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
+							<a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
+							<a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
+							<a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
+						</div>
+					</div>
+
+					<button class="nav-btn" id="btnGuide">
+						<i class="fa fa-book"></i>
+						<span>Guía</span>
+					</button>
+          
+					<button class="nav-btn" id="btnDark">
+						<i class="fa fa-moon"></i>
+						<span>Modo</span>
+					</button>
+          
+					<button class="nav-btn" id="btnLang">
+						<i class="fa fa-language"></i>
+						<span>English</span>
+					</button>
+				</div>
+
+				<div class="nav-right">
+					<!-- Admin button (hidden by default) -->
+					<div class="menu-item" id="adminSection" style="display:none">
+						<button class="nav-btn">
+							<i class="fa fa-wrench"></i>
+							<span>Admin</span>
+						</button>
+						<div class="dropdown">
+							<a href="agregar_linea.html">➕ Agregar línea</a>
+							<a href="base_datos.html">📄 Ver base de datos</a>
+							<a href="sindicatos.html">🤝 Sindicatos</a>
+						</div>
+					</div>
+
+					<div id="userArea">
+						<!-- visible when no session -->
+						<button class="nav-btn" id="btnRegister">
+							<i class="fa fa-user-plus"></i>
+							<span>Registrarse</span>
+						</button>
+
+						<button class="nav-btn primary" id="btnLogin">
+							<i class="fa fa-user"></i>
+							<span>Iniciar sesión</span>
+						</button>
+
+						<!-- profile pill (hidden by default) -->
+						<div class="menu-item profile-wrap" id="profileWrap" style="display:none;">
+							<button class="nav-btn" id="btnProfile">
+								<span id="profileAvatar" style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--primary);font-weight:600;margin-right:8px;">A</span>
+								<div style="text-align:left;line-height:1;">
+									<div id="profileName" style="font-size:13px;color:#fff;font-weight:600">User</div>
+									<div id="profileEmail" style="font-size:11px;opacity:0.9;color:#eafaf7">email@example.com</div>
+								</div>
+							</button>
+							<div class="dropdown" id="profileDropdown">
+								<a href="#" id="btnSwitchUser">Cambiar usuario</a>
+								<a href="#" id="btnLogout">Cerrar sesión</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</nav>
+		</div>
+	</header>
 
   <main class="container">
-    <section class="panel">
-      <header><h2 style="margin:0">Base de datos (demo)</h2></header>
-      <div class="content">
-        <div class="toolbar">
-          <input type="text" id="search" placeholder="Buscar por ruta, operador o vehículo"/>
-          <button class="btn" id="btnExport">⬇️ Exportar JSON</button>
-          <label class="btn" for="fileImport" style="cursor:pointer">⬆️ Importar JSON</label>
-          <input type="file" id="fileImport" accept="application/json" style="display:none"/>
+    <section>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 10px 0">
+        <h2 style="margin:0">Base de datos</h2>
+        <button class="nav-btn primary" id="btnCreate">
+          <i class="fa fa-plus"></i>
+          <span>Agregar línea</span>
+        </button>
+      </div>
+
+      <div class="panel">
+        <div class="content">
+          <div class="toolbar">
+            <div class="search-box">
+              <i class="fa fa-search"></i>
+              <input type="text" id="search" placeholder="Buscar por ruta, operador o vehículo..."/>
+            </div>
+            <div class="actions">
+              <button class="nav-btn" id="btnExport">
+                <i class="fa fa-download"></i>
+                <span>Exportar</span>
+              </button>
+              <label class="nav-btn" for="fileImport" style="cursor:pointer">
+                <i class="fa fa-upload"></i>
+                <span>Importar</span>
+              </label>
+            </div>
+            <input type="file" id="fileImport" accept="application/json" style="display:none"/>
+          </div>
+          <div style="overflow:auto">
+            <table class="table" id="dbTable">
+              <thead>
+                <tr>
+                  <th style="width:56px">ID</th>
+                  <th>Ruta</th>
+                  <th>Operador</th>
+                  <th>Vehículo</th>
+                  <th style="width:280px;text-align:right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p style="margin-top:8px;color:#374151;font-size:13px" id="dbStatus">
+            <i class="fa fa-info-circle"></i>
+            Los datos son almacenados localmente en el navegador.
+          </p>
         </div>
-        <div style="overflow:auto">
-          <table class="table" id="dbTable">
-            <thead><tr><th style="width:56px">ID</th><th>Ruta</th><th>Operador</th><th>Vehículo</th><th style="width:120px">Acción</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <p style="margin-top:8px;color:#374151">* Datos ilustrativos. Conectaré esta vista a tu API SQLite cuando me pases el endpoint.</p>
       </div>
     </section>
-  </main>
-  
-  <footer>
-    <div class="footer-inner">
-      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / 61022444</div>
-      <div class="socials" aria-label="redes sociales">
-        <a href="#" title="Facebook" aria-label="Facebook">
-          <svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.08 5.66 21.2 10.44 22v-7.01H7.9v-2.92h2.54V9.84c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.92h-2.34V22C18.34 21.2 22 17.08 22 12.07z"></path></svg>
-          <span>Facebook</span>
-        </a>
-        <a href="#" title="X/Twitter" aria-label="X/Twitter">
-          <svg viewBox="0 0 24 24"><path d="M3 3h5.3l4.1 6.2L16.7 3H21l-7.2 10.2L21 21h-5.3l-4.2-6.1L7.3 21H3l7.8-10.8L3 3z"></path></svg>
-          <span>Twitter</span>
-        </a>
-        <a href="#" title="Instagram" aria-label="Instagram">
-          <svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm6.75-1.5a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.75 6z"></path></svg>
-          <span>Instagram</span>
-        </a>
-        <a href="#" title="Telegram" aria-label="Telegram">
-          <svg viewBox="0 0 24 24"><path d="M9.04 15.47 8.8 19.7a.94.94 0 0 0 .73-.35l1.75-1.67 3.63 2.67c.67.37 1.15.18 1.33-.62l2.42-11.34c.21-.93-.34-1.3-1-1.07L3.95 11.1c-.9.35-.89.84-.16 1.07l3.6 1.12 8.38-5.29c.39-.24.75-.11.46.15l-7.19 6.32z"></path></svg>
-          <span>Telegram</span>
-        </a>
-      </div>
-    </div>
-  </footer>
+  </main>  <footer>
+    <div class="footer-inner">
+      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / 61022444</div>
+      <div class="socials" aria-label="redes sociales">
+        <a href="#" title="Facebook" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.08 5.66 21.2 10.44 22v-7.01H7.9v-2.92h2.54V9.84c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.92h-2.34V22C18.34 21.2 22 17.08 22 12.07z"></path></svg>
+          <span>Facebook</span>
+        </a>
+        <a href="#" title="X/Twitter" aria-label="X/Twitter">
+          <svg viewBox="0 0 24 24"><path d="M3 3h5.3l4.1 6.2L16.7 3H21l-7.2 10.2L21 21h-5.3l-4.2-6.1L7.3 21H3l7.8-10.8L3 3z"></path></svg>
+          <span>Twitter</span>
+        </a>
+        <a href="#" title="Instagram" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm6.75-1.5a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.75 6z"></path></svg>
+          <span>Instagram</span>
+        </a>
+        <a href="#" title="Telegram" aria-label="Telegram">
+          <svg viewBox="0 0 24 24"><path d="M9.04 15.47 8.8 19.7a.94.94 0 0 0 .73-.35l1.75-1.67 3.63 2.67c.67.37 1.15.18 1.33-.62l2.42-11.34c.21-.93-.34-1.3-1-1.07L3.95 11.1c-.9.35-.89.84-.16 1.07l3.6 1.12 8.38-5.29c.39-.24.75-.11.46.15l-7.19 6.32z"></path></svg>
+          <span>Telegram</span>
+        </a>
+      </div>
+    </div>
+  </footer>
 
-  
-  <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-    <div class="modal">
-      <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
-      <div class="content">
-        <label for="email">Correo</label>
-        <input type="email" id="email" placeholder="usuario@gmail.com"/>
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••"/>
-      </div>
-      <div class="footer">
-        <button class="btn" id="btnCloseLogin">Cerrar</button>
-        <button class="btn primary" id="btnDoLogin">Ingresar</button>
-      </div>
-    </div>
-  </div>
-  <div class="backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-    <div class="modal">
-      <header><h3 id="guideTitle" style="margin:0">Guía rápida</h3></header>
-      <div class="content"><p>Explora las rutas, administra datos y consulta sindicatos.</p></div>
-      <div class="footer"><button class="btn primary" id="btnCloseGuide">Entendido</button></div>
-    </div>
-  </div>
+    <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal">
+      <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
+      <div class="content">
+        <label for="email">Correo</label>
+        <input type="email" id="email" placeholder="usuario@gmail.com"/>
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••"/>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseLogin">Cerrar</button>
+        <button class="btn primary" id="btnDoLogin">Ingresar</button>
+      </div>
+    </div>
+  </div>
+  <div class="backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal">
+      <header><h3 id="guideTitle" style="margin:0">Guía rápida</h3></header>
+      <div class="content"><p>Explora las rutas, administra datos y consulta sindicatos.</p></div>
+      <div class="footer"><button class="btn primary" id="btnCloseGuide">Entendido</button></div>
+    </div>
+  </div>
 
-    const $ = s=>document.querySelector(s);
-    function loadRoutes(){ try{ return JSON.parse(localStorage.getItem('gps_routes')||'[]'); }catch(e){ return []; } }
-    function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }
-    function renderTable(rows){
-      const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML='';
-      if(!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
-      rows.forEach(row=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
-                        <td><a class="btn" href="ver_rutas.html#route=${row.key}">👁️‍🗨 Ver ruta</a></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-    // inicializa desde storage
-    let DATA = loadRoutes(); renderTable(DATA);
-    document.getElementById('search').addEventListener('input', e=>{
-      const q = e.target.value.toLowerCase();
-      const rows = DATA.filter(r=> (r.name||r.ruta||'').toLowerCase().includes(q) || (r.operator||r.operador||'').toLowerCase().includes(q) || (r.vehicle||r.vehiculo||'').toLowerCase().includes(q));
-      renderTable(rows);
-    });
-    document.getElementById('btnExport').addEventListener('click', ()=>{
-      const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'base_datos.json';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    });
-    document.getElementById('fileImport').addEventListener('change', async e=>{
-      const f = e.target.files[0]; if(!f) return; const text = await f.text();
-      try{ const json = JSON.parse(text); if(Array.isArray(json)){ DATA = json; saveRoutes(DATA); renderTable(DATA); alert('Importado con éxito'); } else alert('JSON inválido'); }
-      catch(err){ alert('No se pudo leer el JSON'); }
-    });
-  </script>
-  
-  <script>
-    const $ = s=>document.querySelector(s);
-    window.addEventListener('DOMContentLoaded', ()=>{
-      const btnDark = document.getElementById('btnDark');
-      if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));
-      const btnLang = document.getElementById('btnLang');
-      if(btnLang){ let lang='es'; btnLang.addEventListener('click', ()=>{ lang=(lang==='es')?'en':'es'; btnLang.textContent=(lang==='es')?'🌐 English':'🌐 Español'; const h1=document.querySelector('h1'); if(h1) h1.textContent=(lang==='es')?'GPS Transporte — La Paz':'GPS Transport — La Paz'; }); }
-      const loginBackdrop = document.getElementById('loginBackdrop');
-      const btnLogin = document.getElementById('btnLogin');
-      const btnCloseLogin = document.getElementById('btnCloseLogin');
-      const btnDoLogin = document.getElementById('btnDoLogin');
-      if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
-      if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
-      if(btnDoLogin) btnDoLogin.addEventListener('click', ()=>{ loginBackdrop.style.display='none'; alert('Sesión iniciada (demo)'); });
-      const guideBackdrop = document.getElementById('guideBackdrop');
-      const btnGuide = document.getElementById('btnGuide');
-      const btnCloseGuide = document.getElementById('btnCloseGuide');
-      if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
-      if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
-    });
-  </script>
+    <div class="backdrop" id="routeModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="routeModalTitle">
+    <div class="modal">
+      <header><h3 id="routeModalTitle" style="margin:0">Crear/Editar Ruta</h3></header>
+      <div class="content">
+        <input type="hidden" id="routeId"/>
+        <label for="routeName">Nombre de la Ruta (ej: "Caja Ferroviaria")</label>
+        <input type="text" id="routeName" placeholder="Nombre de la Ruta" required/>
+        <label for="routeOperator">Operador/Sindicato (ej: "Sindicato Murillo")</label>
+        <input type="text" id="routeOperator" placeholder="Operador/Sindicato" required/>
+        <label for="routeVehicle">Tipo de Vehículo (ej: "Microbus N° 45")</label>
+        <input type="text" id="routeVehicle" placeholder="Tipo de Vehículo" required/>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseRouteModal">Cancelar</button>
+        <button class="btn primary" id="btnSaveRoute">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Shared helper to select elements
+    const $ = s=>document.querySelector(s);
+    
+    // --- Funciones de Datos y CRUD (simulado) ---
+    const initialData = [
+      {id: 1, key: 'R01', name: 'Caja Ferroviaria - 7 Lagunas', operator: 'Sindicato Murillo', vehicle: 'Micro N°45'},
+      {id: 2, key: 'R02', name: 'Plaza San Francisco - El Alto', operator: 'Sindicato Litoral', vehicle: 'Minibus B1'},
+      {id: 3, key: 'R03', name: 'Sopocachi - Villa Copacabana', operator: 'Sindicato 18 de Noviembre', vehicle: 'Trufi N°12'},
+    ];
+
+    function loadRoutes(){ 
+      try{ 
+        // Si no hay datos en localStorage, usa los iniciales
+        const stored = localStorage.getItem('gps_routes');
+        if (!stored || stored === '[]') {
+          saveRoutes(initialData); // Guarda los datos iniciales
+          return initialData;
+        }
+        return JSON.parse(stored);
+      }catch(e){ 
+        console.error("Error loading routes:", e);
+        return initialData; // Fallback a datos iniciales en caso de error
+      } 
+    }
+    function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }
+
+    function getNextId(data) {
+      return data.length ? Math.max(...data.map(r => r.id)) + 1 : 1;
+    }
+
+    function createRoute(newRoute) {
+      newRoute.id = getNextId(DATA);
+      newRoute.key = 'R' + String(newRoute.id).padStart(2, '0');
+      DATA.push(newRoute);
+      saveRoutes(DATA);
+      renderTable(DATA);
+      alert('Ruta creada con éxito.');
+    }
+
+    function updateRoute(updatedRoute) {
+      const index = DATA.findIndex(r => r.id === updatedRoute.id);
+      if (index !== -1) {
+        DATA[index] = { ...DATA[index], ...updatedRoute };
+        saveRoutes(DATA);
+        renderTable(DATA);
+        alert('Ruta actualizada con éxito.');
+      }
+    }
+
+    function deleteRoute(id) {
+      DATA = DATA.filter(r => r.id !== id);
+      saveRoutes(DATA);
+      renderTable(DATA);
+      alert('Ruta eliminada con éxito.');
+    }
+
+    function renderTable(rows){
+      const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML='';
+      if(!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
+      rows.forEach(row=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
+                        <td>
+                          <a class="btn" href="ver_rutas.html#route=${row.key}" style="padding: 6px 10px;">👁️‍🗨 Ver</a>
+                          <button class="btn" onclick="editRoute(${row.id})" style="padding: 6px 10px;">✏️ Editar</button>
+                          <button class="btn danger" onclick="confirmDelete(${row.id})" style="padding: 6px 10px;">🗑️ Eliminar</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Variables globales y carga inicial
+    let DATA = loadRoutes(); renderTable(DATA);
+
+    // --- Lógica de la interfaz de usuario y eventos ---
+
+    // Búsqueda
+    document.getElementById('search').addEventListener('input', e=>{
+      const q = e.target.value.toLowerCase();
+      const rows = DATA.filter(r=> 
+        (r.name||r.ruta||'').toLowerCase().includes(q) || 
+        (r.operator||r.operador||'').toLowerCase().includes(q) || 
+        (r.vehicle||r.vehiculo||'').toLowerCase().includes(q)
+      );
+      renderTable(rows);
+    });
+    
+    // Exportar
+    document.getElementById('btnExport').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'base_datos.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+    
+    // Importar
+    document.getElementById('fileImport').addEventListener('change', async e=>{
+      const f = e.target.files[0]; if(!f) return; const text = await f.text();
+      try{ 
+        const json = JSON.parse(text); 
+        if(Array.isArray(json)){ 
+          DATA = json; 
+          saveRoutes(DATA); 
+          renderTable(DATA); 
+          alert('Importado con éxito'); 
+        } else alert('JSON inválido'); 
+      }
+      catch(err){ alert('No se pudo leer el JSON'); }
+    });
+
+    // Funciones del modal Crear/Editar
+
+    const routeModalBackdrop = document.getElementById('routeModalBackdrop');
+    const routeModalTitle = document.getElementById('routeModalTitle');
+    const btnCloseRouteModal = document.getElementById('btnCloseRouteModal');
+    const btnSaveRoute = document.getElementById('btnSaveRoute');
+    
+    const routeIdInput = document.getElementById('routeId');
+    const routeNameInput = document.getElementById('routeName');
+    const routeOperatorInput = document.getElementById('routeOperator');
+    const routeVehicleInput = document.getElementById('routeVehicle');
+    
+    function openRouteModal(mode = 'create', route = {}) {
+      if (mode === 'create') {
+        routeModalTitle.textContent = '➕ Crear nueva ruta';
+        routeIdInput.value = '';
+        routeNameInput.value = '';
+        routeOperatorInput.value = '';
+        routeVehicleInput.value = '';
+      } else {
+        routeModalTitle.textContent = `✏️ Editar Ruta ID: ${route.id}`;
+        routeIdInput.value = route.id;
+        routeNameInput.value = route.name || route.ruta || '';
+        routeOperatorInput.value = route.operator || route.operador || '';
+        routeVehicleInput.value = route.vehicle || route.vehiculo || '';
+      }
+      routeModalBackdrop.style.display = 'flex';
+    }
+
+    window.editRoute = (id) => {
+      const route = DATA.find(r => r.id === id);
+      if (route) openRouteModal('edit', route);
+      else alert('Ruta no encontrada');
+    };
+    
+    window.confirmDelete = (id) => {
+      if (confirm(`¿Estás seguro de que quieres eliminar la Ruta ID ${id}?`)) {
+        deleteRoute(id);
+      }
+    };
+    
+    document.getElementById('btnCreate').addEventListener('click', () => openRouteModal('create'));
+    btnCloseRouteModal.addEventListener('click', () => routeModalBackdrop.style.display = 'none');
+    
+    btnSaveRoute.addEventListener('click', () => {
+      const id = routeIdInput.value ? parseInt(routeIdInput.value) : null;
+      const routeData = {
+        id,
+        name: routeNameInput.value.trim(),
+        operator: routeOperatorInput.value.trim(),
+        vehicle: routeVehicleInput.value.trim()
+      };
+      
+      if (!routeData.name || !routeData.operator || !routeData.vehicle) {
+        alert('Por favor, completa todos los campos.');
+        return;
+      }
+      
+      if (id) updateRoute(routeData);
+      else createRoute(routeData);
+      
+      routeModalBackdrop.style.display = 'none';
+    });
+  </script>
+
+    <script>
+    (function(){
+      const USERS_KEY = 'gps_users';
+      const CURRENT_USER_KEY = 'gps_current_user';
+      const ADMIN_EMAIL = 'admin@admin.com';
+      const ADMIN_PASSWORD = 'admin123';
+
+      function getUsers(){ try{ return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); }catch(e){return[]} }
+      function setCurrent(user){ localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user)); updateUIForSession(user); }
+      function getCurrent(){ try{ return JSON.parse(localStorage.getItem(CURRENT_USER_KEY)||'null'); }catch(e){return null} }
+
+      function ensureProfileWrap(){ let wrap = document.getElementById('profileWrap'); if(!wrap){ const area = document.querySelector('.profile-area'); if(area){ wrap = document.createElement('div'); wrap.id='profileWrap'; area.appendChild(wrap); } } return wrap; }
+
+      function updateUIForSession(session){ const wrap = ensureProfileWrap(); if(!wrap) return; wrap.innerHTML=''; if(!session){ wrap.innerHTML = '<button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>'; const btnLogin = document.getElementById('btnLogin'); if(btnLogin) btnLogin.addEventListener('click', ()=> document.getElementById('loginBackdrop').style.display='flex'); }
+        else { const isAdmin = session.role==='admin'; wrap.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="font-weight:700">${session.name||session.email}</div><div style="font-size:12px;color:#eef">${isAdmin? 'Administrador':'Usuario'}</div><button class="btn" id="btnLogout">Salir</button></div>`; const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', ()=>{ localStorage.removeItem(CURRENT_USER_KEY); updateUIForSession(null); }); }
+      }
+
+      window.addEventListener('DOMContentLoaded', ()=>{
+        const btnDoLogin = document.getElementById('btnDoLogin');
+        if(btnDoLogin){ btnDoLogin.addEventListener('click', ()=>{
+          const email = (document.getElementById('email')||{}).value || 'user@example.com';
+          const pass = (document.getElementById('password')||{}).value || '';
+          if(email === ADMIN_EMAIL && pass === ADMIN_PASSWORD){ const admin = { name:'Administrador', email:ADMIN_EMAIL, role:'admin'}; setCurrent(admin); alert('Sesión iniciada: Admin'); }
+          else { const user = { name: email.split('@')[0], email, role:'user'}; setCurrent(user); alert('Sesión iniciada: ' + user.name); }
+          document.getElementById('loginBackdrop').style.display='none';
+        }); }
+        updateUIForSession(getCurrent());
+      });
+    })();
+  </script>
+
+    <script>
+    window.addEventListener('DOMContentLoaded', ()=>{
+      const btnDark = document.getElementById('btnDark');
+      if(btnDark) btnDark.addEventListener('click', ()=> document.documentElement.classList.toggle('dark'));
+      const btnLang = document.getElementById('btnLang');
+      if(btnLang){ let lang='es'; btnLang.addEventListener('click', ()=>{ lang=(lang==='es')?'en':'es'; btnLang.textContent=(lang==='es')?'🌐 English':'🌐 Español'; const h1=document.querySelector('h1'); if(h1) h1.textContent=(lang==='es')?'GPS Transporte — La Paz':'GPS Transport — La Paz'; }); }
+      const loginBackdrop = document.getElementById('loginBackdrop');
+      const btnLogin = document.getElementById('btnLogin');
+      const btnCloseLogin = document.getElementById('btnCloseLogin');
+      const btnDoLogin = document.getElementById('btnDoLogin');
+      if(btnLogin && loginBackdrop) btnLogin.addEventListener('click', ()=> loginBackdrop.style.display='flex');
+      if(btnCloseLogin) btnCloseLogin.addEventListener('click', ()=> loginBackdrop.style.display='none');
+      const guideBackdrop = document.getElementById('guideBackdrop');
+      const btnGuide = document.getElementById('btnGuide');
+      const btnCloseGuide = document.getElementById('btnCloseGuide');
+      if(btnGuide && guideBackdrop) btnGuide.addEventListener('click', ()=> guideBackdrop.style.display='flex');
+      if(btnCloseGuide) btnCloseGuide.addEventListener('click', ()=> guideBackdrop.style.display='none');
+    });
+  </script>
 
 </body>
 </html>

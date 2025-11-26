@@ -26,7 +26,7 @@ final ThemeData appTheme = ThemeData(
     bodyMedium: TextStyle(fontFamily: 'Inter', color: foregroundColor),
     titleLarge: TextStyle(fontFamily: 'Inter', color: foregroundColor),
   ),
-  cardTheme: CardThemeData(
+  cardTheme: CardTheme(
     color: surfaceColor,
     elevation: 6,
     shape: RoundedRectangleBorder(

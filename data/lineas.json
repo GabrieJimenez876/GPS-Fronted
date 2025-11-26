@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nombre": "Línea 1 - Villa Fátima",
+    "codigo": "VF-001",
+    "sindicato": "Sindicato Villa Fátima",
+    "paradas": ["Villa Fátima", "Terminal", "Plaza Eguino"]
+  },
+  {
+    "id": 2,
+    "nombre": "Línea 2 - Ceja El Alto",
+    "codigo": "CA-002",
+    "sindicato": "Sindicato Litoral",
+    "paradas": ["Ceja El Alto", "Plaza Ballivián", "Cementerio"]
+  }
+]

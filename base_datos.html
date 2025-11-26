@@ -194,6 +194,8 @@
     .nav-btn.primary{ background:var(--c-primary); color:#fff; border-color:var(--c-primary); }
     .nav-btn .fa{ font-size:16px; }
   </style>
+  <!-- Leaflet for map previews in the modal -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-o9N1j7kQb6v6g2a2bY1s5Qxjv5Q5g3pJZ+0s1m0s+3s=" crossorigin=""/>
 </head>
 <body>
   
@@ -360,6 +362,20 @@
     </div>
   </footer>
 
+  <!-- Modal para ver paradas y ruta -->
+  <div class="backdrop" id="viewBackdrop" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal" style="width:90%;max-width:900px">
+      <header><h3 id="viewTitle" style="margin:0">Ver Ruta</h3></header>
+      <div class="content">
+        <div id="viewMap" style="height:320px;border-radius:8px"></div>
+        <div id="viewStopsList" style="margin-top:8px"></div>
+      </div>
+      <div class="footer">
+        <button class="btn" id="btnCloseView">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
     <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <div class="modal">
       <header><h3 id="loginTitle" style="margin:0">Iniciar sesión</h3></header>
@@ -402,80 +418,139 @@
     </div>
   </div>
 
-  <script>
-    // Shared helper to select elements
-    const $ = s=>document.querySelector(s);
-    
-    // --- Funciones de Datos y CRUD (simulado) ---
-    const initialData = [
-      {id: 1, key: 'R01', name: 'Caja Ferroviaria - 7 Lagunas', operator: 'Sindicato Murillo', vehicle: 'Micro N°45'},
-      {id: 2, key: 'R02', name: 'Plaza San Francisco - El Alto', operator: 'Sindicato Litoral', vehicle: 'Minibus B1'},
-      {id: 3, key: 'R03', name: 'Sopocachi - Villa Copacabana', operator: 'Sindicato 18 de Noviembre', vehicle: 'Trufi N°12'},
-    ];
+  <script>
+    // Dynamically load Leaflet JS if not already loaded and render a modal map for a route
+    function loadLeaflet() {
+      return new Promise((resolve, reject) => {
+        if (window.L) return resolve(window.L);
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        s.integrity = 'sha256-o9N1j7kQb6v6g2a2bY1s5Qxjv5Q5g3pJZ+0s1m0s+3s=';
+        s.crossOrigin = '';
+        s.onload = () => resolve(window.L);
+        s.onerror = () => reject(new Error('Leaflet failed to load'));
+        document.head.appendChild(s);
+      });
+    }
 
-    function loadRoutes(){ 
-      try{ 
-        // Si no hay datos en localStorage, usa los iniciales
-        const stored = localStorage.getItem('gps_routes');
-        if (!stored || stored === '[]') {
-          saveRoutes(initialData); // Guarda los datos iniciales
-          return initialData;
-        }
-        return JSON.parse(stored);
-      }catch(e){ 
-        console.error("Error loading routes:", e);
-        return initialData; // Fallback a datos iniciales en caso de error
-      } 
-    }
-    function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }
+    let __viewMap = null;
+    window.viewRoute = async function(id) {
+      let route = DATA.find(r => r.id === id);
+      if (!route) {
+        try {
+          const res = await fetch(`${API}/api/lineas`);
+          const all = await res.json();
+          route = all.find(r => r.id === id);
+        } catch(e) { console.error(e); }
+      }
+      if (!route) { alert('Ruta no encontrada'); return; }
+      document.getElementById('viewTitle').textContent = route.nombre || route.name || 'Ruta';
+      const paradas = route.paradas || [];
+      document.getElementById('viewStopsList').innerHTML = paradas.length ? '<ol>'+ paradas.map(p=>`<li>${p.nombre||p.name||''} — ${p.lat||p.latitude||p.lat}, ${p.lng||p.lng||p.lon||p.longitude||''}</li>`).join('') + '</ol>' : '<div style="color:#666">No hay paradas registradas.</div>';
+      document.getElementById('viewBackdrop').style.display = 'flex';
+      try {
+        await loadLeaflet();
+        if (__viewMap) { __viewMap.remove(); __viewMap = null; }
+        const mapEl = document.getElementById('viewMap');
+        mapEl.innerHTML = '';
+        const center = paradas.length ? [parseFloat(paradas[0].lat), parseFloat(paradas[0].lng)] : [ -16.5, -68.15 ];
+        __viewMap = L.map('viewMap').setView(center, paradas.length ? 14 : 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(__viewMap);
+        const latlngs = [];
+        paradas.forEach(p => {
+          const lat = parseFloat(p.lat || p.latitude || p.latitud || 0);
+          const lng = parseFloat(p.lng || p.longitude || p.lon || p.lng || 0);
+          if (!isFinite(lat) || !isFinite(lng)) return;
+          latlngs.push([lat, lng]);
+          L.marker([lat, lng]).addTo(__viewMap).bindPopup((p.nombre||p.name||'Parada') + '<br/>' + (p.descripcion||''));
+        });
+        if (latlngs.length) {
+          L.polyline(latlngs, { color: '#00a58c' }).addTo(__viewMap);
+          __viewMap.fitBounds(latlngs, { padding: [20,20] });
+        }
+      } catch (err) { console.error('Error cargando Leaflet', err); }
+    };
 
-    function getNextId(data) {
-      return data.length ? Math.max(...data.map(r => r.id)) + 1 : 1;
-    }
+    document.getElementById('btnCloseView').addEventListener('click', ()=> {
+      document.getElementById('viewBackdrop').style.display = 'none';
+      if (__viewMap) { __viewMap.remove(); __viewMap = null; }
+    });
+  </script>
+  <script>
+    // Shared helper to select elements
+    const $ = s => document.querySelector(s);
+    const API = window.location.origin; // serve from same origin
 
-    function createRoute(newRoute) {
-      newRoute.id = getNextId(DATA);
-      newRoute.key = 'R' + String(newRoute.id).padStart(2, '0');
-      DATA.push(newRoute);
-      saveRoutes(DATA);
-      renderTable(DATA);
-      alert('Ruta creada con éxito.');
-    }
+    // --- Data via server API ---
+    async function loadRoutes() {
+      try {
+        const res = await fetch(`${API}/api/lineas`);
+        if (!res.ok) return [];
+        const json = await res.json();
+        // Normalize fields for UI
+        return json.map(l => ({
+          id: l.id,
+          key: l.codigo || ('R' + String(l.id).padStart(2, '0')),
+          name: l.nombre || l.name || l.ruta || '',
+          operator: l.sindicato || l.operator || '',
+          vehicle: l.vehicle || l.vehiculo || ''
+        }));
+      } catch (e) {
+        console.error('Error loading routes from API', e);
+        return [];
+      }
+    }
 
-    function updateRoute(updatedRoute) {
-      const index = DATA.findIndex(r => r.id === updatedRoute.id);
-      if (index !== -1) {
-        DATA[index] = { ...DATA[index], ...updatedRoute };
-        saveRoutes(DATA);
-        renderTable(DATA);
-        alert('Ruta actualizada con éxito.');
-      }
-    }
+    async function createRoute(newRoute) {
+      // Map UI fields to API shape
+      const payload = { nombre: newRoute.name, codigo: newRoute.key || '', sindicato: newRoute.operator, paradas: [] };
+      const res = await fetch(`${API}/api/lineas`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error creando ruta');
+      return await loadAndRender();
+    }
 
-    function deleteRoute(id) {
-      DATA = DATA.filter(r => r.id !== id);
-      saveRoutes(DATA);
-      renderTable(DATA);
-      alert('Ruta eliminada con éxito.');
-    }
+    async function updateRoute(updatedRoute) {
+      const payload = { nombre: updatedRoute.name, codigo: updatedRoute.key || '', sindicato: updatedRoute.operator, paradas: [] };
+      const res = await fetch(`${API}/api/lineas/${updatedRoute.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error actualizando ruta');
+      return await loadAndRender();
+    }
 
-    function renderTable(rows){
-      const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML='';
-      if(!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
-      rows.forEach(row=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
-                        <td>
-                          <a class="btn" href="ver_rutas.html#route=${row.key}" style="padding: 6px 10px;">👁️‍🗨 Ver</a>
-                          <button class="btn" onclick="editRoute(${row.id})" style="padding: 6px 10px;">✏️ Editar</button>
-                          <button class="btn danger" onclick="confirmDelete(${row.id})" style="padding: 6px 10px;">🗑️ Eliminar</button>
-                        </td>`;
-        tbody.appendChild(tr);
-      });
-    }
+    async function deleteRoute(id) {
+      const res = await fetch(`${API}/api/lineas/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Error eliminando ruta');
+      return await loadAndRender();
+    }
 
-    // Variables globales y carga inicial
-    let DATA = loadRoutes(); renderTable(DATA);
+    function renderTable(rows) {
+      const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML = '';
+      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
+                          <td>
+                            <button class="btn" onclick="viewRoute(${row.id})" style="padding: 6px 10px;">👁️‍🗨 Ver</button>
+                            <button class="btn" onclick="editRoute(${row.id})" style="padding: 6px 10px;">✏️ Editar</button>
+                            <button class="btn danger" onclick="confirmDelete(${row.id})" style="padding: 6px 10px;">🗑️ Eliminar</button>
+                          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Load and render
+    async function loadAndRender() {
+      DATA = await loadRoutes();
+      renderTable(DATA);
+      return DATA;
+    }
+
+    // Variables globales y carga inicial
+    let DATA = [];
+    loadAndRender().catch(e => console.error(e));
 
     // --- Lógica de la interfaz de usuario y eventos ---
 

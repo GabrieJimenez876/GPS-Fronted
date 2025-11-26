@@ -25,6 +25,7 @@
     .dropdown { z-index: 1110; }
     #map, .map-box { position: relative; z-index: 0; }
     .backdrop, .modal-backdrop { z-index: 1200; }
+    #map { height: 420px; border-radius: 8px; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -45,6 +46,9 @@
         <input id="routeColor" type="text" placeholder="#1e90ff" />
         <label for="routeStops">Paradas (una por línea: nombre,lat,lng)</label>
         <textarea id="routeStops" rows="6" placeholder="Plaza Murillo,-16.4958,-68.1336\nTerminal,-16.4887,-68.1418"></textarea>
+        <div style="margin-top:8px">O añade paradas haciendo click en el mapa:</div>
+        <div id="map"></div>
+        <div style="margin-top:8px;font-size:13px;color:#555">Paradas añadidas: <span id="stopsCount">0</span></div>
 
         <div style="margin-top:12px;display:flex;gap:8px">
           <button class="btn primary" id="btnSave">Guardar línea</button>
@@ -55,10 +59,9 @@
   </main>
 
   <script>
-    // Utilities to read/write routes using localStorage API (compatible con index.js)
-    function getRoutes(){ try{ return JSON.parse(localStorage.getItem('gps_routes') || '[]'); }catch(e){ return []; } }
-    function saveRoutes(arr){ localStorage.setItem('gps_routes', JSON.stringify(arr)); }
-    
+    // Map + stops functionality using Leaflet
+    const stops = [];
+
     function parseStops(text){
       return text.split('\n').map(l=> l.trim()).filter(Boolean).map((line, i)=>{
         const parts = line.split(',').map(p=>p.trim());
@@ -66,7 +69,46 @@
       });
     }
 
-    document.getElementById('btnSave').addEventListener ('click', ()=>{
+    // Initialize Leaflet map
+    (function initMap(){
+      const L_css = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      const L_js = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      const head = document.head;
+      const link = document.createElement('link'); link.rel='stylesheet'; link.href=L_css; head.appendChild(link);
+      const script = document.createElement('script'); script.src=L_js; script.defer=true; script.onload = () => {
+        const map = L.map('map').setView([-16.5, -68.15], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        const markerLayer = L.layerGroup().addTo(map);
+
+        function refreshStopsCount(){ document.getElementById('stopsCount').textContent = stops.length; }
+
+        // load textarea initial stops
+        const ta = document.getElementById('routeStops');
+        ta.addEventListener('change', ()=>{
+          const parsed = parseStops(ta.value);
+          stops.length = 0; parsed.forEach(s=>stops.push(s));
+          markerLayer.clearLayers();
+          stops.forEach(s=> L.marker([s.lat, s.lng]).addTo(markerLayer).bindPopup(s.name));
+          refreshStopsCount();
+        });
+
+        // add on click
+        map.on('click', function(e){
+          const lat = e.latlng.lat; const lng = e.latlng.lng;
+          const name = prompt('Nombre de la parada (opcional):', `Parada ${stops.length+1}`) || `Parada ${stops.length+1}`;
+          const s = { name, lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+          stops.push(s);
+          L.marker([s.lat, s.lng]).addTo(markerLayer).bindPopup(s.name).openPopup();
+          // append to textarea
+          const cur = document.getElementById('routeStops').value;
+          document.getElementById('routeStops').value = cur + (cur.trim() ? '\n' : '') + `${s.name},${s.lat},${s.lng}`;
+          refreshStopsCount();
+        });
+      };
+      head.appendChild(script);
+    })();
+
+    document.getElementById('btnSave').addEventListener('click', async ()=>{
       const name = document.getElementById('routeName').value.trim();
       const key = document.getElementById('routeKey').value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
       const operator = document.getElementById('routeOperator').value.trim();
@@ -74,17 +116,25 @@
       const color = document.getElementById('routeColor').value.trim() || '#1e90ff';
       const stopsText = document.getElementById('routeStops').value;
       if(!name){ alert('Ingrese nombre de la ruta'); return; }
-      const stops = parseStops(stopsText);
-      const routes = getRoutes();
-      if(routes.some(r=> r.key === key)){ if(!confirm('Ya existe una ruta con esa key. Sobrescribir?')) return; }
-      const id = routes.length ? Math.max(...routes.map(r=>r.id||0))+1 : 1;
-      const route = { id, key, name, operator, vehicle, color, stops };
-      const filtered = routes.filter(r=> r.key !== key);
-      filtered.push(route);
-      saveRoutes(filtered);
-      alert('Ruta guardada');
-      // redirect to ver_rutas to preview
-      location.href = 'ver_rutas.html#route=' + encodeURIComponent(key);
+      const parsedStops = parseStops(stopsText).map(s=> ({ nombre: s.name, lat: s.lat, lng: s.lng }));
+
+      // send to server API
+      try{
+        const payload = { nombre: name, codigo: key, sindicato: operator, paradas: parsedStops };
+        const res = await fetch('/api/lineas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if(!res.ok) throw new Error('Error en servidor');
+        const json = await res.json();
+        alert('Ruta guardada en la base de datos del servidor');
+        location.href = 'base_datos.html';
+      }catch(err){
+        console.error(err); alert('No se pudo guardar en el servidor. Reintentando localmente.');
+        // fallback local
+        const routes = JSON.parse(localStorage.getItem('gps_routes')||'[]');
+        const id = routes.length ? Math.max(...routes.map(r=>r.id||0))+1 : 1;
+        const route = { id, key, name, operator, vehicle, color, stops: parsedStops };
+        routes.push(route); localStorage.setItem('gps_routes', JSON.stringify(routes));
+        location.href = 'base_datos.html';
+      }
     });
   </script>
 

@@ -1,25 +1,15 @@
-
-const express = require('express');
-const app = express();
-const os = require('os');
-
-const PORT = 3000;
-
-// Detecta IP local automáticamente
-const interfaces = os.networkInterfaces();
-let localIP = 'localhost';
-for (let iface in interfaces) {
-    for (let alias of interfaces[iface]) {
-        if (alias.family === 'IPv4' && !alias.internal) {
-            localIP = alias.address;
+{
+    // Usa IntelliSense para conocer los atributos disponibles.
+    // Coloca el cursor sobre un atributo para ver su descripción.
+    // Para más información: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Abrir index.html",
+            // Ajusta la ruta al archivo `index.html` de tu proyecto si es necesario.
+            "file": "C:\\Users\\carlo\\GPS-Fronted\\index.html"
         }
-    }
+    ]
 }
-
-app.use(express.static('public'));
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor disponible en:
-    - Local: http://localhost:${PORT}
-    - Red:   http://${localIP}:${PORT}`);
-});

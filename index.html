@@ -1,821 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>GPS Transporte — La Paz</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"/>
-  <link rel="stylesheet" href="css/admin.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS Transporte - La Paz</title>
   <style>
-    :root{
-      --bg:#f4f4f4;
-      --fg:#222;
-      --primary:#004d40;
-      --accent:#15c9b7;
-      --surface:#fff;
-      --muted:#e8f6f4;
-      --border:#d9d9d9;
-      --radius:10px;
-      --shadow:0 6px 18px rgba(0,0,0,.08);
-
-      --icon-size:16px;   
-      --btn-h:42px;       
-      --btn-fz:14px;      
-      --map-height:520px;
-      --max-width:1100px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    /* Estilos base */
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); color:var(--fg);}
-
-    /* Header */
-    header{ background:var(--primary); color:#fff; box-shadow:var(--shadow); position:sticky; top:0; z-index:1000;}
-    .header-inner{ max-width:var(--max-width); margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
-    
-    /* Brand */
-    .brand{ display:flex; gap:12px; align-items:center; width:100%; }
-    .brand .logo{ width:56px; height:56px; border-radius:10px; background:#031a17; display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
-    .brand h1{ margin:0; font-size:18px; }
-
-    /* Navegación */
-    .nav-row{ display:flex; gap:8px; align-items:center; width:100%; flex-wrap:wrap; justify-content:space-between; }
-    .nav-left { display:flex; gap:8px; align-items:center; }
-    .nav-right { margin-left:auto; display:flex; gap:8px; }
-    
-    /* Botones */
-    .nav-btn{ 
-      height:var(--btn-h); 
-      padding:0 12px; 
-      display:inline-flex; 
-      gap:8px; 
-      align-items:center; 
-      border-radius:8px; 
-      background:rgba(255,255,255,0.95); 
-      color:var(--primary); 
-      border:1px solid rgba(255,255,255,0.08); 
-      cursor:pointer; 
-      font-size:var(--btn-fz);
-    }
-    .nav-btn.primary{ 
-      background:var(--accent); 
-      color:#fff; 
-      border:1px solid var(--accent);
-    }
-    .nav-btn .fa { 
-      font-size:var(--icon-size); 
-      line-height:1; 
-      color:var(--primary);
-    }
-    .nav-btn.primary .fa { color:#fff; }
-
-    /* Dropdown */
-    .menu-item{ position:relative; }
-    .dropdown{ 
-      position:absolute; 
-      top:calc(100% + 8px); 
-      left:0; 
-      background:var(--surface); 
-      border:1px solid var(--border); 
-      border-radius:8px; 
-      min-width:220px; 
-      display:none; 
-      z-index:30; 
-      box-shadow:var(--shadow);
-    }
-    .menu-item:hover .dropdown{ display:block; }
-    .dropdown a{ 
-      display:block; 
-      padding:10px 12px; 
-      color:var(--fg); 
-      text-decoration:none;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
     }
 
-    /* Main layout */
-    main{ max-width:var(--max-width); margin:16px auto; padding:0 12px; }
-    .grid{ display:grid; gap:12px; grid-template-columns:1fr; }
-    @media(min-width:880px){ .grid{ grid-template-columns:360px 1fr; } }
-
-    /* Panels */
-    .panel{ 
-      background:var(--surface); 
-      border:1px solid var(--border); 
-      border-radius:var(--radius); 
-      padding:14px; 
-      box-shadow:var(--shadow);
-    }
-    .map-box{ 
-      height:var(--map-height); 
-      border-radius:8px; 
-      overflow:hidden; 
-      border:1px solid var(--border);
+    header {
+      background: #004d40;
+      color: white;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* Forms */
-    .input-row{ display:flex; gap:10px; align-items:center; width:100%; }
-    .input-row label{ min-width:86px; }
-    .input-row input[type="text"],
-    .input-row input[type="email"],
-    .input-row input[type="password"]{ 
-      flex:1; 
-      height:40px; 
-      padding:0 12px; 
-      border-radius:8px; 
-      border:1px solid var(--border); 
-      font-size:15px;
+    header h1 {
+      font-size: 1.5rem;
     }
 
-    /* Botones en panel */
-    .button-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-    .btn-lg{ height:44px; padding:0 14px; border-radius:8px; background:var(--primary); color:#fff; border:none; font-size:15px; cursor:pointer; display:inline-flex; gap:8px; align-items:center;}
-    .btn-outline{ background:#fff; color:var(--primary); border:1px solid rgba(0,0,0,0.06); }
-
-    .results{ margin-top:10px; background:var(--muted); padding:10px; border-radius:8px; border:1px solid #b2dfdb; font-size:14px; }
-
-    /* Lista de lugares */
-    .list-item{ display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:pointer; }
-    .list-item .fa{ width:24px; text-align:center; color:var(--primary); }
-
-    /* Modales */
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      background:rgba(0,0,0,.45);
-      z-index:1001;
-    }
-    .modal{
-      width:min(520px,92vw);
-      background:#fff;
-      border-radius:10px;
-      overflow:hidden;
-    }
-    .modal-header{
-      background:var(--primary);
-      color:#fff;
-      padding:12px 16px;
-    }
-    .modal-body{
-      padding:16px;
-      display:grid;
-      gap:12px;
-    }
-    .modal-footer{
-      padding:12px 16px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-      border-top:1px solid #eee;
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
-    /* Footer */
-    footer{
-      margin-top:18px;
-      padding:12px 0;
-      background:var(--primary);
-      color:#fff;
-    }
-    .footer-inner{
-      max-width:var(--max-width);
-      margin:0 auto;
-      padding:0 12px;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .socials{
-      display:flex;
-      gap:16px;
-      align-items:center;
-    }
-    .social-link{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width:30px;
-      height:30px;
-      background:#fff;
-      border-radius:6px;
-      text-decoration:none;
-      border:1px solid rgba(255,255,255,0.1);
-      transition:transform 0.2s;
-    }
-    .social-link:hover{
-      transform:scale(1.1);
-    }
-    .social-link img{
-      width:16px;
-      height:16px;
-      object-fit:contain;
+    .panel {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
     }
 
-    /* Dark mode */
-    .dark-mode{
-      --bg:#121212;
-      --fg:#e6e6e6;
-      --surface:#1b1b1b;
-      --muted:#242424;
-      --border:#2b2b2b;
-      --primary:#0aa089;
+    .panel h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #004d40;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    button {
+      background: #004d40;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+
+    button:hover {
+      background: #003a30;
+    }
+
+    .lineas-list {
+      margin-top: 1rem;
+    }
+
+    .linea-item {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid #004d40;
+    }
+
+    .linea-item h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .linea-item p {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0.25rem 0;
+    }
+
+    footer {
+      background: #004d40;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-inner">
-      <!-- Brand -->
-      <div class="brand">
-        <div class="logo" aria-hidden="true">LP</div>
-        <div>
-          <h1 id="appTitle">GPS Transporte — La Paz</h1>
-          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="nav-row">
-        <div class="nav-left">
-          <div class="menu-item">
-            <button class="nav-btn" id="btnRoutes">
-              <i class="fa fa-location-dot"></i>
-              <span>Rutas</span>
-            </button>
-            <div class="dropdown">
-              <a href="rutas/linea-1.html">Línea 1 — Villa Fátima ⇄ Miraflores</a>
-              <a href="rutas/linea-2.html">Línea 2 — Ceja ⇄ Cementerio</a>
-              <a href="rutas/linea-3.html">Línea 3 — Terminal ⇄ Teleférico Central</a>
-              <a href="ver_rutas.html"><strong>Ver todas las rutas →</strong></a>
-            </div>
-          </div>
-
-          <button class="nav-btn" id="btnGuide">
-            <i class="fa fa-book"></i>
-            <span>Guía</span>
-          </button>
-          
-          <button class="nav-btn" id="btnDark">
-            <i class="fa fa-moon"></i>
-            <span>Modo</span>
-          </button>
-          
-          <button class="nav-btn" id="btnLang">
-            <i class="fa fa-language"></i>
-            <span>English</span>
-          </button>
-        </div>
-
-        <div class="nav-right">
-          <!-- Admin button (hidden by default) -->
-          <div class="menu-item" id="adminSection" style="display:none">
-            <button class="nav-btn">
-              <i class="fa fa-wrench"></i>
-              <span>Admin</span>
-            </button>
-            <div class="dropdown">
-              <a href="agregar_linea.html">➕ Agregar línea</a>
-              <a href="base_datos.html">📄 Ver base de datos</a>
-              <a href="sindicatos.html">🤝 Sindicatos</a>
-            </div>
-          </div>
-
-          <div id="userArea">
-            <!-- visible when no session -->
-            <button class="nav-btn" id="btnRegister">
-              <i class="fa fa-user-plus"></i>
-              <span>Registrarse</span>
-            </button>
-
-            <button class="nav-btn primary" id="btnLogin">
-              <i class="fa fa-user"></i>
-              <span>Iniciar sesión</span>
-            </button>
-
-            <!-- profile pill (hidden by default) -->
-            <div class="menu-item profile-wrap" id="profileWrap" style="display:none;">
-              <button class="nav-btn" id="btnProfile">
-                <span id="profileAvatar" style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--primary);font-weight:600;margin-right:8px;">A</span>
-                <div style="text-align:left;line-height:1;">
-                  <div id="profileName" style="font-size:13px;color:#fff;font-weight:600">User</div>
-                  <div id="profileEmail" style="font-size:11px;opacity:0.9;color:#eafaf7">email@example.com</div>
-                </div>
-              </button>
-              <div class="dropdown" id="profileDropdown">
-                <a href="#" id="btnSwitchUser">Cambiar usuario</a>
-                <a href="#" id="btnLogout">Cerrar sesión</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </div>
+    <h1>📍 GPS Transporte — La Paz</h1>
   </header>
 
-  <!-- Guide Modal -->
-  <div class="modal-backdrop" id="guideModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 style="margin:0">Guía rápida</h3>
+  <main>
+    <!-- Panel de búsqueda -->
+    <div class="panel">
+      <h2>Buscar Rutas</h2>
+      <div class="form-group">
+        <label for="destination">Destino:</label>
+        <input type="text" id="destination" placeholder="Ej: Plaza Murillo">
       </div>
-      <div class="modal-body">
-        <p><strong>Cómo usar:</strong></p>
-        <ol>
-          <li>Usa el campo <em>Destino</em> para escribir o elegir un lugar rápido.</li>
-          <li>Presiona <em>Mi ubicación</em> para ubicarte en el mapa.</li>
-          <li>Marca el destino con <em>Marcar destino</em> y luego <em>Rutas</em> para consultar opciones.</li>
-        </ol>
-        <p><strong>Usuarios y administración:</strong></p>
-        <ul>
-          <li>Regístrate para crear una cuenta; al registrarte, se iniciará sesión automáticamente.</li>
-          <li>Al iniciar sesión verás un pequeño perfil (nombre + correo) similar a una sesión de Google.</li>
-          <li>Los usuarios normales no verán el menú <em>Admin</em>. El usuario <code>admin@admin.com</code> mantiene el acceso de administrador.</li>
-          <li>Usa <em>Cerrar sesión</em> o <em>Cambiar usuario</em> en tu perfil para salir o iniciar otra cuenta.</li>
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button class="nav-btn" onclick="closeGuideModal()">Cerrar</button>
+      <button onclick="searchRoutes()">Buscar</button>
+      <button onclick="loadRoutes()">Actualizar</button>
+    </div>
+
+    <!-- Panel de rutas -->
+    <div class="panel">
+      <h2>Rutas Disponibles</h2>
+      <div id="routesList" class="lineas-list">
+        <p>Cargando rutas...</p>
       </div>
     </div>
-  </div>
 
-  <!-- Main content with map and panels -->
-  <main>
-    <div class="grid">
-      <section class="panel">
-        <h2>Destino</h2>
-
-        <div class="input-row" style="margin-top:8px;">
-          <label for="dest">Destino:</label>
-          <input id="dest" type="text" placeholder="Ej: Plaza Murillo" />
-        </div>
-
-        <!-- Botones en línea -->
-        <div class="button-row" style="margin-top:10px;">
-          <button class="nav-btn btn-outline" id="btnMyLoc"><i class="fa fa-location-crosshairs"></i> Mi ubicación</button>
-          <button class="btn-lg" id="btnMarkDest"><i class="fa fa-map-pin"></i> Marcar destino</button>
-          <button class="nav-btn btn-outline" id="btnFindRoutes"><i class="fa fa-route"></i> Rutas</button>
-        </div>
-
-        <div id="results" class="results">Escribe un destino y usa los botones para marcar.</div>
-
-        <hr aria-hidden="true" style="margin:12px 0; border:none; height:1px; background:#eee;" />
-
-        <div>
-          <h3 style="margin:6px 0 8px 0">Lugares rápidos</h3>
-          <!-- lugares solicitados -->
-          <div class="list-item" onclick="quickPlace('plaza estudiante')"><i class="fa fa-square-check"></i><span>Plaza Estudiante</span></div>
-          <div class="list-item" onclick="quickPlace('plaza murillo')"><i class="fa fa-square-check"></i><span>Plaza Murillo</span></div>
-          <div class="list-item" onclick="quickPlace('miraflores')"><i class="fa fa-square-check"></i><span>Miraflores</span></div>
-          <div class="list-item" onclick="quickPlace('prado')"><i class="fa fa-square-check"></i><span>Prado</span></div>
-          <div class="list-item" onclick="quickPlace('terminal')"><i class="fa fa-square-check"></i><span>Terminal</span></div>
-          <div class="list-item" onclick="quickPlace('umsa')"><i class="fa fa-square-check"></i><span>UMSA</span></div>
-          <div class="list-item" onclick="quickPlace('cementerio')"><i class="fa fa-square-check"></i><span>Cementerio</span></div>
-          <div class="list-item" onclick="quickPlace('teleferico central')"><i class="fa fa-square-check"></i><span>Teleférico Central</span></div>
-          <div class="list-item" onclick="quickPlace('ceja')"><i class="fa fa-square-check"></i><span>Ceja</span></div>
-          <div class="list-item" onclick="quickPlace('achachical')"><i class="fa fa-square-check"></i><span>Achachicala</span></div>
-          <div class="list-item" onclick="quickPlace('villa victoria')"><i class="fa fa-square-check"></i><span>Villa Victoria</span></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div id="map" class="map-box" role="application" aria-label="Mapa"></div>
-      </section>
+    <!-- Panel de agregar línea (Admin) -->
+    <div class="panel">
+      <h2>➕ Agregar Nueva Línea</h2>
+      <div class="form-group">
+        <label for="lineNombre">Nombre:</label>
+        <input type="text" id="lineNombre" placeholder="Ej: Línea 1 - Villa Fátima">
+      </div>
+      <div class="form-group">
+        <label for="lineCodigo">Código:</label>
+        <input type="text" id="lineCodigo" placeholder="Ej: VF-001">
+      </div>
+      <div class="form-group">
+        <label for="lineSindicato">Sindicato:</label>
+        <input type="text" id="lineSindicato" placeholder="Ej: Sindicato Villa Fátima">
+      </div>
+      <button onclick="addLine()">Guardar Línea</button>
     </div>
   </main>
 
-  <!-- Registro Modal -->
-  <div class="modal-backdrop" id="registerModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 style="margin:0">Crear cuenta</h3>
-      </div>
-      <div class="modal-body">
-        <div>
-          <label for="regName">Nombre completo</label>
-          <input type="text" id="regName" class="input-row" required>
-        </div>
-        <div>
-          <label for="regEmail">Correo electrónico</label>
-          <input type="email" id="regEmail" class="input-row" required>
-        </div>
-        <div>
-          <label for="regPassword">Contraseña</label>
-          <input type="password" id="regPassword" class="input-row" required>
-        </div>
-        <div>
-          <label for="regConfirmPassword">Confirmar contraseña</label>
-          <input type="password" id="regConfirmPassword" class="input-row" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="nav-btn" onclick="closeRegisterModal()">Cancelar</button>
-        <button class="nav-btn primary" onclick="register()">Registrarse</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Login Modal -->
-  <div class="modal-backdrop" id="loginModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 style="margin:0">Iniciar sesión</h3>
-      </div>
-      <div class="modal-body">
-        <div>
-          <label for="loginEmail">Correo electrónico</label>
-          <input type="email" id="loginEmail" class="input-row" required>
-        </div>
-        <div>
-          <label for="loginPassword">Contraseña</label>
-          <input type="password" id="loginPassword" class="input-row" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="nav-btn" onclick="closeLoginModal()">Cancelar</button>
-        <button class="nav-btn primary" onclick="login()">Ingresar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
   <footer>
-    <div class="footer-inner">
-      <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / +591 76522444</div>
-        <div class="socials">
-          <a href="#" class="social-link" title="Facebook" aria-label="Facebook">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.08 5.66 21.2 10.44 22v-7.01H7.9v-2.92h2.54V9.84c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.92h-2.34V22C18.34 21.2 22 17.08 22 12.07z" fill="#031A17"/></svg>
-          </a>
-          <a href="#" class="social-link" title="Twitter" aria-label="Twitter">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#031A17" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h5.3l4.1 6.2L16.7 3H21l-7.2 10.2L21 21h-5.3l-4.2-6.1L7.3 21H3l7.8-10.8L3 3z"/></svg>
-          </a>
-          <a href="#" class="social-link" title="Instagram" aria-label="Instagram">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#031A17" xmlns="http://www.w3.org/2000/svg"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm6.75-1.5a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.75 6z"/></svg>
-          </a>
-          <a href="#" class="social-link" title="Telegram" aria-label="Telegram">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#031A17" xmlns="http://www.w3.org/2000/svg"><path d="M9.04 15.47 8.8 19.7a.94.94 0 0 0 .73-.35l1.75-1.67 3.63 2.67c.67.37 1.15.18 1.33-.62l2.42-11.34c.21-.93-.34-1.3-1-1.07L3.95 11.1c-.9.35-.89.84-.16 1.07l3.6 1.12 8.38-5.29c.39-.24.75-.11.46.15l-7.19 6.32z"/></svg>
-          </a>
-        </div>
-    </div>
+    <p>GPS Transporte © 2025 | Email: lapazbus@lapaz.bo | Tel: 2652444</p>
   </footer>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
   <script>
-    // Inicializa el mapa centrado en La Paz y aplica límites aproximados
-    const map = L.map('map', { zoomControl: true }).setView([-16.5, -68.15], 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
+    const API_URL = 'http://localhost:3000';
 
-    // Límites aproximados de la ciudad de La Paz para evitar drag fuera de zona
-    const lpBounds = L.latLngBounds([-16.62, -68.24], [-16.43, -68.02]);
-    map.setMaxBounds(lpBounds);
-    map.on('drag', () => map.panInsideBounds(lpBounds, { animate: false }));
-
-    // Marcadores iniciales
-    let userMarker = L.marker([-16.5, -68.15]).addTo(map).bindPopup("Tu ubicación");
-    let destMarker = null;
-    let lastClicked = null;
-    map.on('click', e => lastClicked = e.latlng); // guarda última posición click mapa
-
-    // Tabla mejorada de lugares comunes con coordenadas exactas
-    const commonPlaces = {
-      "plaza estudiante": [-16.5041, -68.1311],     // Plaza del Estudiante / Franz Tamayo
-      "plaza murillo": [-16.4958, -68.1336],        // Centro de la plaza
-      "miraflores": [-16.4989, -68.1219],          // Plaza Triangular (zona central de Miraflores)
-      "prado": [-16.5050, -68.1345],                // El Obelisco, punto central del Paseo del Prado
-      "terminal": [-16.4887, -68.1418],             // Terminal de Buses de La Paz
-      "umsa": [-16.5042, -68.1331],                 // Monoblock Central UMSA, Avenida Villazón
-      "cementerio": [-16.4969, -68.1517],           // Cementerio General de La Paz
-      "teleferico central": [-16.4897, -68.1335],    // Estación Central Teleférico (Línea Roja)
-      "ceja": [-16.5029, -68.1751],                 // Punto central en La Ceja de El Alto
-      "achachical": [-16.4839, -68.1350],          // Cruce Achachicala (referencia de la zona)
-      "villa victoria": [-16.5248, -68.1639]       // Referencia aproximada de la zona (basado en GR5W+PJG)
-    };
-
-    // Selectores y elementos
-    const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
-    const results = $('#results');
-
-    // Helper: intenta obtener una posición precisa (reintenta una vez si falla)
-    function getAccuratePosition(options = {}) {
-      const defaults = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
-      const opts = Object.assign({}, defaults, options);
-      return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject(new Error('Geolocalización no disponible'));
-        navigator.geolocation.getCurrentPosition(resolve, err => {
-          // Si falla en el primer intento, reintentar una vez con un timeout mayor
-          navigator.geolocation.getCurrentPosition(resolve, reject, Object.assign({}, opts, { timeout: opts.timeout * 2 }));
-        }, opts);
-      });
-    }
-
-    // Marca el destino: primero busca en la tabla local, si no existe usa Nominatim para geocodificar
-    async function markDestinationByName(name) {
-      let coords = null;
-      let source = 'manual';
-      if (name) {
-        const key = name.trim().toLowerCase();
-        if (commonPlaces[key]) { coords = commonPlaces[key]; source = 'local'; }
-      }
-
-      // si no hay coords y el usuario hizo click, usa el último click
-      if (!coords && lastClicked) { coords = [lastClicked.lat, lastClicked.lng]; source = 'map-click'; }
-
-      // Si aún no hay coords y tenemos texto, intentar geocodificar mediante Nominatim
-      if (!coords && name && name.trim().length > 0) {
-        try {
-          const q = encodeURIComponent(name.trim() + ' La Paz Bolivia');
-          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${q}`;
-          const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-          const data = await resp.json();
-          if (data && data.length > 0) {
-            const best = data[0];
-            coords = [parseFloat(best.lat), parseFloat(best.lon)];
-            source = 'nominatim';
-          }
-        } catch (e) {
-          console.warn('Nominatim error', e);
-        }
-      }
-
-      // fallback central si no encontramos nada
-      if (!coords) coords = [-16.5, -68.15];
-
-      // remueve marcador anterior y coloca uno nuevo
-      if (destMarker) map.removeLayer(destMarker);
-      destMarker = L.marker(coords).addTo(map).bindPopup("Destino: " + (name || "Sin nombre") + ` (${source})`).openPopup();
-      map.setView(coords, 14);
-      results.textContent = `Destino marcado (${coords[0].toFixed(5)}, ${coords[1].toFixed(5)}) — fuente: ${source}`;
-    }
-
-    // Evento para el botón "Marcar destino" (ahora soporta geocoding)
-    $('#btnMarkDest').addEventListener('click', async () => {
-      const text = $('#dest').value;
+    async function loadRoutes() {
+      const listDiv = document.getElementById('routesList');
       try {
-        await markDestinationByName(text);
-      } catch (e) {
-        console.error(e);
-        results.textContent = 'No se pudo marcar el destino.';
-      }
-    });
-
-    // Obtiene la ubicación del navegador (con intento de mayor precisión)
-    $('#btnMyLoc').addEventListener('click', async () => {
-      try {
-        const pos = await getAccuratePosition();
-        const { latitude, longitude } = pos.coords;
-        const latlng = L.latLng(latitude, longitude);
-        if (!lpBounds.contains(latlng)) { results.textContent = 'Tu ubicación está fuera de La Paz.'; return; }
-        if (userMarker) map.removeLayer(userMarker);
-        userMarker = L.marker(latlng).addTo(map).bindPopup("Tu ubicación").openPopup();
-        map.setView(latlng, 14);
-        results.textContent = `Ubicación establecida (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
-      } catch (err) {
-        console.warn('geolocation error', err);
-        results.textContent = 'No se pudo obtener la ubicación. Verifica permisos o intenta nuevamente.';
-      }
-    });
-
-    // Simula búsqueda de rutas entre marcador de usuario y destino
-    $('#btnFindRoutes').addEventListener('click', () => {
-      const u = userMarker ? userMarker.getLatLng() : null;
-      const d = destMarker ? destMarker.getLatLng() : null;
-      if (!u || !d) { results.textContent = 'Marca tu ubicación y un destino para buscar rutas.'; return; }
-      results.innerHTML = `<strong>Rutas</strong><br>Desde: ${u.lat.toFixed(5)}, ${u.lng.toFixed(5)}<br>Hasta: ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}<br><em>Conectando al backend...</em>`;
-      // Pendiente: fetch('/api/routes?from=...&to=...') -> renderizar rutas
-    });
-
-    // Llena el campo destino con un lugar rápido y lo marca en el mapa
-    function quickPlace(key) { $('#dest').value = key; markDestinationByName(key); }
-
-    // Alterna modo oscuro
-    $('#btnDark').addEventListener('click', () => document.body.classList.toggle('dark-mode'));
-
-  // Modales de guía (abre modal más completa)
-  $('#btnGuide').addEventListener('click', () => guideModal.style.display = 'flex');
-
-  // Guide modal controls
-  const guideModal = $('#guideModal');
-  function closeGuideModal() { guideModal.style.display = 'none'; }
-
-    // Idioma (botón English)
-    let currentLang = 'es';
-    $('#btnLang').addEventListener('click', () => {
-      currentLang = currentLang === 'es' ? 'en' : 'es';
-      const labels = {
-        es: { routes: 'Rutas', guide: 'Guía', login: 'Iniciar sesión', myloc: 'Mi ubicación', mark: 'Marcar destino', title: 'GPS Transporte — La Paz' },
-        en: { routes: 'Routes', guide: 'Guide', login: 'Sign in', myloc: 'My location', mark: 'Mark destination', title: 'GPS Transport — La Paz' }
-      };
-      $('#btnRoutes span').textContent = labels[currentLang].routes;
-      $('#btnGuide span').textContent = labels[currentLang].guide;
-      $('#btnLogin span').textContent = labels[currentLang].login;
-      $('#btnMyLoc').innerHTML = `<i class="fa fa-location-crosshairs"></i> ${labels[currentLang].myloc}`;
-      $('#btnMarkDest').innerHTML = `<i class="fa fa-map-pin"></i> ${labels[currentLang].mark}`;
-      $('#appTitle').textContent = labels[currentLang].title;
-      // cambiar texto de placeholder
-      $('#dest').placeholder = currentLang === 'es' ? 'Ej: Plaza Murillo' : 'Ex: Plaza Murillo';
-    });
-
-  // DOM Elements para usuarios
-  const loginModal = $('#loginModal');
-  const registerModal = $('#registerModal');
-  const adminSection = $('#adminSection');
-
-  // Buttons / profile
-  const btnLogin = $('#btnLogin');
-  const btnRegister = $('#btnRegister');
-  const profileWrap = $('#profileWrap');
-  const profileNameEl = $('#profileName');
-  const profileEmailEl = $('#profileEmail');
-  const profileAvatar = $('#profileAvatar');
-  const btnLogout = $('#btnLogout');
-  const btnSwitchUser = $('#btnSwitchUser');
-
-    // Local storage keys
-    const USERS_KEY = 'gps_users';
-    const CURRENT_USER_KEY = 'gps_current_user';
-
-    // Admin credentials
-    const ADMIN_EMAIL = 'admin@admin.com';
-    const ADMIN_PASSWORD = 'admin123';
-
-  // Event Listeners
-  btnLogin.addEventListener('click', () => loginModal.style.display = 'flex');
-  btnRegister.addEventListener('click', () => registerModal.style.display = 'flex');
-  btnLogout && btnLogout.addEventListener('click', (e) => { e.preventDefault(); logout(); });
-  btnSwitchUser && btnSwitchUser.addEventListener('click', (e) => { e.preventDefault(); switchUser(); });
-
-    // Modal Controls
-    function closeLoginModal() {
-      loginModal.style.display = 'none';
-      $('#loginEmail').value = '';
-      $('#loginPassword').value = '';
-    }
-
-    function closeRegisterModal() {
-      registerModal.style.display = 'none';
-      $('#regName').value = '';
-      $('#regEmail').value = '';
-      $('#regPassword').value = '';
-      $('#regConfirmPassword').value = '';
-    }
-
-    // User Management
-    function getUsers() {
-      const users = localStorage.getItem(USERS_KEY);
-      return users ? JSON.parse(users) : [];
-    }
-
-    function saveUser(user) {
-      const users = getUsers();
-      users.push(user);
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    }
-
-    function register() {
-      const name = $('#regName').value.trim();
-      const email = $('#regEmail').value.trim();
-      const password = $('#regPassword').value;
-      const confirmPassword = $('#regConfirmPassword').value;
-
-      if (!email.includes('@')) {
-        alert('El correo debe contener @');
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
-        return;
-      }
-
-      const users = getUsers();
-      if (users.some(u => u.email === email)) {
-        alert('Este correo ya está registrado');
-        return;
-      }
-
-      const newUser = { name, email, password };
-      saveUser(newUser);
-      // auto-login user after register
-      const session = { isAdmin: false, name: name, email: email };
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-      updateUIForSession(session);
-      alert('Usuario registrado e iniciada la sesión');
-      closeRegisterModal();
-    }
-
-    function login() {
-      const email = $('#loginEmail').value.trim();
-      const password = $('#loginPassword').value;
-
-      if (!email.includes('@')) {
-        alert('El correo debe contener @');
-        return;
-      }
-
-      // Check admin credentials
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        const session = { isAdmin: true, name: 'Admin', email: ADMIN_EMAIL };
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-        closeLoginModal();
-        updateUIForSession(session);
-        return;
-      }
-
-      // Check regular users
-      const users = getUsers();
-      const user = users.find(u => u.email === email && u.password === password);
-
-      if (user) {
-        const session = { isAdmin: false, name: user.name || 'Usuario', email: user.email };
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-        closeLoginModal();
-        updateUIForSession(session);
-      } else {
-        alert('Credenciales incorrectas');
-      }
-    }
-
-    function updateUIForSession(session) {
-      // hide login/register and show profile pill
-      btnLogin.style.display = 'none';
-      btnRegister.style.display = 'none';
-      if (session && session.email) {
-        profileNameEl.textContent = session.name || session.email.split('@')[0];
-        profileEmailEl.textContent = session.email;
-        profileAvatar.textContent = (session.name || session.email).charAt(0).toUpperCase();
-        profileWrap.style.display = 'block';
-      } else {
-        profileWrap.style.display = 'none';
-      }
-      // admin visibility
-      adminSection.style.display = session && session.isAdmin ? 'block' : 'none';
-    }
-
-    function logout() {
-      localStorage.removeItem(CURRENT_USER_KEY);
-      profileWrap.style.display = 'none';
-      btnLogin.style.display = 'inline-flex';
-      btnRegister.style.display = 'inline-flex';
-      adminSection.style.display = 'none';
-    }
-
-    function switchUser() {
-      // simple switch: logout then open login modal
-      logout();
-      loginModal.style.display = 'flex';
-    }
-
-    // Check session on load
-    window.addEventListener('DOMContentLoaded', () => {
-      const currentUser = localStorage.getItem(CURRENT_USER_KEY);
-      if (currentUser) {
-        try {
-          const session = JSON.parse(currentUser);
-          updateUIForSession(session);
-        } catch (e) {
-          console.error('session parse error', e);
+        listDiv.innerHTML = '<p>Cargando...</p>';
+        const response = await fetch(`${API_URL}/api/lineas`);
+        const routes = await response.json();
+        
+        if (routes.length === 0) {
+          listDiv.innerHTML = '<p>No hay rutas disponibles</p>';
+          return;
         }
+
+        listDiv.innerHTML = routes.map(r => `
+          <div class="linea-item">
+            <h3>${r.nombre}</h3>
+            <p><strong>Código:</strong> ${r.codigo}</p>
+            <p><strong>Sindicato:</strong> ${r.sindicato}</p>
+            <p><strong>Paradas:</strong> ${r.paradas ? r.paradas.join(', ') : 'N/A'}</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        listDiv.innerHTML = '<p>Error al cargar rutas</p>';
+        console.error(error);
       }
-    });
-
-    (function adjustIcons() {
-      $$('.nav-btn .fa').forEach(i => i.style.width = '18px');
-    })();
-  </script>
-  <!-- Admin and Guide scripts -->
-  <script src="js/admin.js"></script>
-  <script src="js/guide.js"></script>
-  <script>
-    // Inicializar managers adicionales
-    // adminManager y guideManager se exponen globalmente para uso desde otras partes
-    window.adminManager = new AdminManager();
-    window.guideManager = new GuideManager();
-
-    // Si hay parámetro admin en la URL, mostrar la vista correspondiente
-    const params = new URLSearchParams(window.location.search);
-    const adminView = params.get('admin');
-    if (adminView) {
-      adminManager.showView(adminView, false);
     }
 
-    // Vincular el botón Admin del header para abrir el panel al hacer clic
-    const adminBtn = document.querySelector('#adminSection .nav-btn');
-    if (adminBtn) {
-      adminBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Si no hay vista seleccionada, abrir agregarLinea por defecto
-        const view = adminManager.currentView || 'agregarLinea';
-        adminManager.showView(view);
-      });
+    async function addLine() {
+      const nombre = document.getElementById('lineNombre').value.trim();
+      const codigo = document.getElementById('lineCodigo').value.trim();
+      const sindicato = document.getElementById('lineSindicato').value.trim();
+
+      if (!nombre || !codigo || !sindicato) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/api/lineas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, codigo, sindicato, paradas: [] })
+        });
+
+        if (response.ok) {
+          alert('✅ Línea agregada');
+          document.getElementById('lineNombre').value = '';
+          document.getElementById('lineCodigo').value = '';
+          document.getElementById('lineSindicato').value = '';
+          loadRoutes();
+        } else {
+          alert('Error al agregar línea');
+        }
+      } catch (error) {
+        alert('Error de conexión');
+        console.error(error);
+      }
     }
 
-    // Restaurar última pestaña de la guía (si existe)
-    guideManager.restoreLastTab();
+    function searchRoutes() {
+      const destination = document.getElementById('destination').value.trim();
+      if (!destination) {
+        alert('Ingresa un destino');
+        return;
+      }
+      alert(`Buscando rutas a: ${destination}`);
+    }
+
+    // Cargar rutas al iniciar
+    window.addEventListener('load', loadRoutes);
   </script>
 </body>
 </html>

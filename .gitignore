@@ -1,25 +1,66 @@
-﻿# Ignorar archivos comunes para Flutter, Node y editores
-.DS_Store
-*.log
+﻿# Node.js
 node_modules/
-.env
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
 
 # Flutter/Dart
-.build/
 .dart_tool/
-build/
-.packages
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
+pubspec.lock
+build/
+.build/
+.gradle/
+.android/
+.ios/
+.macos/
+.windows/
+.linux/
+.web/
 .pub-cache/
 
-# VSCode
+# IDEs
 .vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.sublime-project
+*.sublime-workspace
+
+# Environment files
+.env
+.env.local
+.env.*.local
 
 # Python
 __pycache__/
 *.pyc
 
-# macOS
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
 Icon\r
 
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build outputs
+dist/
+out/
+*.exe
+*.apk
+*.ipa
+*.app
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.tmp/

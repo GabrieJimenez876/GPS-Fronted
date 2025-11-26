@@ -1,31 +1,13 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-=======
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'theme.dart'; // Importa el tema de colores
+import 'theme.dart';
 
 // Páginas
 import 'pages/login_page.dart';
 import 'pages/mapa_page.dart';
 import 'pages/registro_page.dart';
 import 'pages/agregar_linea_page.dart';
-// Asumo que 'ver_rutas.html' se corresponde con 'mapa_page.dart' o similar.
-// Usaremos mapa_page.dart como la página principal '/'
 
 // --- CLAVE GLOBAL PARA LA NAVEGACIÓN (Solución al error del Navigator) ---
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -367,7 +349,6 @@ class MapContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           // Aquí va el widget de mapa real, que será MapViewPage (o mapa_page.dart)
           child: const MapaPage(),
->>>>>>> 3ad15d412ad428e80d3b86bf67b474c1ea29056a
         ),
       ),
     );

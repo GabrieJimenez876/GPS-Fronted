@@ -1,361 +1,248 @@
+# 🚍 GPS Transporte — La Paz, Bolivia
 
-# 🚍 Proyecto GPS de Rutas de Transporte en La Paz, Bolivia
-
-Este repositorio contiene la parte frontend y archivos relacionados para una aplicación de visualización de rutas de minibuses en La Paz (Flutter + web estática) y un backend ligero en Node.js con SQLite.
+Sistema integral de visualización y gestión de rutas de transporte para La Paz. Aplicación completa con frontend web estático, backend Node.js, y opciones de Flutter.
 
 ---
 
-## Inicio rápido (Windows - PowerShell)
+## ⚡ Inicio Rápido (5 minutos)
 
-Sigue estos pasos para clonar el repositorio, instalar dependencias y levantar la aplicación en un entorno Windows usando PowerShell.
+### Opción 1: Windows (Automático)
 
-1) Clonar el repositorio:
-
-```powershell
-git clone git@github.com:GabrieJimenez876/GPS-Fronted.git
-cd "GPS-Fronted"
+```batch
+1. Double-click: check-setup.bat
+2. Double-click: install-dependencies.bat
+3. Double-click: start-server.bat
+4. Abre: http://localhost:3000
 ```
 
-Si prefieres HTTPS:
+### Opción 2: Línea de comandos
+
+```powershell
+npm install
+npm start
+# Abre: http://localhost:3000
+```
+
+---
+
+## 🌐 Acceso desde Otra Computadora (Red Local)
+
+1. En la PC principal, ejecuta: `start-server.bat`
+2. El servidor mostrará:
+   ```
+   📍 Acceso red: http://192.168.1.100:3000
+   ```
+3. Desde otra PC en la misma red, abre esa URL
+4. **¡Listo!** Funciona automáticamente
+
+---
+
+## 📋 Requisitos Previos
+
+- **Node.js** v14+ (incluye npm) - [Descargar](https://nodejs.org/)
+- **Flutter** (opcional, solo para app móvil) - [Descargar](https://flutter.dev/)
+- **Git** (para clonar el repositorio) - [Descargar](https://git-scm.com/)
+
+---
+
+## 📦 Instalación Completa
+
+### 1. Clonar el repositorio
 
 ```powershell
 git clone https://github.com/GabrieJimenez876/GPS-Fronted.git
-cd "GPS-Fronted"
-```
-
-2) Requisitos (instalar si no los tienes):
-
-- Git: https://git-scm.com/
-- Node.js (incluye npm): https://nodejs.org/ (recomendado LTS)
-- Flutter + Dart (si vas a ejecutar la parte Flutter): https://flutter.dev/docs/get-started/install
-- SQLite (opcional, el proyecto puede usar un script para inicializar la DB): https://www.sqlite.org/download.html
-
-3) Instalar dependencias del backend (Node.js):
-
-```powershell
-# desde la raíz del proyecto
-npm install
-```
-
-4) Instalar dependencias de Flutter (si usarás Flutter):
-
-```powershell
-flutter pub get
-```
-
-5) Inicializar base de datos SQLite (si existe script):
-
-```powershell
-# Si el proyecto incluye un script JS para crear la DB
-node initdb.js
-```
-
-6) Ejecutar el backend (Node.js):
-
-```powershell
-npm start
-# o, si el package.json tiene un script dev
-npm run dev
-```
-
-7) Ejecutar el frontend web estático:
-
-- Abre `index.html` en el navegador (doble clic) o usa un servidor estático (recomendado):
-
-```powershell
-# Servir la carpeta actual en el puerto 8080 (requiere http-server o similar)
-npx http-server -c-1 -p 8080
-# luego abrir http://localhost:8080/index.html
-```
-
-8) Ejecutar la app Flutter (opcional):
-
-```powershell
-# Ejecutar en Chrome
-flutter run -d chrome
-# Ejecutar en emulador Android
-flutter emulators --launch <emulator_id>; flutter run
-```
-
----
-
-## Credenciales de prueba
-
-- Usuario: `admin@admin.com`
-- Contraseña: `admin123`
-
-Usa estas credenciales para pruebas locales en el backend/servicios que respeten autenticación.
-
----
-
-## Instalación detallada y verificación de requisitos (Windows - PowerShell)
-
-Instala y verifica las siguientes herramientas antes de intentar ejecutar la aplicación.
-
-1) Git
-
-```powershell
-git --version
-# Debe mostrar una versión, p. ej. git version 2.x.x
-```
-
-2) Node.js y npm
-
-```powershell
-node --version
-npm --version
-# Recomendado: Node.js LTS (>= 16.x)
-```
-
-3) Flutter (si usarás la parte móvil/web)
-
-```powershell
-flutter --version
-# Sigue la guía oficial si falta: https://flutter.dev/docs/get-started/install/windows
-```
-
-4) SQLite (opcional)
-
-```powershell
-sqlite3 --version
-# Si no está disponible, muchas operaciones pueden ejecutarse mediante librerías de Node.js que usan sqlite3 internamente.
-```
-
-5) Paquetes NPM adicionales (servidor estático):
-
-```powershell
-npx http-server --version
-# Si no está instalado globalmente, npx lo usará desde npm
-```
-
----
-
-## Tecnologías y herramientas usadas
-
-Aquí están las principales tecnologías, frameworks y librerías usadas en el proyecto:
-
-- Flutter & Dart — Frontend móvil (Android/iOS) y Flutter Web.
-- HTML5 + CSS3 — Frontend web estático.
-- Leaflet.js — Librería JavaScript para mapas interactivos.
-- OpenStreetMap — Fuente de mapas y teselas.
-- Node.js + Express — Backend y API REST.
-- SQLite — Base de datos ligera y portable.
-- JSON Web Tokens (JWT) — Autenticación basada en tokens.
-- npm / npx — Gestión de paquetes y ejecución de herramientas.
-- http-server (opcional) — Servidor estático para pruebas locales.
-
-Archivos y carpetas importantes en este repositorio:
-
-- `index.html` — Mapa web estático con Leaflet.
-- `mapa_page.dart`, `agregar_linea_page.dart` — Páginas Flutter relevantes.
-- `server.js` / `api/` — Código del backend (si aplica).
-- `punt.json` — Datos de paradas/elementos geojson.
-- `pubspec.yaml` — Dependencias de Flutter.
-
----
-
-## Cómo ejecutar (resumen)
-
-1. Instalar dependencias:
-
-```powershell
-npm install
-flutter pub get
-```
-
-2. Inicializar la base de datos (si existe script):
-
-```powershell
-node initdb.js
-```
-
-3. Ejecutar backend:
-
-```powershell
-npm start
-# o
-npm run dev
-```
-
-4. Servir frontend web:
-
-```powershell
-npx http-server -c-1 -p 8080
-# Abrir: http://localhost:8080/index.html
-```
-
-5. Ejecutar Flutter (opcional):
-
-```powershell
-flutter run -d chrome
-```
-
----
-
-Si quieres, puedo:
-
-- Añadir un script `initdb.js` o `scripts/init_db.ps1` si no existe para automatizar la creación de la base de datos.
-- Crear un pequeño archivo `run-local.ps1` que ejecute los comandos de inicialización y arranque en el orden correcto para Windows.
-
-Dime si quieres que añada alguno de esos scripts y lo implemento.
-
-
-## 🔐 Configuración del Repositorio
-
-### Configurar SSH en VS Code
-
-1. Abrir terminal en VS Code (Ctrl + Ñ) y ejecutar:
-```powershell
-# Reiniciar SSH Agent
-Stop-Service ssh-agent
-Start-Service ssh-agent
-# Limpiar agente SSH
-ssh-add -D
-
-# Generar nueva clave SSH
-ssh-keygen -t ed25519 -C "tu_email@gmail.com"
-# Presionar Enter en todas las preguntas
-# Agregar clave al agente
-ssh-add ~/.ssh/id_ed25519
-
-# Crear archivo config
-notepad ~/.ssh/config
-```
-
-2. En el archivo config, pegar:
-```
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_ed25519
-    IdentitiesOnly yes
-```
-
-3. Mostrar y copiar clave pública:
-```powershell
-cat ~/.ssh/id_ed25519.pub
-```
-
-4. Agregar clave en GitHub:
-   - Ir a https://github.com/settings/keys
-   - Click "New SSH key"
-   - Pegar clave y guardar
-
-5. Probar conexión:
-```powershell
-ssh -T git@github.com
-```
-
----
-
-## 🧱 Estructura del Proyecto
-
-- **Frontend móvil:** Flutter (compatible con Android, iOS y Web)
-- **Frontend web:** HTML + Leaflet.js + OpenStreetMap
-- **Backend:** Node.js + Express
-- **Base de datos:** SQLite 
-- **Mapas:** OpenStreetMap (con soporte offline opcional)
-- **Autenticación:** JWT (JSON Web Tokens)
-
----
-
-## 📦 Libretas y Archivos Utilizados
-
-- `index.html` → Mapa interactivo con rutas y paradas
-- `mapa_page.dart` → Página principal en Flutter con GPS y rutas
-- `api/` → Backend en Node.js para consultar rutas y paradas
-- `db/` → Scripts de base de datos PostgreSQL/PostGIS
-
----
-
-## 🚀 Funcionalidades Principales
-
-- Visualización de rutas de minibuses en La Paz
-- GPS en tiempo real: ubicación actual y destino
-- Consulta de paradas cercanas y líneas disponibles
-- Cuadro informativo con sindicatos y recorridos
-- Panel administrativo para gestión de rutas (en desarrollo)
-- Compatible con Flutter Web para ejecución en navegador
-
----
-
-## 🗺️ Tecnologías Utilizadas
-
-### Frontend
-- Flutter
-- HTML5 + CSS3
-- Leaflet.js
-- OpenStreetMap
-
-### Backend
-- Node.js + Express
-- SQLite (base de datos local)
-- API RESTful
-
-### Base de Datos
-- SQLite3 para almacenamiento local
-- Migraciones automáticas
-- Backup automático
-- No requiere servidor de base de datos
-
----
-
-## 👤 Usuario de Prueba
-
-- **Usuario:** admin  
-- **Contraseña:** 1234  
-
-Con estas credenciales se puede acceder al sistema principal y probar el mapa.
-
----
-
-## 📁 Instalación
-
-1. Instalar Flutter y ejecutar `flutter pub get`
-2. Ejecutar el backend con Node.js (`npm install && npm start`)
-3. Crear la base de datos PostgreSQL con extensión PostGIS
-4. Ejecutar la app en navegador con `flutter run -d chrome` o abrir `index.html`
-
----
-
-## 📌 Notas
-
-- Base de datos SQLite para mayor portabilidad y facilidad de despliegue
-- El mapa está limitado geográficamente a La Paz, Bolivia
-- Las rutas y paradas se cargan dinámicamente desde la base de datos
-- Soporte para modo offline utilizando caché local
-- Interfaz responsive adaptada a móvil y escritorio
-
-## 🔄 Sincronización
-
-Para sincronizar el repositorio en otra PC:
-
-1. Clonar el repositorio:
-```powershell
-git clone git@github.com:GabrieJimenez876/GPS-Fronted.git
 cd GPS-Fronted
 ```
 
-2. Configurar Git:
+### 2. Instalar dependencias Node.js
+
 ```powershell
-git config user.name "Tu Nombre"
-git config user.email "tu_email@gmail.com"
+npm install
 ```
 
-3. Instalar dependencias:
+### 3. (Opcional) Instalar dependencias Flutter
+
 ```powershell
-flutter pub get  # Para Flutter
-npm install     # Para Node.js
+flutter pub get
 ```
 
-4. Inicializar base de datos SQLite:
+### 4. Ejecutar el servidor
+
 ```powershell
-node initdb.js
+npm start
 ```
 
-## 💡 Mejoras Futuras
+---
 
-- Implementación de PWA para acceso offline completo
-- Sincronización de datos en tiempo real
-- Notificaciones push para actualizaciones de rutas
-- Integración con APIs de clima y tráfico
+## 🎯 Scripts Disponibles
+
+| Script | Descripción |
+|--------|-------------|
+| `npm start` | Inicia el servidor en puerto 3000 |
+| `npm install` | Instala todas las dependencias |
+| `start-server.bat` | Inicia servidor (Windows, automático) |
+| `install-dependencies.bat` | Instala dependencias (Windows) |
+| `check-setup.bat` | Verifica configuración (Windows) |
+| `clean-reinstall.bat` | Limpia y reinstala (Windows) |
+| `test-quick.bat` | Prueba rápida del setup (Windows) |
+
+---
+
+## 🔐 Credenciales de Prueba
+
+```
+Admin:
+  Email: admin@admin.com
+  Contraseña: admin123
+
+Usuario Normal:
+  Registrarse desde la interfaz web
+```
+
+---
+
+## 🌟 Características Principales
+
+✅ **Geolocalización en tiempo real** - Ubícate en el mapa  
+✅ **Búsqueda de rutas** - Encuentra la mejor opción  
+✅ **Mapa interactivo** - Basado en Leaflet y OpenStreetMap  
+✅ **Sistema de autenticación** - Login y registro  
+✅ **Panel de administración** - Gestiona líneas y sindicatos  
+✅ **API REST** - Para integraciones externas  
+✅ **Responsive Design** - Funciona en móvil, tablet y desktop  
+✅ **Portátil** - Funciona desde cualquier computadora  
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+GPS-Fronted/
+├── index.html                    ← Página web principal
+├── server.js                     ← Backend Express
+├── package.json                  ← Dependencias Node.js
+├── pubspec.yaml                  ← Dependencias Flutter
+│
+├── lib/                          ← Código Flutter/Dart
+│   ├── main.dart
+│   ├── pages/
+│   ├── services/
+│   ├── models/
+│   └── viewmodels/
+│
+├── css/                          ← Estilos
+├── js/                           ← Scripts JavaScript
+├── android/                      ← Configuración Android
+├── ios/                          ← Configuración iOS
+│
+├── 🔧 Scripts de inicio (.bat)
+├── 📖 Guías de instalación
+└── .gitignore
+```
+
+---
+
+## 🚀 Tecnologías Utilizadas
+
+### Backend
+- **Node.js** + **Express** - Servidor web
+- **Body-parser** - Procesa formularios
+- **Detección automática de IP** - Funciona en cualquier red
+
+### Frontend Web
+- **HTML5** + **CSS3** - Interfaz
+- **JavaScript vanilla** - Interactividad
+- **Leaflet.js** - Mapas interactivos
+- **OpenStreetMap** - Datos cartográficos
+
+### Frontend Móvil (Opcional)
+- **Flutter** + **Dart** - Aplicación multiplataforma
+- **flutter_map** - Mapas en Flutter
+- **geolocator** - Geolocalización
+- **http** - Cliente HTTP
+
+---
+
+## 🌐 URLs Disponibles
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Página principal con mapa |
+| `/api/lineas` | API: obtener todas las líneas |
+| `/ver_lineas` | Vista HTML de todas las líneas |
+| `/guardar_linea` | API: guardar nueva línea (POST) |
+
+---
+
+## 🔧 Configuración Adicional
+
+### Cambiar Puerto (default: 3000)
+
+```powershell
+set PORT=8080
+npm start
+```
+
+### Limpiar Todo y Reinstalar
+
+```powershell
+# Windows
+clean-reinstall.bat
+
+# Mac/Linux
+rm -rf node_modules package-lock.json
+npm install
+```
+
+---
+
+## 📚 Documentación Completa
+
+- **SETUP.md** - Guía detallada de instalación
+- **EJECUTAR-DESDE-CUALQUIER-PC.md** - Cómo compartir en la red
+- **QUICK-REFERENCE.md** - Referencia rápida de comandos
+- **CAMBIOS-REALIZADOS.md** - Detalles de las modificaciones
+- **INICIO.txt** - Guía visual de bienvenida
+
+---
+
+## 🆘 Solución de Problemas
+
+| Problema | Solución |
+|----------|----------|
+| npm no encontrado | Instala Node.js desde nodejs.org |
+| Puerto 3000 en uso | `set PORT=3001 && npm start` |
+| No funciona desde otra PC | Verifica firewall y usa la IP correcta |
+| Dependencias outdated | Ejecuta `clean-reinstall.bat` |
+| Geolocalización no funciona | Permite acceso a ubicación en navegador |
+
+---
+
+## 📞 Contacto y Soporte
+
+**Email:** lapazbus@lapaz.bo  
+**Teléfono:** 2652444 / +591 76522444  
+**GitHub:** [GabrieJimenez876/GPS-Fronted](https://github.com/GabrieJimenez876/GPS-Fronted)
+
+---
+
+## 📝 Licencia
+
+MIT - Ver `LICENSE` para más detalles
+
+---
+
+## ✨ Próximos Pasos
+
+1. ✅ Clonar y ejecutar
+2. ✅ Acceder a `http://localhost:3000`
+3. 🔄 Probar desde otra PC en la red
+4. 🔧 Personalizar datos y rutas
+5. 🗄️ Conectar base de datos real
+6. 🚀 Desplegar a producción
+
+---
+
+**¡Listo para comenzar!** 🎉
+
+Ejecuta `start-server.bat` o `npm start` para iniciar el servidor.

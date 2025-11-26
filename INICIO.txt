@@ -1,0 +1,94 @@
+📍 GPS Transporte — La Paz
+
+BIENVENIDO AL PROYECTO
+
+Antes de comenzar, ejecuta estos pasos en orden:
+
+═══════════════════════════════════════════
+
+PASO 1: VERIFICAR CONFIGURACIÓN
+───────────────────────────────────────────
+double-click en: check-setup.bat
+
+Este script verifica que Node.js y npm estén instalados.
+
+
+PASO 2: INSTALAR DEPENDENCIAS
+───────────────────────────────────────────
+double-click en: install-dependencies.bat
+
+O manualmente en PowerShell/CMD:
+  npm install
+
+
+PASO 3: INICIAR SERVIDOR
+───────────────────────────────────────────
+double-click en: start-server.bat
+
+O manualmente en PowerShell/CMD:
+  npm start
+
+El servidor se iniciará en:
+  • http://localhost:3000 (acceso local)
+  • http://[TU_IP]:3000 (acceso desde otra PC)
+
+
+PASO 4: ACCEDER DESDE OTRA COMPUTADORA
+───────────────────────────────────────────
+1. Busca tu IP local:
+   - Abre PowerShell y ejecuta: ipconfig
+   - Busca "IPv4 Address" (ejemplo: 192.168.1.100)
+
+2. Desde otra computadora, abre en el navegador:
+   http://192.168.1.100:3000
+   (cambia la IP por la que encontraste)
+
+
+═══════════════════════════════════════════
+
+ESTRUCTURA DEL PROYECTO
+
+📁 GPS-Fronted/
+  ├── 📄 index.html          ← Página principal web
+  ├── 📄 server.js           ← Servidor Express
+  ├── 📁 lib/                ← Código Flutter/Dart
+  ├── 📁 css/                ← Estilos
+  ├── 📁 js/                 ← Scripts JavaScript
+  └── 📁 android/iOS/        ← Configuración móvil
+
+═══════════════════════════════════════════
+
+CARACTERÍSTICAS
+
+✅ Geolocalización en tiempo real
+✅ Búsqueda de rutas optimizadas
+✅ Sistema de autenticación
+✅ Panel de administración
+✅ API REST
+
+═══════════════════════════════════════════
+
+DOCUMENTACIÓN
+
+Consulta SETUP.md para:
+- Instrucciones detalladas
+- Solución de problemas
+- Acceso desde otra red
+- Configuración adicional
+
+═══════════════════════════════════════════
+
+CONTACTO
+
+Email: lapazbus@lapaz.bo
+Teléfono: 2652444 / +591 76522444
+
+═══════════════════════════════════════════
+
+¿NECESITAS AYUDA?
+
+1. Lee: SETUP.md
+2. Ejecuta: check-setup.bat
+3. Revisa los scripts .bat disponibles
+
+¡LISTO! Comienza con check-setup.bat

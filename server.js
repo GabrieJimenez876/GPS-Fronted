@@ -1,10 +1,27 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
+const os = require('os');
+const fs = require('fs');
+
+// Cargar configuración
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+const PORT = process.env.PORT || config.server.port;
+const HOST = config.server.host;
+
+let localIP = 'localhost';
+if (config.server.autoDetectIP) {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        localIP = iface.address;
+        break;
+      }
+    }
+  }
+}
 
 const app = express();
-const PORT = 3000;
-
 
 // Servir archivos estáticos desde el directorio raíz
 app.use(express.static(__dirname));
@@ -38,21 +55,12 @@ const transportLines = [
 ];
 
 // --- Configuración de middleware ---
-// Usamos body-parser para procesar datos de formularios (URL-encoded)
 app.use(bodyParser.urlencoded({ extended: true }));
-// Aceptar JSON en requests (para API desde admin panel)
 app.use(express.json());
-
-// Servir archivos estáticos (por ejemplo si mueves el HTML a /public)
-// Por simplicidad, se inserta el HTML directamente en la ruta abajo.
-// app.use(express.static(path.join(__dirname, 'public')));
-
 
 // --- Ruta 1: Servir el formulario (GET /) ---
 app.get('/', (req, res) => {
-  // Enviamos el HTML directamente para que funcione de inmediato.
-  // El formulario tiene method="POST" y action="/guardar_linea" para enviar datos al servidor.
-    const formHtml = `
+  const formHtml = `
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -108,7 +116,6 @@ app.get('/', (req, res) => {
 
 // --- Ruta 2: Procesar envío del formulario (POST /guardar_linea) ---
 app.post('/guardar_linea', (req, res) => {
-  // 1. Obtener datos del cuerpo de la petición (soportamos JSON y form-urlencoded)
   let nombre, codigo, sindicato, paradas, recorrido;
   if (req.is('application/json')) {
     ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
@@ -116,7 +123,6 @@ app.post('/guardar_linea', (req, res) => {
     ({ nombre, codigo, sindicato, paradas, recorrido } = req.body);
   }
 
-  // 2. Procesar/limpiar datos (paradas puede venir como array o como string separada por comas)
   let paradasArray = [];
   if (Array.isArray(paradas)) {
     paradasArray = paradas.map(p => String(p).trim()).filter(p => p.length > 0);
@@ -124,7 +130,6 @@ app.post('/guardar_linea', (req, res) => {
     paradasArray = paradas.split(',').map(p => p.trim()).filter(p => p.length > 0);
   }
 
-  // 3. Construir el objeto de la nueva línea
   const newLine = {
     nombre: nombre || 'Sin nombre',
     codigo: codigo || `C-${Date.now()}`,
@@ -134,20 +139,15 @@ app.post('/guardar_linea', (req, res) => {
     timestamp: new Date().toISOString()
   };
     
-  // 4. Almacenar los datos (en nuestra base simulada)
   transportLines.push(newLine);
 
-  // 5. Registrar la nueva entrada en la consola (para depuración)
   console.log(`✅ Nueva Línea Guardada: ${newLine.nombre} (${newLine.codigo})`);
   console.log('Datos:', newLine);
   console.log('------------------------------');
 
-  // 6. Responder al cliente
   if (req.is('application/json')) {
-    // Para peticiones AJAX desde el panel de admin, devolver JSON
     res.json({ success: true, line: newLine });
   } else {
-    // Redirigir para solicitudes de formulario tradicionales
     res.redirect('/');
   }
 });
@@ -249,7 +249,10 @@ app.get('/ver_lineas', (req, res) => {
 });
 
 // --- Iniciar el servidor ---
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor Express corriendo en http://localhost:${PORT}`);
-  console.log('Presiona Ctrl+C para detenerlo.');
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 Servidor Express corriendo\n`);
+  console.log(`📍 Acceso local: http://localhost:${PORT}`);
+  console.log(`📍 Acceso red: http://${localIP}:${PORT}`);
+  console.log(`\n✅ El servidor está disponible desde cualquier computadora en la red`);
+  console.log(`\nPresiona Ctrl+C para detenerlo.\n`);
 });

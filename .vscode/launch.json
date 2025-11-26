@@ -7,9 +7,10 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Abrir index.html",
-            // Ajusta la ruta al archivo `index.html` de tu proyecto si es necesario.
-            "file": "C:\\Users\\carlo\\GPS-Fronted\\index.html"
+            "name": "Abrir index.html (workspace)",
+            // Uses workspace relative path so it works on any machine
+            "file": "${workspaceFolder}/index.html",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

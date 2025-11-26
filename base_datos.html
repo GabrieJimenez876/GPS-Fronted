@@ -54,29 +54,12 @@
     .card:hover{transform:translateY(-1px)}
     .card h3{margin:0 0 6px 0}
     .card p{margin:0;color:#374151}
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .table th {
-      background: #f8fafc;
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 500;
-      color: #1f2937;
-      font-size: 14px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f1f5f9;
-      color: #4b5563;
-      font-size: 14px;
-      vertical-align: middle;
+    <footer>
+      <div class="footer-inner">
+        <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444</div>
+        <div style="opacity:.9;font-size:13px">GPS Transporte — La Paz</div>
+      </div>
+    </footer>
     }
     .table tbody tr:hover {
       background: #f8fafc;
@@ -194,8 +177,9 @@
     .nav-btn.primary{ background:var(--c-primary); color:#fff; border-color:var(--c-primary); }
     .nav-btn .fa{ font-size:16px; }
   </style>
-  <!-- Leaflet for map previews in the modal -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-o9N1j7kQb6v6g2a2bY1s5Qxjv5Q5g3pJZ+0s1m0s+3s=" crossorigin=""/>
+  <!-- Shared styles and scripts -->
+  <link rel="stylesheet" href="/assets/shared.css" />
+  <script src="/assets/shared.js"></script>
 </head>
 <body>
   
@@ -375,6 +359,8 @@
       </div>
     </div>
   </div>
+  <!-- Background map behind content -->
+  <div id="bgMap"></div>
 
     <div class="backdrop" id="loginBackdrop" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <div class="modal">

@@ -4,13 +4,25 @@
     "nombre": "Línea 1 - Villa Fátima",
     "codigo": "VF-001",
     "sindicato": "Sindicato Villa Fátima",
-    "paradas": ["Villa Fátima", "Terminal", "Plaza Eguino"]
+    "vehiculo": "Microbus N° 12",
+    "descripcion": "Recorrido principal norte-sur, frecuencia alta.",
+    "paradas": [
+      { "id": 1, "nombre": "Villa Fátima", "lat": -16.5001, "lng": -68.1501, "descripcion": "Terminal inicial" },
+      { "id": 2, "nombre": "Terminal", "lat": -16.5025, "lng": -68.1488, "descripcion": "Parada central" },
+      { "id": 3, "nombre": "Plaza Eguino", "lat": -16.5040, "lng": -68.1465, "descripcion": "Destino" }
+    ]
   },
   {
     "id": 2,
     "nombre": "Línea 2 - Ceja El Alto",
     "codigo": "CA-002",
     "sindicato": "Sindicato Litoral",
-    "paradas": ["Ceja El Alto", "Plaza Ballivián", "Cementerio"]
+    "vehiculo": "Minibus N° 7",
+    "descripcion": "Conexión con zona comercial y cementerio.",
+    "paradas": [
+      { "id": 1, "nombre": "Ceja El Alto", "lat": -16.4980, "lng": -68.1600, "descripcion": "Inicio" },
+      { "id": 2, "nombre": "Plaza Ballivián", "lat": -16.4955, "lng": -68.1550, "descripcion": "Plaza central" },
+      { "id": 3, "nombre": "Cementerio", "lat": -16.4920, "lng": -68.1505, "descripcion": "Terminal final" }
+    ]
   }
 ]

@@ -1,24 +1,22 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:latlong2/latlong.dart';
-import '../constants.dart';
-import '../models/route_model.dart';
+import 'dart:convert';
 
 class RouteService {
-  static final RouteService _instance = RouteService._internal();
+  final String baseUrl = 'http://localhost:3000';
 
-  factory RouteService() {
-    return _instance;
+  Future<List<dynamic>> getRoutes() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api/lineas'));
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
+}
 
-  RouteService._internal();
-
-  /// Obtiene todas las rutas del servidor
-  Future<List<RouteModel>> fetchRoutes() async {
-    final response = await http.get(
-      Uri.parse('$BASE_URL/routes/all'),
-      headers: {'Content-Type': 'application/json'},
-    );
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);

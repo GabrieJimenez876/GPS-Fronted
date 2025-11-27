@@ -187,16 +187,21 @@
 		<div class="header-inner">
 			<!-- Brand -->
 			<div class="brand">
-				<div class="logo" aria-hidden="true">LP</div>
+				<div class="logo" style="background:url('assets/logo.svg') center/contain no-repeat;background-color:#00a58c" aria-hidden="true"><!-- Logo --></div>
 				<div>
-					<h1 id="appTitle">GPS Transporte — La Paz</h1>
-					<div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+					<h1 id="appTitle">P@ceña Go — La Paz</h1>
+					<div style="font-size:12px; opacity:.9">Plataforma de Inteligencia Geoespacial</div>
 				</div>
 			</div>
 
 			<!-- Navigation -->
 			<nav class="nav-row">
 				<div class="nav-left">
+					<a href="index.html" class="nav-btn" title="Volver al inicio" style="text-decoration:none">
+						<i class="fa fa-home"></i>
+						<span>Inicio</span>
+					</a>
+
 					<div class="menu-item">
 						<button class="nav-btn" id="btnRoutes">
 							<i class="fa fa-location-dot"></i>
@@ -517,15 +522,17 @@
       const tbody = document.querySelector('#dbTable tbody'); tbody.innerHTML = '';
       if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5">No hay rutas registradas.</td></tr>'; return; }
       rows.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
-                          <td>
-                            <button class="btn" onclick="viewRoute(${row.id})" style="padding: 6px 10px;">👁️‍🗨 Ver</button>
-                            <button class="btn" onclick="editRoute(${row.id})" style="padding: 6px 10px;">✏️ Editar</button>
-                            <button class="btn danger" onclick="confirmDelete(${row.id})" style="padding: 6px 10px;">🗑️ Eliminar</button>
-                          </td>`;
-        tbody.appendChild(tr);
-      });
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${row.id || ''}</td><td>${row.name || row.ruta || row.key}</td><td>${row.operator || row.operador || '—'}</td><td>${row.vehicle || row.vehiculo || '—'}</td>
+                            <td>
+                              <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+                                <button class="btn" onclick="viewRoute(${row.id})" style="padding: 6px 10px;">👁️‍🗨 Ver</button>
+                                <button class="btn" onclick="editRoute(${row.id})" style="padding: 6px 10px;">✏️ Editar</button>
+                                <button class="btn danger" onclick="confirmDelete(${row.id})" style="padding: 6px 10px;">🗑️ Eliminar</button>
+                              </div>
+                            </td>`;
+          tbody.appendChild(tr);
+        });
     }
 
     // Load and render
@@ -603,22 +610,34 @@
       routeModalBackdrop.style.display = 'flex';
     }
 
-    window.editRoute = (id) => {
-      const route = DATA.find(r => r.id === id);
-      if (route) openRouteModal('edit', route);
-      else alert('Ruta no encontrada');
-    };
-    
-    window.confirmDelete = (id) => {
+    window.editRoute = (id) => {
+      const session = getCurrent();
+      // RBAC Check: Only admin_sindicato can edit routes
+      if (!session || (session.role !== 'admin_sindicato' && session.role !== 'admin')) {
+        alert('❌ Acceso denegado.\n\nSolo administradores pueden editar líneas.');
+        return;
+      }
+      const route = DATA.find(r => r.id === id);
+      if (route) openRouteModal('edit', route);
+      else alert('Ruta no encontrada');
+    };    window.confirmDelete = (id) => {
       if (confirm(`¿Estás seguro de que quieres eliminar la Ruta ID ${id}?`)) {
         deleteRoute(id);
       }
     };
     
-    document.getElementById('btnCreate').addEventListener('click', () => openRouteModal('create'));
-    btnCloseRouteModal.addEventListener('click', () => routeModalBackdrop.style.display = 'none');
-    
-    btnSaveRoute.addEventListener('click', () => {
+    document.getElementById('btnCreate').addEventListener('click', () => {
+      const session = getCurrent();
+      // RBAC Check: Only admin_sindicato can create routes
+      if (!session || (session.role !== 'admin_sindicato' && session.role !== 'admin')) {
+        alert('❌ Acceso denegado.\n\nSolo administradores pueden crear nuevas líneas.\n\nContacta al administrador del sindicato para solicitar permisos.');
+        return;
+      }
+      openRouteModal('create');
+    });
+    btnCloseRouteModal.addEventListener('click', () => routeModalBackdrop.style.display = 'none');
+    
+    btnSaveRoute.addEventListener('click', () => {
       const id = routeIdInput.value ? parseInt(routeIdInput.value) : null;
       const routeData = {
         id,
@@ -652,8 +671,8 @@
 
       function ensureProfileWrap(){ let wrap = document.getElementById('profileWrap'); if(!wrap){ const area = document.querySelector('.profile-area'); if(area){ wrap = document.createElement('div'); wrap.id='profileWrap'; area.appendChild(wrap); } } return wrap; }
 
-      function updateUIForSession(session){ const wrap = ensureProfileWrap(); if(!wrap) return; wrap.innerHTML=''; if(!session){ wrap.innerHTML = '<button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>'; const btnLogin = document.getElementById('btnLogin'); if(btnLogin) btnLogin.addEventListener('click', ()=> document.getElementById('loginBackdrop').style.display='flex'); }
-        else { const isAdmin = session.role==='admin'; wrap.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="font-weight:700">${session.name||session.email}</div><div style="font-size:12px;color:#eef">${isAdmin? 'Administrador':'Usuario'}</div><button class="btn" id="btnLogout">Salir</button></div>`; const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', ()=>{ localStorage.removeItem(CURRENT_USER_KEY); updateUIForSession(null); }); }
+      function updateUIForSession(session){ const wrap = ensureProfileWrap(); if(!wrap) return; wrap.innerHTML=''; if(!session){ wrap.innerHTML = '<button class="btn primary" id="btnLogin">🔐 Iniciar sesión</button>'; const btnLogin = document.getElementById('btnLogin'); if(btnLogin) btnLogin.addEventListener('click', ()=> document.getElementById('loginBackdrop').style.display='flex'); }
+        else { const isAdmin = session.role==='admin' || session.role==='admin_sindicato'; const roleText = session.role==='admin'? 'Administrador' : session.role==='admin_sindicato'? 'Admin Sindicato' : 'Usuario'; wrap.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><div style="font-weight:700">${session.name||session.email}</div><div style="font-size:12px;color:#eef">${roleText}</div><button class="btn" id="btnLogout">Salir</button></div>`; const btnLogout = document.getElementById('btnLogout'); if(btnLogout) btnLogout.addEventListener('click', ()=>{ localStorage.removeItem(CURRENT_USER_KEY); updateUIForSession(null); }); }
       }
 
       window.addEventListener('DOMContentLoaded', ()=>{

@@ -114,12 +114,15 @@
   <header>
     <div class="header-inner">
       <div class="brand">
-        <div class="logo" aria-hidden="true">LP</div>
+        <div class="logo" style="background:url('../assets/logo.svg') center/contain no-repeat;width:56px;height:56px" aria-hidden="true"><!-- Logo --></div>
         <div>
-          <h1>GPS Transporte — La Paz</h1>
-          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+          <h1>P@ceña Go — Línea 1</h1>
+          <div style="font-size:12px; opacity:.9">Plataforma de Inteligencia Geoespacial</div>
         </div>
       </div>
+      <a href="../index.html" style="height:42px;padding:0 12px;display:inline-flex;gap:8px;align-items:center;border-radius:8px;background:rgba(255,255,255,0.95);color:var(--primary);border:1px solid rgba(255,255,255,0.08);cursor:pointer;text-decoration:none;font-size:14px" title="Volver al inicio">
+        <i class="fa fa-home"></i> Inicio
+      </a>
       <nav class="nav-row">
         <div class="nav-left">
           <div class="menu-item">
@@ -188,6 +191,10 @@
   </header>
   <main>
     <h2>Línea 1 — Villa Fátima ⇄ Miraflores</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn-lg" id="btnDownloadRoute" style="background:#1976d2">📥 Descargar línea</button>
+      <button class="btn-lg" id="btnDownloadMap" style="background:#388e3c">🗺️ Descargar mapa</button>
+    </div>
     <div class="grid">
       <section class="panel">
         <h3>Detalles de la ruta</h3>
@@ -224,13 +231,86 @@
   </div>
   <!-- Registro y Login modales (igual que en principal) -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     const map = L.map('map').setView([-16.5, -68.15], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
-    // Agregar marcadores para la ruta (ejemplo)
-    L.marker([-16.5041, -68.1311]).addTo(map).bindPopup("Villa Fátima");
-    L.marker([-16.4989, -68.1219]).addTo(map).bindPopup("Miraflores");
-    // Scripts de login, modales, etc. (replicados del principal)
+    
+    // Ruta: Villa Fátima ⇄ Miraflores
+    const routeData = {
+      name: 'Línea 1 — Villa Fátima ⇄ Miraflores',
+      origin: 'Villa Fátima',
+      destination: 'Miraflores',
+      vehicle: 'Microbus',
+      schedule: '6:00 AM - 10:00 PM',
+      fare: 'Bs. 2.50',
+      stops: [
+        { name: 'Villa Fátima', lat: -16.5041, lng: -68.1311 },
+        { name: 'Plaza Estudiante', lat: -16.5041, lng: -68.1311 },
+        { name: 'Prado', lat: -16.5050, lng: -68.1345 },
+        { name: 'Miraflores Centro', lat: -16.4989, lng: -68.1219 }
+      ],
+      path: [
+        [-16.5041, -68.1311],
+        [-16.5050, -68.1345],
+        [-16.4989, -68.1219]
+      ]
+    };
+
+    // Agregar polyline y marcadores
+    const polyline = L.polyline(routeData.path, { color: '#1976d2', weight: 5, opacity: 0.8 }).addTo(map);
+    routeData.stops.forEach((stop, i) => {
+      L.marker([stop.lat, stop.lng]).addTo(map).bindPopup(`<b>${i+1}. ${stop.name}</b>`);
+    });
+
+    // Descargar datos de la línea como GeoJSON
+    document.getElementById('btnDownloadRoute').addEventListener('click', () => {
+      const geoJSON = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              name: routeData.name,
+              origin: routeData.origin,
+              destination: routeData.destination,
+              vehicle: routeData.vehicle,
+              schedule: routeData.schedule,
+              fare: routeData.fare
+            },
+            geometry: {
+              type: 'LineString',
+              coordinates: routeData.path.map(p => [p[1], p[0]])
+            }
+          },
+          ...routeData.stops.map((stop, i) => ({
+            type: 'Feature',
+            properties: { name: stop.name, order: i + 1 },
+            geometry: { type: 'Point', coordinates: [stop.lng, stop.lat] }
+          }))
+        ]
+      };
+
+      const dataStr = JSON.stringify(geoJSON, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'linea-1.geojson';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Descargar mapa como PNG
+    document.getElementById('btnDownloadMap').addEventListener('click', async () => {
+      const canvas = await html2canvas(document.getElementById('map'), { backgroundColor: '#fff' });
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'linea-1-mapa.png';
+      link.click();
+    });
+
+    // Scripts de login, modales, etc.
     const $ = s => document.querySelector(s);
     $('#btnGuide').addEventListener('click', () => $('#guideModal').style.display = 'flex');
     function closeGuideModal() { $('#guideModal').style.display = 'none'; }
@@ -240,7 +320,6 @@
       currentLang = currentLang === 'es' ? 'en' : 'es';
       // Cambios de idioma
     });
-    // Código completo de login/registro del principal
   </script>
 </body>
 </html>

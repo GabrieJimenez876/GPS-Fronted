@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Línea 3 — Terminal ⇄ Teleférico Central — P@ceña Go</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    :root{--map-height:520px;--max-width:1100px;--primary:#004d40}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;margin:0;background:#f4f4f4;color:#222}
+    header{background:var(--primary);color:#fff;padding:12px;display:flex;align-items:center;gap:16px;justify-content:space-between}
+    .header-left{display:flex;align-items:center;gap:12px;flex:1}
+    .logo-box{width:56px;height:56px;background:url('../assets/logo.svg') center/contain no-repeat;border-radius:8px}
+    h1{margin:0;font-size:18px}
+    main{max-width:var(--max-width);margin:16px auto;padding:0 12px}
+    .panel{background:#fff;border-radius:10px;padding:14px}
+    .map-box{height:var(--map-height);border-radius:8px;overflow:hidden;border:1px solid #ddd}
+    .home-btn{height:42px;padding:0 12px;display:inline-flex;gap:8px;align-items:center;border-radius:8px;background:rgba(255,255,255,0.95);color:var(--primary);border:1px solid rgba(255,255,255,0.08);cursor:pointer;text-decoration:none;font-size:14px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <div class="logo-box" aria-hidden="true"></div>
+      <div>
+        <h1>P@ceña Go — Línea 3</h1>
+        <div style="font-size:12px; opacity:.9">Plataforma de Inteligencia Geoespacial</div>
+      </div>
+    </div>
+    <a href="../index.html" class="home-btn" title="Volver al inicio">
+      <i class="fa fa-home"></i> Inicio
+    </a>
+  </header>
+  <main>
+    <div class="panel">
+      <h2>Línea 3 — Terminal ⇄ Teleférico Central</h2>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="btn-lg" id="btnDownloadRoute" style="background:#1976d2;color:#fff;padding:0 14px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;gap:8px;align-items:center;height:44px;font-size:15px">📥 Descargar línea</button>
+        <button class="btn-lg" id="btnDownloadMap" style="background:#388e3c;color:#fff;padding:0 14px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;gap:8px;align-items:center;height:44px;font-size:15px">🗺️ Descargar mapa</button>
+      </div>
+      <p><strong>Operador:</strong> Sindicato Terminal</p>
+      <p><strong>Vehículo:</strong> Microbus N° 12</p>
+      <div id="map" class="map-box" role="application" aria-label="Mapa de la ruta"></div>
+    </div>
+  </main>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    const map = L.map('map').setView([-16.495, -68.14], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
+    
+    // Route data for Línea 3
+    const routeData = {
+      name: 'Línea 3 — Terminal ⇄ Teleférico Central',
+      origin: 'Terminal',
+      destination: 'Teleférico Central',
+      operator: 'Sindicato Terminal',
+      vehicle: 'Microbus N° 12',
+      stops: [
+        {name:'Terminal', lat:-16.4887, lng:-68.1418},
+        {name:'Plaza Murillo', lat:-16.4958, lng:-68.1336},
+        {name:'Teleférico Central', lat:-16.4897, lng:-68.1335}
+      ]
+    };
+    
+    const latlngs = routeData.stops.map(s=>[s.lat,s.lng]);
+    L.polyline(latlngs,{color:'#27ae60', weight:4}).addTo(map);
+    routeData.stops.forEach((s,i)=> L.marker([s.lat,s.lng]).addTo(map).bindPopup(`${i+1}. ${s.name}`));
+    map.fitBounds(latlngs, {padding:[30,30]});
+
+    // Download route as GeoJSON
+    document.getElementById('btnDownloadRoute').addEventListener('click', () => {
+      const geoJSON = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              name: routeData.name,
+              origin: routeData.origin,
+              destination: routeData.destination,
+              operator: routeData.operator,
+              vehicle: routeData.vehicle
+            },
+            geometry: {
+              type: 'LineString',
+              coordinates: latlngs.map(p => [p[1], p[0]])
+            }
+          },
+          ...routeData.stops.map((stop, i) => ({
+            type: 'Feature',
+            properties: { name: stop.name, order: i + 1 },
+            geometry: { type: 'Point', coordinates: [stop.lng, stop.lat] }
+          }))
+        ]
+      };
+      const dataStr = JSON.stringify(geoJSON, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'linea-3.geojson';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Download map as PNG
+    document.getElementById('btnDownloadMap').addEventListener('click', async () => {
+      try{
+        const canvas = await html2canvas(document.getElementById('map'), { backgroundColor: '#fff', scale: 2 });
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'linea-3-mapa.png';
+        link.click();
+      }catch(err){ console.error('Error', err); alert('No se pudo descargar el mapa'); }
+    });
+  </script>
+</body>
+</html>

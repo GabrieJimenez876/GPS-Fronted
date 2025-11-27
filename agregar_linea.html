@@ -29,7 +29,15 @@
   </style>
 </head>
 <body>
-  <header><div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center"><div style="width:36px;height:36px;background:#00a58c;border-radius:8px;display:grid;place-items:center">LP</div><h1 style="margin:0;font-size:18px">Agregar Línea</h1></div></header>
+  <header><div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:12px;align-items:center;flex:1">
+      <div style="width:36px;height:36px;background:url('../assets/logo.svg') center/contain no-repeat;background-color:#00a58c;border-radius:8px"></div>
+      <h1 style="margin:0;font-size:18px">P@ceña Go — Agregar Línea</h1>
+    </div>
+    <a href="../index.html" style="height:42px;padding:0 12px;display:inline-flex;gap:8px;align-items:center;border-radius:8px;background:rgba(255,255,255,0.95);color:#004d40;border:1px solid rgba(255,255,255,0.08);cursor:pointer;text-decoration:none;font-size:14px" title="Volver al inicio">
+      <i class="fa fa-home"></i> Inicio
+    </a>
+  </div></header>
   <main class="container">
     <section class="panel">
       <h2 style="margin:0 0 8px 0">Nueva línea</h2>
@@ -52,6 +60,7 @@
 
         <div style="margin-top:12px;display:flex;gap:8px">
           <button class="btn primary" id="btnSave">Guardar línea</button>
+          <button class="btn" id="btnPreview">Previsualizar</button>
           <a href="ver_rutas.html" class="btn ghost">Volver a ver rutas</a>
         </div>
       </div>
@@ -118,23 +127,45 @@
       if(!name){ alert('Ingrese nombre de la ruta'); return; }
       const parsedStops = parseStops(stopsText).map(s=> ({ nombre: s.name, lat: s.lat, lng: s.lng }));
 
-      // send to server API
+      // payload normalized for server and localStorage
+      const payload = { nombre: name, codigo: key, sindicato: operator, paradas: parsedStops, vehiculo: vehicle, color };
+
+      // try server save, otherwise fallback to localStorage and open preview
       try{
-        const payload = { nombre: name, codigo: key, sindicato: operator, paradas: parsedStops };
         const res = await fetch('/api/lineas', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         if(!res.ok) throw new Error('Error en servidor');
         const json = await res.json();
         alert('Ruta guardada en la base de datos del servidor');
-        location.href = 'base_datos.html';
+        // open preview of new route
+        location.href = `ver_rutas.html#route=${encodeURIComponent(key)}`;
       }catch(err){
-        console.error(err); alert('No se pudo guardar en el servidor. Reintentando localmente.');
+        console.error(err); alert('No se pudo guardar en el servidor. Guardando localmente y abriendo previsualización.');
         // fallback local
         const routes = JSON.parse(localStorage.getItem('gps_routes')||'[]');
         const id = routes.length ? Math.max(...routes.map(r=>r.id||0))+1 : 1;
-        const route = { id, key, name, operator, vehicle, color, stops: parsedStops };
+        const route = { id, codigo: key, nombre: name, sindicato: operator, vehiculo: vehicle, color, paradas: parsedStops };
         routes.push(route); localStorage.setItem('gps_routes', JSON.stringify(routes));
-        location.href = 'base_datos.html';
+        // open preview of saved route
+        location.href = `ver_rutas.html#route=${encodeURIComponent(key)}`;
       }
+    });
+
+    // Previsualizar sin guardar en servidor (agrega en localStorage con id temporal)
+    document.getElementById('btnPreview').addEventListener('click', ()=>{
+      const name = document.getElementById('routeName').value.trim();
+      const key = document.getElementById('routeKey').value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+      const operator = document.getElementById('routeOperator').value.trim();
+      const vehicle = document.getElementById('routeVehicle').value.trim();
+      const color = document.getElementById('routeColor').value.trim() || '#1e90ff';
+      const stopsText = document.getElementById('routeStops').value;
+      if(!name){ alert('Ingrese nombre de la ruta'); return; }
+      const parsedStops = parseStops(stopsText).map(s=> ({ nombre: s.name, lat: s.lat, lng: s.lng }));
+      const routes = JSON.parse(localStorage.getItem('gps_routes')||'[]');
+      const tempId = Date.now() * -1;
+      const route = { id: tempId, codigo: key, nombre: name, sindicato: operator, vehiculo: vehicle, color, paradas: parsedStops };
+      routes.push(route); localStorage.setItem('gps_routes', JSON.stringify(routes));
+      // open preview
+      location.href = `ver_rutas.html#route=${encodeURIComponent(key)}`;
     });
   </script>
 

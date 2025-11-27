@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#004d40" opacity="0.1" stroke="#004d40" stroke-width="2"/>
+  
+  <!-- Map pin (location marker) -->
+  <path d="M100 30 C85 30 75 40 75 55 C75 75 100 110 100 110 C100 110 125 75 125 55 C125 40 115 30 100 30 Z" fill="#15c9b7" stroke="#004d40" stroke-width="2"/>
+  
+  <!-- Inner circle for pin -->
+  <circle cx="100" cy="55" r="8" fill="#004d40"/>
+  
+  <!-- Bus outline (simplified) inside the bottom area -->
+  <g transform="translate(60, 130)">
+    <rect x="0" y="0" width="80" height="30" rx="5" fill="none" stroke="#004d40" stroke-width="2"/>
+    <!-- Windows -->
+    <rect x="5" y="4" width="12" height="10" fill="none" stroke="#004d40" stroke-width="1"/>
+    <rect x="22" y="4" width="12" height="10" fill="none" stroke="#004d40" stroke-width="1"/>
+    <rect x="39" y="4" width="12" height="10" fill="none" stroke="#004d40" stroke-width="1"/>
+    <!-- Wheels -->
+    <circle cx="12" cy="32" r="4" fill="#004d40"/>
+    <circle cx="68" cy="32" r="4" fill="#004d40"/>
+  </g>
+  
+  <!-- @ symbol stylized -->
+  <text x="100" y="155" font-size="28" font-weight="bold" fill="#15c9b7" text-anchor="middle" font-family="Arial">@</text>
+</svg>

@@ -228,10 +228,10 @@
     <div class="header-inner">
       <!-- Brand -->
       <div class="brand">
-        <div class="logo" aria-hidden="true">LP</div>
+        <div class="logo" aria-hidden="true" style="background:url('assets/logo.svg') center/contain no-repeat;width:56px;height:56px"><!-- SVG Logo --></div>
         <div>
-          <h1 id="appTitle">GPS Transporte — La Paz</h1>
-          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+          <h1 id="appTitle">P@ceña Go — La Paz</h1>
+          <div style="font-size:12px; opacity:.9">Plataforma de Inteligencia Geoespacial para Transporte</div>
         </div>
       </div>
 
@@ -268,6 +268,12 @@
         </div>
 
         <div class="nav-right">
+          <!-- Home button (index page, so links to self or just shows as active) -->
+          <button class="nav-btn" id="btnHome" title="Inicio" style="display:none">
+            <i class="fa fa-home"></i>
+            <span>Inicio</span>
+          </button>
+
           <!-- Admin button (hidden by default) -->
           <div class="menu-item" id="adminSection" style="display:none">
             <button class="nav-btn">
@@ -356,6 +362,7 @@
           <button class="nav-btn btn-outline" id="btnMyLoc"><i class="fa fa-location-crosshairs"></i> Mi ubicación</button>
           <button class="btn-lg" id="btnMarkDest"><i class="fa fa-map-pin"></i> Marcar destino</button>
           <button class="nav-btn btn-outline" id="btnFindRoutes"><i class="fa fa-route"></i> Rutas</button>
+          <button class="nav-btn btn-outline" id="btnDownloadMap" style="background:#388e3c;color:#fff"><i class="fa fa-download"></i> Descargar mapa</button>
         </div>
 
         <div id="results" class="results">Escribe un destino y usa los botones para marcar.</div>
@@ -443,25 +450,13 @@
   <footer>
     <div class="footer-inner">
       <div>Contacto: <a href="mailto:lapazbus@lapaz.bo" style="color:#b2fff5">lapazbus@lapaz.bo</a> — Tel: 2652444 / +591 76522444</div>
-      <div class="socials">
-        <a href="#" class="social-link" title="Facebook">
-          <img src="img/fac.png" alt="Facebook" width="16" height="16">
-        </a>
-        <a href="#" class="social-link" title="Twitter">
-          <img src="img/twitter.png" alt="Twitter" width="16" height="16">
-        </a>
-        <a href="#" class="social-link" title="Instagram">
-          <img src="img/instagram.png" alt="Instagram" width="16" height="16">
-        </a>
-        <a href="#" class="social-link" title="Telegram">
-          <img src="img/telegram.png" alt="Telegram" width="16" height="16">
-        </a>
-      </div>
+      <div class="socials"><!-- social icons removed as requested --></div>
     </div>
   </footer>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     // Inicializa el mapa centrado en La Paz y aplica límites aproximados
@@ -477,7 +472,28 @@
     let userMarker = L.marker([-16.5, -68.15]).addTo(map).bindPopup("Tu ubicación");
     let destMarker = null;
     let lastClicked = null;
-    map.on('click', e => lastClicked = e.latlng); // guarda última posición click mapa
+    map.on('click', async (e) => {
+      // guarda última posición click mapa
+      lastClicked = e.latlng;
+      // marca el destino inmediatamente
+      if (destMarker) map.removeLayer(destMarker);
+      destMarker = L.marker([lastClicked.lat, lastClicked.lng]).addTo(map).bindPopup("Destino").openPopup();
+      map.setView(lastClicked, 14);
+      // busca rutas cercanas y muestra resultado (si hay)
+      try{
+        const matches = await findNearbyRoutes([lastClicked.lat, lastClicked.lng], 0.3);
+        if(!matches || matches.length === 0){ results.innerHTML = ''; return; }
+        let listHtml = '<strong>Líneas cercanas</strong><br><ul style="padding-left:18px;margin:8px 0">';
+        matches.forEach(m => {
+          const r = m.route || m;
+          const name = r.nombre || r.name || r.codigo || r.key || r.id || 'Línea';
+          const previewLink = `ver_rutas.html#route=${encodeURIComponent(r.codigo||r.key||r.id||name)}`;
+          listHtml += `<li><strong>${name}</strong> <a style="margin-left:8px" href="${previewLink}">Ver ruta</a> <span style="color:#666;margin-left:6px">(${(m.minDist*1000).toFixed(0)} m)</span></li>`;
+        });
+        listHtml += '</ul>';
+        results.innerHTML = listHtml;
+      }catch(err){ console.error('find on click', err); results.innerHTML = ''; }
+    }); // guarda última posición click mapa
 
     // Tabla mejorada de lugares comunes con coordenadas exactas
     const commonPlaces = {
@@ -538,13 +554,78 @@
     });
 
     // Simula búsqueda de rutas entre marcador de usuario y destino
-    $('#btnFindRoutes').addEventListener('click', () => {
-      const u = userMarker ? userMarker.getLatLng() : null;
-      const d = destMarker ? destMarker.getLatLng() : null;
-      if (!u || !d) { results.textContent = 'Marca tu ubicación y un destino para buscar rutas.'; return; }
-      results.innerHTML = `<strong>Rutas</strong><br>Desde: ${u.lat.toFixed(5)}, ${u.lng.toFixed(5)}<br>Hasta: ${d.lat.toFixed(5)}, ${d.lng.toFixed(5)}<br><em>Conectando al backend...</em>`;
-      // Pendiente: fetch('/api/routes?from=...&to=...') -> renderizar rutas
+    $('#btnFindRoutes').addEventListener('click', async () => {
+      const d = destMarker ? destMarker.getLatLng() : (lastClicked || null);
+      if (!d) { results.textContent = 'Marca un destino en el mapa (clic) o presiona "Marcar destino".'; return; }
+      results.innerHTML = '';
+      try{
+        const nearby = await findNearbyRoutes([d.lat, d.lng], 0.3); // 0.3 km threshold
+        if(!nearby || !nearby.length){ results.innerHTML = ''; return; }
+        // Render list sorted by distance
+        const listHtml = nearby.map(r=> `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #e6f3ef"><div><strong>${r.name}</strong><div style="font-size:13px;color:#666">${r.operator} · ${ (r.vehicle||'') }</div><div style="font-size:12px;color:#666">Distancia: ${ (r.minDist*1000).toFixed(0) } m</div></div><div><button class="nav-btn" onclick="location.href='ver_rutas.html#route=${encodeURIComponent(r.key||r.id||r.name)}'">Ver ruta</button></div></div>`).join('');
+        results.innerHTML = listHtml;
+      }catch(err){ console.error(err); results.textContent = 'Error buscando rutas cercanas'; }
     });
+
+    // Compute haversine distance in kilometers between two [lat,lng]
+    function distanceKm(a, b){
+      const toRad = v => v * Math.PI / 180;
+      const R = 6371; // km
+      const dLat = toRad(b[0]-a[0]); const dLon = toRad(b[1]-a[1]);
+      const lat1 = toRad(a[0]); const lat2 = toRad(b[0]);
+      const sinDLat = Math.sin(dLat/2), sinDLon = Math.sin(dLon/2);
+      const h = sinDLat*sinDLat + Math.cos(lat1)*Math.cos(lat2)*sinDLon*sinDLon;
+      const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1-h));
+      return R * c;
+    }
+
+    // Fetch routes from data file AND localStorage; return those with any stop within `thresholdKm` of dest
+    async function findNearbyRoutes(destLatLng, thresholdKm){
+      const matches = [];
+      // server-side file (authoritative) if available
+      try{
+        const res = await fetch('/data/lineas.json');
+        if(res.ok){
+          const data = await res.json();
+          (data||[]).forEach(r => {
+            const stops = r.paradas || r.stops || [];
+            if(!Array.isArray(stops)) return;
+            let min = Infinity;
+            stops.forEach(p => {
+              const plat = parseFloat(p.lat||p.latitude||p[0]||0), plng = parseFloat(p.lng||p.longitude||p[1]||0);
+              if(!isFinite(plat) || !isFinite(plng)) return;
+              const dkm = distanceKm(destLatLng, [plat, plng]);
+              if(dkm < min) min = dkm;
+            });
+            if(min <= thresholdKm){
+              matches.push({ route: r, minDist: min });
+            }
+          });
+        }
+      }catch(e){ /* ignore server errors */ }
+
+      // local user-created routes saved in localStorage (gps_routes)
+      try{
+        const local = JSON.parse(localStorage.getItem('gps_routes')||'[]');
+        (local||[]).forEach(r => {
+          const stops = r.paradas || r.stops || r.stops || [];
+          if(!Array.isArray(stops)) return;
+          let min = Infinity;
+          stops.forEach(p => {
+            const plat = parseFloat(p.lat||p.latitude||0), plng = parseFloat(p.lng||p.longitude||0);
+            if(!isFinite(plat) || !isFinite(plng)) return;
+            const dkm = distanceKm(destLatLng, [plat, plng]);
+            if(dkm < min) min = dkm;
+          });
+          if(min <= thresholdKm){
+            matches.push({ route: r, minDist: min });
+          }
+        });
+      }catch(e){ /* ignore parse errors */ }
+
+      // sort by distance asc
+      return matches.sort((a,b)=> a.minDist - b.minDist);
+    }
 
     // Llena el campo destino con un lugar rápido y lo marca en el mapa
     function quickPlace(key) { $('#dest').value = key; markDestinationByName(key); }
@@ -738,6 +819,17 @@
           console.error('session parse error', e);
         }
       }
+    });
+
+    // Descargar mapa actual como PNG
+    $('#btnDownloadMap').addEventListener('click', async () => {
+      try{
+        const canvas = await html2canvas(document.getElementById('map'), { backgroundColor: '#fff', scale: 2 });
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `mapa-${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+      }catch(err){ console.error('Error descargando mapa', err); alert('No se pudo descargar el mapa'); }
     });
 
     (function adjustIcons() {

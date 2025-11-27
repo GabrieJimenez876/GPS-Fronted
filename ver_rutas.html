@@ -60,6 +60,9 @@
     .stop-list{list-style:none;margin:10px 0 0 0;padding:0;display:grid;gap:8px;max-height:calc(100vh - 260px);overflow:auto}
     .stop-item{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--c-border);border-radius:10px;background:#fafafa}
     .stop-badge{min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;background:#6b7280}
+    /* ensure marker badge is centered inside Leaflet divIcon wrapper */
+    .stop-icon { display:flex; align-items:center; justify-content:center; }
+    .stop-icon .stop-badge { transform: none; }
     .table{width:100%;border-collapse:collapse}
     .table th,.table td{border:1px solid #ddd;padding:8px;font-size:14px}
     .table th{background:var(--c-primary);color:#fff;text-align:left}
@@ -153,16 +156,21 @@
     <div class="header-inner">
       <!-- Brand -->
       <div class="brand">
-        <div class="logo" aria-hidden="true">LP</div>
+        <div class="logo" aria-hidden="true" style="background:url('../assets/logo.svg') center/contain no-repeat;width:36px;height:36px;border-radius:50%;background-color:#00695c"><!-- SVG Logo --></div>
         <div>
-          <h1 id="appTitle">GPS Transporte — La Paz</h1>
-          <div style="font-size:12px; opacity:.9">Centro de transporte comunitario</div>
+          <h1 id="appTitle">P@ceña Go — La Paz</h1>
+          <div style="font-size:12px; opacity:.9">Plataforma de Inteligencia Geoespacial</div>
         </div>
       </div>
 
       <!-- Navigation -->
       <nav class="nav-row">
         <div class="nav-left">
+          <a href="../index.html" class="nav-btn" title="Volver al inicio">
+            <i class="fa fa-home"></i>
+            <span>Inicio</span>
+          </a>
+
           <div class="menu-item">
             <button class="nav-btn" id="btnRoutes">
               <i class="fa fa-location-dot"></i>
@@ -353,9 +361,22 @@
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'© OpenStreetMap'}).addTo(map);
     const routeLayer = L.layerGroup().addTo(map);
 
-    // Load routes from localStorage (key: 'gps_routes')
+    // Load routes from localStorage (key: 'gps_routes') and normalize the shape
     function loadRoutesFromStorage(){
-      try{ return JSON.parse(localStorage.getItem('gps_routes') || '[]'); }catch(e){ return []; }
+      try{
+        const raw = JSON.parse(localStorage.getItem('gps_routes') || '[]');
+        return (raw||[]).map((r,i)=>{
+          const key = r.key || r.codigo || (r.id? String(r.id) : ('R'+(i+1)));
+          const name = r.name || r.nombre || r.key || r.codigo || (`Línea ${key}`);
+          const operator = r.operator || r.sindicato || r.operador || '';
+          const vehicle = r.vehicle || r.vehiculo || '';
+          const color = r.color || '#2196f3';
+          const rawStops = r.paradas || r.stops || r.stops || [];
+          const stops = (rawStops||[]).map((p,idx)=> ({ name: p.nombre || p.name || `Parada ${idx+1}`, lat: parseFloat(p.lat||p.latitude||p.latitud||0), lng: parseFloat(p.lng||p.longitude||p.lon||0) }));
+          const path = r.path || (stops.length ? stops.map(s=>[s.lat,s.lng]) : []);
+          return { id: r.id || (i+1), key, name, operator, vehicle, color, stops, path, original: r };
+        });
+      }catch(e){ return []; }
     }
 
     const ROUTES_OBJ = (function(){
@@ -399,15 +420,26 @@
         routes.forEach(r=>{ const op = (r.operator||r.operator||'Sin sindicato'); if(!byOp[op]) byOp[op]=[]; byOp[op].push(r); });
         Object.keys(byOp).forEach(op=>{
           const lines = byOp[op];
-          const el = document.createElement('div'); el.className='list-item'; el.style.justifyContent='space-between';
-          el.innerHTML = `<div><strong>${op}</strong><div style="font-size:13px;color:#666">${lines.length} línea(s)</div></div><div><button class="nav-btn" style="height:34px;padding:6px 10px" data-op="${op}">Ver</button></div>`;
-          content.appendChild(el);
+          const opBlock = document.createElement('div');
+          opBlock.style.marginBottom = '8px';
+          const opTitle = document.createElement('div');
+          opTitle.innerHTML = `<strong>${op}</strong> <span style="font-size:13px;color:#666">(${lines.length} línea(s))</span>`;
+          opBlock.appendChild(opTitle);
+          const listDiv = document.createElement('div');
+          listDiv.style.marginTop = '6px';
+          lines.forEach(l => {
+            const row = document.createElement('div');
+            row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.alignItems = 'center'; row.style.padding = '6px 0';
+            row.innerHTML = `<div style="font-size:14px">${l.name || l.key}</div><div><button class="nav-btn" style="height:30px;padding:6px 10px" data-line="${l.key}">Ver</button></div>`;
+            listDiv.appendChild(row);
+          });
+          opBlock.appendChild(listDiv);
+          content.appendChild(opBlock);
         });
         block.appendChild(content);
         sidebar.insertBefore(block, sidebar.firstChild);
-        Array.from(block.querySelectorAll('button[data-op]')).forEach(btn=> btn.addEventListener('click', ()=>{
-          const op = btn.getAttribute('data-op'); const routes = loadRoutesFromStorage().filter(r=> (r.operator||'')===op);
-          if(routes.length) showRoute(routes[0].key || routes[0].key);
+        Array.from(block.querySelectorAll('button[data-line]')).forEach(btn=> btn.addEventListener('click', ()=>{
+          const key = btn.getAttribute('data-line'); showRoute(key);
         }));
       }catch(e){ console.error('renderSindicatos error', e); }
     }
@@ -438,7 +470,8 @@
       const list = reversed ? [...data.stops].reverse() : data.stops;
       stopList.innerHTML = '';
       list.forEach((s,idx)=>{
-        const icon = L.divIcon({ className:'stop-icon', html:`<div class="stop-badge" style="background:${data.color};">${idx+1}</div>`, iconSize:[26,26], iconAnchor:[13,13] });
+        // numbered badge marker — centered and popup above the badge
+        const icon = L.divIcon({ className:'stop-icon', html:`<div class="stop-badge" style="background:${data.color};">${idx+1}</div>`, iconSize:[26,26], iconAnchor:[13,13], popupAnchor:[0,-18] });
         L.marker([s.lat, s.lng], {icon}).addTo(routeLayer).bindPopup(`<b>${idx+1}. ${s.name}</b><br>${data.name}`);
         const li = document.createElement('li');
         li.className = 'stop-item'; li.innerHTML = `<span class="stop-badge" style="background:${data.color};">${idx+1}</span><span class="stop-name">${s.name}</span>`;

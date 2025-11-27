@@ -75,82 +75,77 @@
     .nav-btn .fa{ font-size:16px; }
   </style>
  <script>
-    // Seed example routes into localStorage if none exist (so the map shows examples)
-    (function(){
-      try{
-        const key = 'gps_routes';
-        const current = JSON.parse(localStorage.getItem(key) || '[]');
-        
-        // --- NUEVA RUTA 201 ---
-        const route201 = {
-          id: 3,
-          key: 'R201',
-          name: 'Línea 201: El Tejar → Chasquipampa',
-          operator: 'Sindicato 14 de Septiembre',
-          vehicle: 'Autobús',
-          color: '#e74c3c', // Rojo distintivo
-          stops: [
-            { name: 'Av. Apumalla (Inicio)', lat: -16.4950, lng: -68.1510 }, // El Tejar / San Pedro
-            { name: 'Av. Perú', lat: -16.4940, lng: -68.1435 },
-            { name: 'Estación Central', lat: -16.4950, lng: -68.1300 },
-            { name: 'Pza. San Francisco / Av. Ismael Montes', lat: -16.4988, lng: -68.1373 },
-            { name: 'Pza. Del Estudiante / El Prado', lat: -16.5055, lng: -68.1350 },
-            { name: 'Obrajes Calle 0', lat: -16.5200, lng: -68.1130 }, // Cruce de la Costanera
-            { name: 'Obrajes Calle 7', lat: -16.5270, lng: -68.1090 }, 
-            { name: 'Calacoto Calle 8 (Pasarela Anapol)', lat: -16.5360, lng: -68.0890 },
-            { name: 'San Miguel (Iglesia)', lat: -16.5410, lng: -68.0825 },
-            { name: 'Achumani / Muñoz Reyes', lat: -16.5500, lng: -68.0670 },
-            { name: 'Final Chasquipampa', lat: -16.5600, lng: -68.0550 } // Fin de la ruta
-          ],
-          // Trayecto simulado para que se vea el recorrido en el mapa (más puntos para mejor visualización)
-          path: [
-            [-16.4950, -68.1510], [-16.4945, -68.1480], [-16.4940, -68.1435], [-16.4940, -68.1380], [-16.4988, -68.1373], 
-            [-16.5000, -68.1360], [-16.5055, -68.1350], [-16.5100, -68.1300], [-16.5150, -68.1250], 
-            [-16.5200, -68.1130], [-16.5230, -68.1100], [-16.5270, -68.1090], [-16.5300, -68.1050],
-            [-16.5360, -68.0890], [-16.5380, -68.0850], [-16.5410, -68.0825], [-16.5450, -68.0750],
-            [-16.5500, -68.0670], [-16.5550, -68.0600], [-16.5600, -68.0550]
-          ]
-        };
-        
-        const sample = [
-          {
-            id: 1,
-            key: 'amarilla',
-            name: 'Línea Amarilla',
-            operator: 'Sindicato Amarillo',
-            vehicle: 'Microbus',
-            color: '#f1c40f',
-            stops: [
-              { name: 'Cementerio', lat: -16.49694, lng: -68.15167 },
-              { name: 'Plaza Murillo', lat: -16.50066, lng: -68.13735 },
-              { name: 'Hospital Juan XXIII', lat: -16.5072, lng: -68.1325 }
-            ],
-            path: [[-16.49694,-68.15167],[-16.50066,-68.13735],[-16.5072,-68.1325]]
-          },
-          {
-            id: 2,
-            key: 'verde',
-            name: 'Línea Verde',
-            operator: 'Sindicato Verde',
-            vehicle: 'Minibus',
-            color: '#27ae60',
-            stops: [
-              { name: 'Munaypata', lat: -16.5012, lng: -68.1541 },
-              { name: 'Plaza Eguino', lat: -16.4982, lng: -68.1409 },
-              { name: 'Estación Central', lat: -16.4950, lng: -68.1300 }
-            ],
-            path: [[-16.5012,-68.1541],[-16.4982,-68.1409],[-16.4950,-68.13]]
-          },
-          route201 // Agregamos la nueva ruta
-      ];
+    // Seed example routes into localStorage: prefer server file `data/lineas.json`, fallback to inline R201
+    (async function(){
+      try{
+        const key = 'gps_routes';
+        const current = JSON.parse(localStorage.getItem(key) || '[]');
 
-      if(!current || current.length === 0 || !current.find(r => r.key === 'R201')){
-        // Si no hay rutas o falta la R201, sobrescribe con el set completo
-        localStorage.setItem(key, JSON.stringify(sample));
-      }
-        
-    }catch(e){ console.warn('no se pudo seed routes', e); }
-    })();
+        // inline fallback route (kept for offline preview)
+        const route201 = {
+          id: 201,
+          key: 'R201',
+          name: 'Línea 201 — Avenida Apumalla ⇄ Calle 14 de Septiembre',
+          operator: 'Sindicato 14 de Septiembre',
+          vehicle: 'Microbus N° 201',
+          color: '#1e88e5',
+          stops: [
+            { name: 'Avenida Apumalla 1055', lat: -16.494907, lng: -68.145221 },
+            { name: 'J.M. Asin 593', lat: -16.495810, lng: -68.144012 },
+            { name: 'J.M. Asin 420', lat: -16.496502, lng: -68.143401 },
+            { name: 'Quintanilla Zuazo', lat: -16.499201, lng: -68.140900 },
+            { name: 'Av. República', lat: -16.500800, lng: -68.137900 },
+            { name: 'Av. Perú', lat: -16.503410, lng: -68.132900 },
+            { name: 'Av. Ismael Montes', lat: -16.505312, lng: -68.130410 },
+            { name: 'Av. Mariscal Santa Cruz', lat: -16.508811, lng: -68.131099 },
+            { name: 'Av. 16 de Julio', lat: -16.510800, lng: -68.128300 },
+            { name: 'Landaeta', lat: -16.512700, lng: -68.125709 },
+            { name: 'Sánchez Lima', lat: -16.515900, lng: -68.122900 },
+            { name: 'Obrajes', lat: -16.522999, lng: -68.110100 },
+            { name: 'Av. Hernando Siles', lat: -16.533400, lng: -68.108900 },
+            { name: 'San Miguel', lat: -16.541001, lng: -68.086900 },
+            { name: 'Calle 25 Arturo Fortún', lat: -16.549808, lng: -68.073000 },
+            { name: 'Calle 38 La Loma', lat: -16.554901, lng: -68.067700 },
+            { name: 'Héroes del Chaco', lat: -16.560702, lng: -68.061900 },
+            { name: 'Calle 14 de Septiembre 150', lat: -16.563700, lng: -68.058400 }
+          ],
+          path: [
+            [-16.494907, -68.145221],[-16.495810, -68.144012],[-16.496502, -68.143401],[-16.499201, -68.140900],
+            [-16.500800, -68.137900],[-16.503410, -68.132900],[-16.505312, -68.130410],[-16.508811, -68.131099],
+            [-16.510800, -68.128300],[-16.512700, -68.125709],[-16.515900, -68.122900],[-16.522999, -68.110100],
+            [-16.533400, -68.108900],[-16.541001, -68.086900],[-16.549808, -68.073000],[-16.554901, -68.067700],
+            [-16.560702, -68.061900],[-16.563700, -68.058400]
+          ]
+        };
+
+        // Try loading server-side routes file
+        let sample = [];
+        try{
+          const resp = await fetch('/data/lineas.json');
+          if(resp.ok){
+            const data = await resp.json();
+            if(Array.isArray(data) && data.length){
+              sample = data.map(r => ({
+                id: r.id,
+                key: r.codigo && r.codigo.trim() !== '' ? r.codigo : ('R' + String(r.id)),
+                name: r.nombre || r.name || '',
+                operator: r.sindicato || r.operator || '',
+                vehicle: r.vehiculo || r.vehicle || '',
+                color: '#1e88e5',
+                stops: Array.isArray(r.paradas) ? r.paradas.map((p, i) => ({ name: p.nombre||p.name||`Parada ${i+1}`, lat: parseFloat(p.lat||p.latitude||p.latitud||0), lng: parseFloat(p.lng||p.longitude||p.lon||0) })) : [],
+                path: Array.isArray(r.paradas) ? r.paradas.map(p => [parseFloat(p.lat||p.latitude||p.latitud||0), parseFloat(p.lng||p.longitude||p.lon||0)]) : []
+              }));
+            }
+          }
+        }catch(err){ /* ignore fetch errors, fallback below */ }
+
+        if(!sample.length){ sample = [ route201 ]; }
+
+        const needsWrite = !Array.isArray(current) || current.length === 0 || !current.find(r => r.key === 'R201') || sample.some(s => s.key && !current.find(c => c.key === s.key));
+        if(needsWrite){ localStorage.setItem(key, JSON.stringify(sample)); }
+
+      }catch(e){ console.warn('no se pudo seed routes', e); }
+    })();
   </script>
 </head>
 <body>
@@ -385,6 +380,36 @@
         tbody.appendChild(tr);
       });
       $$('button[data-show]').forEach(b=> b.addEventListener('click', ()=> showRoute(b.getAttribute('data-show'))));
+      // After rendering the routes table, also populate sindicatos list in the sidebar
+      renderSindicatos();
+    }
+
+    // Build and render sindicatos (group routes by operator) into the sidebar
+    function renderSindicatos(){
+      try{
+        const sidebar = document.getElementById('sidebar');
+        if(!sidebar) return;
+        const existing = document.getElementById('sindicatosBlock'); if(existing) existing.remove();
+        const block = document.createElement('div'); block.id='sindicatosBlock'; block.className='panel';
+        block.style.marginBottom='12px';
+        const header = document.createElement('header'); header.innerHTML = '<h3 style="margin:0">Sindicatos</h3>'; block.appendChild(header);
+        const content = document.createElement('div'); content.className='content';
+        const routes = loadRoutesFromStorage();
+        const byOp = {};
+        routes.forEach(r=>{ const op = (r.operator||r.operator||'Sin sindicato'); if(!byOp[op]) byOp[op]=[]; byOp[op].push(r); });
+        Object.keys(byOp).forEach(op=>{
+          const lines = byOp[op];
+          const el = document.createElement('div'); el.className='list-item'; el.style.justifyContent='space-between';
+          el.innerHTML = `<div><strong>${op}</strong><div style="font-size:13px;color:#666">${lines.length} línea(s)</div></div><div><button class="nav-btn" style="height:34px;padding:6px 10px" data-op="${op}">Ver</button></div>`;
+          content.appendChild(el);
+        });
+        block.appendChild(content);
+        sidebar.insertBefore(block, sidebar.firstChild);
+        Array.from(block.querySelectorAll('button[data-op]')).forEach(btn=> btn.addEventListener('click', ()=>{
+          const op = btn.getAttribute('data-op'); const routes = loadRoutesFromStorage().filter(r=> (r.operator||'')===op);
+          if(routes.length) showRoute(routes[0].key || routes[0].key);
+        }));
+      }catch(e){ console.error('renderSindicatos error', e); }
     }
 
     function clearRoute(){

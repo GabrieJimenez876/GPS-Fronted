@@ -451,7 +451,8 @@
           L.marker([lat, lng]).addTo(__viewMap).bindPopup((p.nombre||p.name||'Parada') + '<br/>' + (p.descripcion||''));
         });
         if (latlngs.length) {
-          L.polyline(latlngs, { color: '#00a58c' }).addTo(__viewMap);
+          // Draw route in blue, 4px thick as requested
+          L.polyline(latlngs, { color: 'blue', weight: 4 }).addTo(__viewMap);
           __viewMap.fitBounds(latlngs, { padding: [20,20] });
         }
       } catch (err) { console.error('Error cargando Leaflet', err); }

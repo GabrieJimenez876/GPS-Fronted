@@ -2,9 +2,6 @@
 
 Sistema integral de visualización y gestión de rutas de transporte para La Paz. Aplicación completa con frontend web estático, backend Node.js, y opciones de Flutter.
 
----
-
-## ⚡ Inicio Rápido (5 minutos)
 
 ### Opción 1: Windows (Automático)
 
@@ -39,9 +36,12 @@ npm start
 
 ## 📋 Requisitos Previos
 
-- **Node.js** v14+ (incluye npm) - [Descargar](https://nodejs.org/)
-- **Flutter** (opcional, solo para app móvil) - [Descargar](https://flutter.dev/)
-- **Git** (para clonar el repositorio) - [Descargar](https://git-scm.com/)
+- **Node.js** v14+ (incluye npm) - [Descargar]
+(https://nodejs.org/)
+- **Flutter** (opcional, solo para app móvil) - [Descargar]
+(https://flutter.dev/)
+- **Git** (para clonar el repositorio) - [Descargar]
+(https://git-scm.com/)
 
 ---
 
@@ -174,28 +174,6 @@ GPS-Fronted/
 
 ---
 
-## 🔧 Configuración Adicional
-
-### Cambiar Puerto (default: 3000)
-
-```powershell
-set PORT=8080
-npm start
-```
-
-### Limpiar Todo y Reinstalar
-
-```powershell
-# Windows
-clean-reinstall.bat
-
-# Mac/Linux
-rm -rf node_modules package-lock.json
-npm install
-```
-
----
-
 ## 📚 Documentación Completa
 
 - **SETUP.md** - Guía detallada de instalación
@@ -206,25 +184,6 @@ npm install
 
 ---
 
-## 🆘 Solución de Problemas
-
-| Problema | Solución |
-|----------|----------|
-| npm no encontrado | Instala Node.js desde nodejs.org |
-| Puerto 3000 en uso | `set PORT=3001 && npm start` |
-| No funciona desde otra PC | Verifica firewall y usa la IP correcta |
-| Dependencias outdated | Ejecuta `clean-reinstall.bat` |
-| Geolocalización no funciona | Permite acceso a ubicación en navegador |
-
----
-
-## 📞 Contacto y Soporte
-
-**Email:** lapazbus@lapaz.bo  
-**Teléfono:** 2652444 / +591 76522444  
-**GitHub:** [GabrieJimenez876/GPS-Fronted](https://github.com/GabrieJimenez876/GPS-Fronted)
-
----
 
 ## 📝 Licencia
 
@@ -242,7 +201,3 @@ MIT - Ver `LICENSE` para más detalles
 6. 🚀 Desplegar a producción
 
 ---
-
-**¡Listo para comenzar!** 🎉
-
-Ejecuta `start-server.bat` o `npm start` para iniciar el servidor.
